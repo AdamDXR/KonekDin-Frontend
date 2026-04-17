@@ -1,0 +1,7 @@
+1. catatan adam
+2. boleh dicoba atau tambah
+3. buat frontend
+4. Cara run :
+   - php artisan serve
+   - npm run dev
+   - http://localhost:8000/ 
