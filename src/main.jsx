@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import '../../src/index.css'
+import './index.css'
 
 // Layouts
 import AdminLayout from '@/layouts/AdminLayout'
