@@ -10,6 +10,7 @@ import LearnerLayout from '@/layouts/LearnerLayout'
 
 // Auth Pages
 import Login from '@/pages/Auth/Login'
+import Register from '@/pages/Auth/Register'
 
 // Admin Pages
 import AdminDashboard from '@/pages/Admin/Dashboard'
@@ -32,6 +33,7 @@ import RiwayatBelajar from '@/pages/Learner/RiwayatBelajar'
 import Notifikasi from '@/pages/Learner/Notifikasi'
 import ProfilTutor from '@/pages/Learner/ProfilTutor'
 import ProfilLearner from '@/pages/Learner/ProfilLearner'
+import BeriUlasan from '@/pages/Learner/BeriUlasan'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -39,6 +41,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
@@ -67,6 +70,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="detail-pesanan" element={<DetailPesanan />} />
           <Route path="jadwal-belajar" element={<JadwalBelajar />} />
           <Route path="riwayat-belajar" element={<RiwayatBelajar />} />
+          <Route path="beri-ulasan/:id" element={<BeriUlasan />} />
           <Route path="notifikasi" element={<Notifikasi />} />
         </Route>
       </Routes>

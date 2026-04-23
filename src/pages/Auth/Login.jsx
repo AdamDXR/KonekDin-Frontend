@@ -188,9 +188,9 @@ export default function Login() {
 
             <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
               Belum punya akun?{' '}
-              <a href="#" className="font-semibold text-[#1a1a4b] dark:text-[#2dd4bf] hover:underline transition-all">
+              <Link to="/register" className="font-semibold text-[#1a1a4b] dark:text-[#2dd4bf] hover:underline transition-all">
                 Daftar Sekarang
-              </a>
+              </Link>
             </p>
           </div>
         </div>

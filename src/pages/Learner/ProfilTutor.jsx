@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   ArrowLeft,
   Star,
@@ -246,10 +246,12 @@ export default function ProfilTutor() {
                 </p>
               </div>
 
-              <Button className="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 text-[14px] font-bold shadow-none gap-2">
-                <Zap className="h-4 w-4" />
-                Pesan Sesi Sekarang
-              </Button>
+              <Link to="/learner/detail-pesanan" className="block w-full">
+                <Button className="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 text-[14px] font-bold shadow-none gap-2">
+                  <Zap className="h-4 w-4" />
+                  Pesan Sesi Sekarang
+                </Button>
+              </Link>
             </div>
 
             {/* Alur Belajar */}

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Link } from 'react-router-dom'
 
 const historyData = [
   {
@@ -71,9 +72,12 @@ export default function RiwayatBelajar() {
                     <h3 className="text-[18px] font-bold text-[#0a0f44]">{session.subject}</h3>
                     <p className="text-[13px] text-slate-500 mt-0.5">{session.tutorName}</p>
                   </div>
-                  <span className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full uppercase tracking-[0.08em] flex-shrink-0">
+                  <Link
+                    to={`/learner/beri-ulasan/${session.id}`}
+                    className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full uppercase tracking-[0.08em] flex-shrink-0 hover:bg-amber-100 transition-colors"
+                  >
                     BERI ULASAN
-                  </span>
+                  </Link>
                 </div>
 
                 {/* Date/Time */}
@@ -90,10 +94,12 @@ export default function RiwayatBelajar() {
 
                 {/* Action */}
                 <div className="flex justify-end mt-3">
-                  <Button className="bg-[#0a0f44] hover:bg-[#060a2b] text-white rounded-lg h-9 px-4 text-[12px] font-medium shadow-none gap-1.5">
-                    <Repeat2 className="h-3.5 w-3.5" />
-                    Belajar lagi dengan tutor ini
-                  </Button>
+                  <Link to={`/learner/profil-tutor/${session.id}`}>
+                    <Button className="bg-[#0a0f44] hover:bg-[#060a2b] text-white rounded-lg h-9 px-4 text-[12px] font-medium shadow-none gap-1.5">
+                      <Repeat2 className="h-3.5 w-3.5" />
+                      Belajar lagi dengan tutor ini
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
