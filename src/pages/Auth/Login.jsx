@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, GraduationCap } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
@@ -14,14 +18,16 @@ export default function Login() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 p-4 font-sans">
-      <div className="flex w-full max-w-5xl bg-white dark:bg-slate-900 shadow-2xl rounded-2xl overflow-hidden flex-col md:flex-row">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 font-sans">
+      {/* Container utama (tengah) */}
+      <div className="flex-grow flex items-center justify-center p-4">
+        <div className="flex w-full max-w-5xl bg-white dark:bg-slate-900 shadow-2xl rounded-2xl overflow-hidden flex-col md:flex-row">
         
         {/* KOLOM KIRI: Visual Branding */}
         <div className="relative w-full md:w-5/12 bg-[#1a1a4b] text-white p-10 flex flex-col justify-between hidden md:flex">
           {/* Logo / Header Branding */}
           <div className="flex items-center space-x-2 z-10">
-            <GraduationCap className="h-8 w-8 text-white" />
+            <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-8 w-8 object-contain" />
             <span className="text-2xl font-bold tracking-tight">KonekDin</span>
           </div>
 
@@ -35,9 +41,17 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Footer Branding */}
-          <div className="z-10 text-sm text-slate-400">
-            © 2026 KonekDin. All rights reserved.
+          {/* Footer Branding / Avatars */}
+          <div className="z-10 flex flex-col space-y-3">
+            <div className="flex -space-x-3">
+              <img className="w-10 h-10 rounded-full border-2 border-[#1a1a4b] object-cover" src="https://i.pravatar.cc/100?img=3" alt="User" />
+              <img className="w-10 h-10 rounded-full border-2 border-[#1a1a4b] object-cover" src="https://i.pravatar.cc/100?img=4" alt="User" />
+              <img className="w-10 h-10 rounded-full border-2 border-[#1a1a4b] object-cover" src="https://i.pravatar.cc/100?img=5" alt="User" />
+              <div className="w-10 h-10 rounded-full border-2 border-[#1a1a4b] bg-[#007A5E] text-white flex items-center justify-center text-xs font-bold">
+                +10k
+              </div>
+            </div>
+            <p className="text-slate-300 text-sm">Tingkatkan pemahamanmu bersama ahlinya.</p>
           </div>
 
           {/* Abstract Background Design */}
@@ -54,7 +68,7 @@ export default function Login() {
             {/* Logo for mobile only */}
             <div className="flex items-center space-x-2 mb-8 md:hidden">
               <div className="bg-[#1a1a4b] p-2 rounded-lg">
-                <GraduationCap className="h-6 w-6 text-white" />
+                <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-6 w-6 object-contain" />
               </div>
               <span className="text-2xl font-bold text-slate-800 dark:text-white">KonekDin</span>
             </div>
@@ -67,17 +81,18 @@ export default function Login() {
             <form className="space-y-5" onSubmit={handleLogin}>
               {/* Input Email */}
               <div className="space-y-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <Label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Email
-                </label>
+                </Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Mail className="h-5 w-5 text-slate-400" />
                   </div>
-                  <input
+                  <Input
+                    id="email"
                     type="email"
                     required
-                    className="block w-full pl-10 pr-3 py-3 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a4b] dark:focus:ring-blue-500 transition-colors"
+                    className="block w-full h-12 pl-10 pr-3 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] dark:focus-visible:ring-blue-500 transition-colors"
                     placeholder="nama@email.com"
                   />
                 </div>
@@ -85,17 +100,18 @@ export default function Login() {
 
               {/* Input Password */}
               <div className="space-y-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <Label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Password
-                </label>
+                </Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Lock className="h-5 w-5 text-slate-400" />
                   </div>
-                  <input
+                  <Input
+                    id="password"
                     type={showPassword ? 'text' : 'password'}
                     required
-                    className="block w-full pl-10 pr-10 py-3 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a4b] dark:focus:ring-blue-500 transition-colors"
+                    className="block w-full h-12 pl-10 pr-10 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] dark:focus-visible:ring-blue-500 transition-colors"
                     placeholder="••••••••"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -116,19 +132,17 @@ export default function Login() {
 
               {/* Checkbox and Lupa Sandi */}
               <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center">
-                  <input
+                <div className="flex items-center space-x-2">
+                  <Checkbox
                     id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-[#1a1a4b] focus:ring-[#1a1a4b] border-slate-300 rounded cursor-pointer accent-[#1a1a4b]"
+                    className="h-4 w-4 border-slate-300 data-[state=checked]:bg-[#1a1a4b] data-[state=checked]:border-[#1a1a4b]"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <Label htmlFor="remember-me" className="text-sm font-normal text-slate-700 dark:text-slate-300 cursor-pointer">
                     Ingat Saya
-                  </label>
+                  </Label>
                 </div>
                 <div className="text-sm">
-                  <a href="#" className="font-medium text-[#2dd4bf] hover:text-[#25b5a2] transition-colors">
+                  <a href="#" className="font-medium text-[#007A5E] hover:text-[#005c47] transition-colors">
                     Lupa Kata Sandi?
                   </a>
                 </div>
@@ -136,12 +150,12 @@ export default function Login() {
 
               {/* Tombol Teruskan */}
               <div className="pt-2">
-                <button
+                <Button
                   type="submit"
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-[#1a1a4b] hover:bg-[#121235] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a1a4b] transition-colors"
+                  className="w-full flex justify-center h-12 py-3 px-4 rounded-lg shadow-sm text-sm font-semibold text-white bg-[#1a1a4b] hover:bg-[#121235] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1a1a4b] transition-colors"
                 >
                   Masuk
-                </button>
+                </Button>
               </div>
             </form>
 
@@ -159,9 +173,10 @@ export default function Login() {
               </div>
 
               <div className="mt-6">
-                <button
+                <Button
                   type="button"
-                  className="w-full inline-flex justify-center items-center py-2.5 px-4 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  variant="outline"
+                  className="w-full inline-flex justify-center items-center h-12 py-2.5 px-4 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 transition-colors"
                 >
                   <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                     <path
@@ -182,19 +197,51 @@ export default function Login() {
                     />
                   </svg>
                   Masuk dengan Google
-                </button>
+                </Button>
               </div>
             </div>
 
             <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
               Belum punya akun?{' '}
-              <Link to="/register" className="font-semibold text-[#1a1a4b] dark:text-[#2dd4bf] hover:underline transition-all">
+              <Link to="/register" className="font-semibold text-[#007A5E] hover:text-[#005c47] hover:underline transition-all">
                 Daftar Sekarang
               </Link>
             </p>
           </div>
         </div>
       </div>
+      </div>
+
+      {/* Global Footer */}
+      <footer className="w-full py-6 px-4 md:px-12 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 font-medium">
+        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 w-full">
+          <div className="hidden md:flex flex-col space-y-1">
+            <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">KonekDin</span>
+            <span>© 2026 KonekDin. Part of the Academic Commons.</span>
+          </div>
+
+          <div className="flex-grow flex justify-center space-x-6 uppercase tracking-wider">
+            <button className="flex items-center space-x-1 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+              <span>IDN</span>
+            </button>
+            <a href="#" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">PUSAT BANTUAN</a>
+            <a href="#" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors">KEBIJAKAN PRIVASI</a>
+          </div>
+
+          <div className="flex space-x-6">
+            <a href="#" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors hover:underline">Privacy Policy</a>
+            <a href="#" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors hover:underline">Terms of Service</a>
+            <a href="#" className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors hover:underline">Help Center</a>
+          </div>
+
+          {/* Mobile copyright */}
+          <div className="md:hidden flex flex-col items-center space-y-1 pt-4 text-center">
+            <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">KonekDin</span>
+            <span>© 2026 KonekDin. Part of the Academic Commons.</span>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
