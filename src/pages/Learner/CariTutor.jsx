@@ -210,6 +210,9 @@ export default function CariTutor() {
 
       {/* Tutors Grid */}
       <div className="flex-1 pb-10">
+        <div className="mb-4 text-slate-600 font-medium text-sm">
+          Menampilkan <span className="font-bold text-[#1E1B4B]">{filteredTutors.length}</span> tutor tersedia
+        </div>
         {paginatedTutors.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedTutors.map((tutor) => (
