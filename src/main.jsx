@@ -36,7 +36,6 @@ import RiwayatBelajar from '@/pages/Learner/RiwayatBelajar'
 import Notifikasi from '@/pages/Learner/Notifikasi'
 import ProfilTutor from '@/pages/Learner/ProfilTutor'
 import ProfilLearner from '@/pages/Learner/ProfilLearner'
-// import BeriUlasan from '@/pages/Learner/BeriUlasan'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
