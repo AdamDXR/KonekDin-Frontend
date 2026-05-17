@@ -28,7 +28,7 @@ import Landing from '@/pages/Landing/Landing'
 // import JadwalMengajar from '@/pages/Tutor/JadwalMengajar'
 
 // Learner Pages
-// import LearnerDashboard from '@/pages/Learner/Dashboard'
+import LearnerDashboard from '@/pages/Learner/Dashboard'
 import CariTutor from '@/pages/Learner/CariTutor'
 import DetailPesanan from '@/pages/Learner/DetailPesanan'
 import JadwalBelajar from '@/pages/Learner/JadwalBelajar'
@@ -69,10 +69,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         {/* Learner Routes */}
         <Route path="/learner" element={<LearnerLayout />}>
           {/* Default: redirect ke dashboard */}
-          {/* 
           <Route index element={<Navigate to="/learner/dashboard" replace />} />
           <Route path="dashboard" element={<LearnerDashboard />} />
-          */}
           <Route path="cari-tutor" element={<CariTutor />} />
           <Route path="jadwal-belajar" element={<JadwalBelajar />} />
           <Route path="riwayat-belajar" element={<RiwayatBelajar />} />
