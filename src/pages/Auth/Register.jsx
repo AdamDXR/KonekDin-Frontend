@@ -1,355 +1,310 @@
 import { useState } from 'react'
 import {
-  Mail, Lock, Eye, EyeOff, User, GraduationCap,
-  BookOpen, ChevronRight, ChevronLeft, Check
+  Mail, Lock, User, RotateCcw, Eye, EyeOff
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-
-const ROLES = [
-  {
-    id: 'learner',
-    label: 'Mahasiswa / Learner',
-    desc: 'Cari tutor & tingkatkan prestasimu',
-    icon: BookOpen,
-  },
-  {
-    id: 'tutor',
-    label: 'Tutor / Mentor',
-    desc: 'Bagikan ilmu & dapatkan penghasilan',
-    icon: GraduationCap,
-  },
-]
-
-const steps = ['Pilih Peran', 'Data Diri', 'Akun & Kata Sandi']
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 export default function Register() {
   const navigate = useNavigate()
-  const [step, setStep] = useState(1)
-  const [role, setRole] = useState(null)
-  const [showPass, setShowPass] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [agreed, setAgreed] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [form, setForm] = useState({
     fullName: '',
     email: '',
-    university: '',
-    prodi: '',
-    nim: '',
     password: '',
     confirmPassword: '',
   })
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
-  const handleNext = () => {
-    if (step < 3) setStep(step + 1)
-  }
-
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1)
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Dummy: langsung ke halaman learner atau tutor
-    navigate(role === 'tutor' ? '/tutor' : '/learner')
+    // Dummy submit, arahkan ke learner
+    navigate('/learner')
   }
 
-  const canNext1 = role !== null
-  const canNext2 = form.fullName.trim() && form.email.trim() && form.university.trim()
-  const canSubmit = form.password.length >= 6 && form.password === form.confirmPassword && agreed
+  const isPasswordMatch = form.confirmPassword ? form.password === form.confirmPassword : true
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4 font-sans">
-      <div className="flex w-full max-w-5xl bg-white shadow-2xl rounded-2xl overflow-hidden flex-col md:flex-row">
-
-        {/* ===== LEFT: Branding ===== */}
-        <div className="relative w-full md:w-5/12 bg-[#1a1a4b] text-white p-10 flex flex-col justify-between hidden md:flex">
-          <div className="flex items-center space-x-2 z-10">
-            <GraduationCap className="h-8 w-8 text-white" />
-            <span className="text-2xl font-bold tracking-tight">KonekDin</span>
-          </div>
-
-          <div className="z-10 mt-16 mb-20 space-y-6">
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white">
-              Bergabunglah &<br />Mulai Perjalananmu.
-            </h1>
-            <p className="text-slate-300 text-base leading-relaxed max-w-sm">
-              Daftar sekarang dan temukan tutor terbaik atau mulai berbagi ilmumu bersama ribuan mahasiswa.
-            </p>
-
-            {/* Step indicator */}
-            <div className="space-y-3 pt-4">
-              {steps.map((s, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 transition-all ${
-                    step > i + 1
-                      ? 'bg-teal-400 border-teal-400 text-white'
-                      : step === i + 1
-                      ? 'bg-white border-white text-[#1a1a4b]'
-                      : 'bg-transparent border-slate-500 text-slate-500'
-                  }`}>
-                    {step > i + 1 ? <Check className="h-3.5 w-3.5" /> : i + 1}
-                  </div>
-                  <span className={`text-sm font-medium ${
-                    step === i + 1 ? 'text-white' : step > i + 1 ? 'text-teal-300' : 'text-slate-500'
-                  }`}>{s}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="z-10 text-sm text-slate-400">© 2026 KonekDin. All rights reserved.</div>
-
-          {/* Decorative blobs */}
-          <div className="absolute inset-0 z-0">
-            <div className="absolute -bottom-24 -left-20 w-80 h-80 bg-[#2b2b73] rounded-full blur-3xl opacity-50" />
-            <div className="absolute top-10 -right-20 w-64 h-64 bg-[#393992] rounded-full blur-3xl opacity-30" />
-          </div>
-        </div>
-
-        {/* ===== RIGHT: Form ===== */}
-        <div className="w-full md:w-7/12 p-8 md:p-14 lg:p-16 flex flex-col justify-center bg-white">
-          <div className="max-w-md w-full mx-auto">
-
-            {/* Mobile logo */}
-            <div className="flex items-center space-x-2 mb-8 md:hidden">
-              <div className="bg-[#1a1a4b] p-2 rounded-lg">
-                <GraduationCap className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-slate-800">KonekDin</span>
+    <div className="flex flex-col min-h-screen bg-[#f4f7f6] font-sans">
+      {/* Container utama (tengah) */}
+      <div className="flex-grow flex items-center justify-center p-4">
+        <div className="flex w-full max-w-5xl bg-white shadow-2xl rounded-3xl overflow-hidden flex-col md:flex-row">
+        
+          {/* KOLOM KIRI: Visual Branding */}
+          <div className="relative w-full md:w-5/12 bg-[#0a0f44] text-white p-10 flex flex-col justify-between hidden md:flex overflow-hidden">
+            
+            {/* Background Image with Overlay */}
+            <div className="absolute inset-0 z-0">
+              <img 
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Students studying" 
+                className="w-full h-full object-cover opacity-30 mix-blend-luminosity"
+              />
+              <div className="absolute inset-0 bg-[#0a0f44]/80 mix-blend-multiply"></div>
+              {/* Extra gradient for depth */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f44] via-transparent to-[#0a0f44]/50"></div>
             </div>
 
-            {/* Header */}
-            <div className="mb-8">
-              <p className="text-xs font-bold tracking-[0.14em] text-teal-500 uppercase mb-1">
-                Langkah {step} dari {steps.length}
-              </p>
-              <h2 className="text-3xl font-bold text-slate-800 mb-1">{steps[step - 1]}</h2>
-              <p className="text-slate-500 text-sm">
-                {step === 1 && 'Pilih peran yang sesuai dengan kamu.'}
-                {step === 2 && 'Lengkapi informasi diri kamu.'}
-                {step === 3 && 'Buat kata sandi untuk akunmu.'}
+            {/* Logo / Header Branding */}
+            <div className="flex items-center space-x-2 z-10">
+              <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-10 w-10 object-contain brightness-0 invert" />
+              <span className="text-3xl font-bold tracking-tight">KonekDin</span>
+            </div>
+
+            {/* Headline Body */}
+            <div className="z-10 mt-16 mb-20 space-y-6">
+              <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white">
+                Membangun Jembatan <br /> Akademik Masa Depan.
+              </h1>
+              <p className="text-slate-300 text-[15px] leading-relaxed max-w-[280px]">
+                Bergabunglah dengan ribuan mahasiswa dan mentor profesional dalam ekosistem pembelajaran kolaboratif terbaik.
               </p>
             </div>
 
-            {/* ===== STEP 1: Pilih Peran ===== */}
-            {step === 1 && (
-              <div className="space-y-4">
-                {ROLES.map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => setRole(r.id)}
-                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                      role === r.id
-                        ? 'border-[#1a1a4b] bg-[#f0f0ff]'
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className={`h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                      role === r.id ? 'bg-[#1a1a4b] text-white' : 'bg-slate-100 text-slate-500'
-                    }`}>
-                      <r.icon className="h-6 w-6" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-slate-800">{r.label}</p>
-                      <p className="text-sm text-slate-400 mt-0.5">{r.desc}</p>
-                    </div>
-                    <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                      role === r.id ? 'border-[#1a1a4b]' : 'border-slate-300'
-                    }`}>
-                      {role === r.id && <div className="h-2.5 w-2.5 rounded-full bg-[#1a1a4b]" />}
-                    </div>
-                  </button>
-                ))}
-
-                <button
-                  onClick={handleNext}
-                  disabled={!canNext1}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold text-white bg-[#1a1a4b] hover:bg-[#121235] disabled:opacity-40 disabled:cursor-not-allowed transition-colors mt-4"
-                >
-                  Lanjut <ChevronRight className="h-4 w-4" />
-                </button>
+            {/* Footer Branding / Avatars */}
+            <div className="z-10 flex flex-col space-y-4">
+              <div className="flex -space-x-3">
+                <img className="w-11 h-11 rounded-full border-[3px] border-[#0a0f44] object-cover" src="https://i.pravatar.cc/100?img=1" alt="User" />
+                <img className="w-11 h-11 rounded-full border-[3px] border-[#0a0f44] object-cover" src="https://i.pravatar.cc/100?img=2" alt="User" />
+                <img className="w-11 h-11 rounded-full border-[3px] border-[#0a0f44] object-cover" src="https://i.pravatar.cc/100?img=3" alt="User" />
+                <div className="w-11 h-11 rounded-full border-[3px] border-[#0a0f44] bg-[#007A5E] text-white flex items-center justify-center text-xs font-bold">
+                  +10k
+                </div>
               </div>
-            )}
+              <p className="text-[#8DF5E4] font-medium text-sm">Tingkatkan pemahamanmu bersama ahlinya.</p>
+            </div>
+          </div>
 
-            {/* ===== STEP 2: Data Diri ===== */}
-            {step === 2 && (
-              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleNext() }}>
-                {/* Full Name */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <input
-                      type="text" name="fullName" value={form.fullName} onChange={handleChange}
-                      required placeholder="Nama sesuai KTP"
-                      className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-lg text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a4b] transition-colors text-sm"
-                    />
-                  </div>
+          {/* KOLOM KANAN: Formulir Register */}
+          <div className="w-full md:w-7/12 p-8 md:p-14 flex flex-col justify-center bg-white z-10 rounded-l-3xl -ml-4 md:-ml-6 shadow-[-10px_0_30px_rgba(0,0,0,0.05)]">
+            <div className="max-w-[400px] w-full mx-auto">
+              
+              {/* Logo for mobile only */}
+              <div className="flex items-center space-x-2 mb-8 md:hidden">
+                <div className="bg-[#1a1a4b] p-2 rounded-lg">
+                  <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-6 w-6 object-contain brightness-0 invert" />
                 </div>
+                <span className="text-2xl font-bold text-slate-800">KonekDin</span>
+              </div>
 
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <input
-                      type="email" name="email" value={form.email} onChange={handleChange}
-                      required placeholder="nama@email.com"
-                      className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-lg text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a4b] transition-colors text-sm"
-                    />
-                  </div>
-                </div>
+              <div className="text-left mb-8">
+                {/* Teks diubah dari "Selamat Datang Kembali" menjadi "Buat Akun Baru" agar logis */}
+                <h2 className="text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">Buat Akun Baru</h2>
+                <p className="text-slate-500 font-medium">Daftar ke akun KonekDin Anda untuk mulai belajar</p>
+              </div>
 
-                {/* University */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Universitas</label>
-                  <div className="relative">
-                    <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <input
-                      type="text" name="university" value={form.university} onChange={handleChange}
-                      required placeholder="Nama universitas kamu"
-                      className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-lg text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a4b] transition-colors text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* NIM & Prodi — only for learner */}
-                {role === 'learner' && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">NIM</label>
-                      <input
-                        type="text" name="nim" value={form.nim} onChange={handleChange}
-                        placeholder="A11.2024.xxxxx"
-                        className="block w-full px-3 py-3 border border-slate-200 rounded-lg text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a4b] transition-colors text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Program Studi</label>
-                      <input
-                        type="text" name="prodi" value={form.prodi} onChange={handleChange}
-                        placeholder="Teknik Informatika"
-                        className="block w-full px-3 py-3 border border-slate-200 rounded-lg text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a4b] transition-colors text-sm"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-1">
-                  <button
-                    type="button" onClick={handleBack}
-                    className="flex items-center gap-1 px-4 py-3 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
-                  >
-                    <ChevronLeft className="h-4 w-4" /> Kembali
-                  </button>
-                  <button
-                    type="submit" disabled={!canNext2}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold text-white bg-[#1a1a4b] hover:bg-[#121235] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Lanjut <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* ===== STEP 3: Kata Sandi ===== */}
-            {step === 3 && (
               <form className="space-y-4" onSubmit={handleSubmit}>
-                {/* Password */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Kata Sandi</label>
+                
+                {/* Input Nama Lengkap */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="fullName" className="block text-sm font-bold text-slate-900">
+                    Nama Lengkap
+                  </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <input
-                      type={showPass ? 'text' : 'password'} name="password" value={form.password} onChange={handleChange}
-                      required placeholder="Minimal 6 karakter"
-                      className="block w-full pl-10 pr-10 py-3 border border-slate-200 rounded-lg text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1a1a4b] transition-colors text-sm"
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <Input
+                      id="fullName"
+                      name="fullName"
+                      type="text"
+                      value={form.fullName}
+                      onChange={handleChange}
+                      required
+                      className="block w-full h-12 pl-11 pr-3 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] focus-visible:bg-white focus-visible:border-slate-200 transition-all font-medium"
+                      placeholder="Masukkan nama lengkap"
                     />
-                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                      {showPass ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  {/* Password strength */}
-                  <div className="flex gap-1 mt-2">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
-                        form.password.length === 0 ? 'bg-slate-200'
-                        : form.password.length < 6 && i === 1 ? 'bg-red-400'
-                        : form.password.length >= 6 && form.password.length < 10 && i <= 2 ? 'bg-yellow-400'
-                        : form.password.length >= 10 ? 'bg-teal-400'
-                        : 'bg-slate-200'
-                      }`} />
-                    ))}
                   </div>
                 </div>
 
-                {/* Confirm Password */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Konfirmasi Kata Sandi</label>
+                {/* Input Email */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="block text-sm font-bold text-slate-900">
+                    Alamat Email
+                  </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <input
-                      type={showConfirm ? 'text' : 'password'} name="confirmPassword" value={form.confirmPassword} onChange={handleChange}
-                      required placeholder="Ulangi kata sandi"
-                      className={`block w-full pl-10 pr-10 py-3 border rounded-lg text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 transition-colors text-sm ${
-                        form.confirmPassword && form.password !== form.confirmPassword
-                          ? 'border-red-300 focus:ring-red-200'
-                          : 'border-slate-200 focus:ring-[#1a1a4b]'
-                      }`}
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      required
+                      className="block w-full h-12 pl-11 pr-3 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] focus-visible:bg-white focus-visible:border-slate-200 transition-all font-medium"
+                      placeholder="nama@email.com"
                     />
-                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                      {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
                   </div>
-                  {form.confirmPassword && form.password !== form.confirmPassword && (
-                    <p className="text-xs text-red-500 mt-1">Kata sandi tidak cocok</p>
+                </div>
+
+                {/* Input Password */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="block text-sm font-bold text-slate-900">
+                    Kata Sandi
+                  </Label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={form.password}
+                      onChange={handleChange}
+                      required
+                      className="block w-full h-12 pl-11 pr-10 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] focus-visible:bg-white focus-visible:border-slate-200 transition-all font-medium"
+                      placeholder="Masukkan kata sandi"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Input Konfirmasi Password */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirmPassword" className="block text-sm font-bold text-slate-900">
+                    Konfirmasi Kata Sandi
+                  </Label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <RotateCcw className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      className={`block w-full h-12 pl-11 pr-10 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:bg-white transition-all font-medium ${
+                        !isPasswordMatch ? 'focus-visible:ring-red-500 border-red-300 bg-red-50' : 'focus-visible:ring-[#1a1a4b] focus-visible:border-slate-200'
+                      }`}
+                      placeholder="Ulangi kata sandi"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+                  {!isPasswordMatch && (
+                    <p className="text-xs text-red-500 font-medium pt-1">Kata sandi tidak sama</p>
                   )}
                 </div>
 
-                {/* Terms */}
-                <div className="flex items-start gap-3 pt-1">
-                  <input
-                    id="terms" type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
-                    className="h-4 w-4 mt-0.5 accent-[#1a1a4b] cursor-pointer flex-shrink-0"
-                  />
-                  <label htmlFor="terms" className="text-sm text-slate-600 cursor-pointer leading-relaxed">
-                    Saya menyetujui{' '}
-                    <a href="#" className="font-semibold text-[#1a1a4b] hover:underline">Syarat & Ketentuan</a>
-                    {' '}dan{' '}
-                    <a href="#" className="font-semibold text-[#1a1a4b] hover:underline">Kebijakan Privasi</a>
-                    {' '}KonekDin.
-                  </label>
-                </div>
-
-                <div className="flex gap-3 pt-1">
-                  <button
-                    type="button" onClick={handleBack}
-                    className="flex items-center gap-1 px-4 py-3 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                {/* Tombol Teruskan */}
+                <div className="pt-3">
+                  <Button
+                    type="submit"
+                    disabled={!isPasswordMatch || !form.password}
+                    className="w-full flex justify-center h-12 py-3 px-4 rounded-xl shadow-md text-[15px] font-bold text-white bg-[#0a0f44] hover:bg-[#060a2b] focus-visible:ring-[#0a0f44] transition-all disabled:opacity-50"
                   >
-                    <ChevronLeft className="h-4 w-4" /> Kembali
-                  </button>
-                  <button
-                    type="submit" disabled={!canSubmit}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold text-white bg-[#1a1a4b] hover:bg-[#121235] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Check className="h-4 w-4" /> Daftar Sekarang
-                  </button>
+                    Daftar Sekarang
+                  </Button>
                 </div>
               </form>
-            )}
 
-            {/* Link to Login */}
-            <p className="mt-8 text-center text-sm text-slate-600">
-              Sudah punya akun?{' '}
-              <Link to="/login" className="font-semibold text-[#1a1a4b] hover:underline transition-all">
-                Masuk Sekarang
-              </Link>
-            </p>
+              {/* Opsi Daftar Lainnya */}
+              <div className="mt-7">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs font-bold tracking-widest text-slate-400 uppercase">
+                    <span className="px-4 bg-white">
+                      atau
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full inline-flex justify-center items-center h-12 py-2.5 px-4 border border-slate-200 rounded-xl shadow-sm bg-white text-[15px] font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    <svg className="h-5 w-5 mr-3" viewBox="0 0 24 24">
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                    Daftar dengan Google
+                  </Button>
+                </div>
+              </div>
+
+              <p className="mt-8 text-center text-[15px] text-slate-600 font-medium">
+                Sudah punya akun?{' '}
+                <Link to="/login" className="font-bold text-[#007A5E] hover:text-[#005c47] underline underline-offset-2 transition-all">
+                  Masuk Sekarang
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Global Footer */}
+      <footer className="w-full py-6 px-4 md:px-12 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 font-semibold border-t border-slate-200/60 mt-auto bg-transparent">
+        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 w-full max-w-7xl mx-auto">
+          <div className="hidden md:flex flex-col space-y-1">
+            <span className="font-extrabold text-[#1a1a4b] text-sm tracking-tight">KonekDin</span>
+            <span>© 2026 KonekDin. Part of the Academic Commons.</span>
+          </div>
+
+          <div className="flex-grow flex justify-center md:justify-end space-x-6 uppercase tracking-wider md:pr-8">
+            <button className="flex items-center space-x-1.5 hover:text-slate-800 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+              <span>IDN</span>
+            </button>
+            <a href="#" className="hover:text-slate-800 transition-colors">PUSAT BANTUAN</a>
+            <a href="#" className="hover:text-slate-800 transition-colors">KEBIJAKAN PRIVASI</a>
+          </div>
+
+          <div className="flex space-x-6 text-slate-500">
+            <a href="#" className="hover:text-slate-800 transition-colors hover:underline underline-offset-2">Privacy Policy</a>
+            <a href="#" className="hover:text-slate-800 transition-colors hover:underline underline-offset-2">Terms of Service</a>
+            <a href="#" className="hover:text-slate-800 transition-colors hover:underline underline-offset-2">Help Center</a>
+          </div>
+
+          {/* Mobile copyright */}
+          <div className="md:hidden flex flex-col items-center space-y-1 pt-4 text-center w-full">
+            <span className="font-extrabold text-[#1a1a4b] text-sm tracking-tight">KonekDin</span>
+            <span>© 2026 KonekDin. Part of the Academic Commons.</span>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
