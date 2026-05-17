@@ -13,27 +13,27 @@ import Login from '@/pages/Auth/Login'
 import Register from '@/pages/Auth/Register'
 
 // Admin Pages
-import AdminDashboard from '@/pages/Admin/Dashboard'
-import KelolaUser from '@/pages/Admin/KelolaUser'
-import KelolaMatakuliah from '@/pages/Admin/KelolaMatakuliah'
-import ValidasiBadge from '@/pages/Admin/ValidasiBadge'
-import Settings from '@/pages/Admin/Settings'
-import LogTransaksi from '@/pages/Admin/LogTransaksi'
+//import AdminDashboard from '@/pages/Admin/Dashboard'
+//import KelolaUser from '@/pages/Admin/KelolaUser'
+//import KelolaMatakuliah from '@/pages/Admin/KelolaMatakuliah'
+//import ValidasiBadge from '@/pages/Admin/ValidasiBadge'
+//import Settings from '@/pages/Admin/Settings'
+//import LogTransaksi from '@/pages/Admin/LogTransaksi'
 
 // Tutor Pages
-import TutorDashboard from '@/pages/Tutor/Dashboard'
-import JadwalMengajar from '@/pages/Tutor/JadwalMengajar'
+//import TutorDashboard from '@/pages/Tutor/Dashboard'
+//import JadwalMengajar from '@/pages/Tutor/JadwalMengajar'
 
 // Learner Pages
-import LearnerDashboard from '@/pages/Learner/Dashboard'
-import CariTutor from '@/pages/Learner/CariTutor'
-import DetailPesanan from '@/pages/Learner/DetailPesanan'
+//import LearnerDashboard from '@/pages/Learner/Dashboard'
+//import CariTutor from '@/pages/Learner/CariTutor'
+//import DetailPesanan from '@/pages/Learner/DetailPesanan'
 import JadwalBelajar from '@/pages/Learner/JadwalBelajar'
-import RiwayatBelajar from '@/pages/Learner/RiwayatBelajar'
-import Notifikasi from '@/pages/Learner/Notifikasi'
-import ProfilTutor from '@/pages/Learner/ProfilTutor'
-import ProfilLearner from '@/pages/Learner/ProfilLearner'
-import BeriUlasan from '@/pages/Learner/BeriUlasan'
+//import RiwayatBelajar from '@/pages/Learner/RiwayatBelajar'
+//import Notifikasi from '@/pages/Learner/Notifikasi'
+//import ProfilTutor from '@/pages/Learner/ProfilTutor'
+//import ProfilLearner from '@/pages/Learner/ProfilLearner'
+//import BeriUlasan from '@/pages/Learner/BeriUlasan'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
