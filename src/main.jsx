@@ -29,7 +29,7 @@ import Landing from '@/pages/Landing/Landing'
 
 // // Learner Pages
 // import LearnerDashboard from '@/pages/Learner/Dashboard'
-// import CariTutor from '@/pages/Learner/CariTutor'
+import CariTutor from '@/pages/Learner/CariTutor'
 // import DetailPesanan from '@/pages/Learner/DetailPesanan'
 // import JadwalBelajar from '@/pages/Learner/JadwalBelajar'
 // import RiwayatBelajar from '@/pages/Learner/RiwayatBelajar'
@@ -72,7 +72,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           {/* 
           <Route index element={<Navigate to="/learner/dashboard" replace />} />
           <Route path="dashboard" element={<LearnerDashboard />} />
+          */}
           <Route path="cari-tutor" element={<CariTutor />} />
+          {/*
           <Route path="profil-tutor/:id" element={<ProfilTutor />} />
           <Route path="profil-learner" element={<ProfilLearner />} />
           <Route path="detail-pesanan" element={<DetailPesanan />} />

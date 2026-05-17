@@ -78,10 +78,6 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
     {/* Bottom Actions */}
     <div className="px-3 pb-5 space-y-0.5">
       <div className="h-px bg-slate-100 mx-2 mb-3"></div>
-      <button className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 w-full transition-colors">
-        <HelpCircle className="h-[18px] w-[18px]" strokeWidth={1.8} />
-        Bantuan
-      </button>
       <button
         onClick={() => navigate('/login')}
         className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full transition-colors"
@@ -134,24 +130,27 @@ export default function LearnerLayout() {
           </Avatar>
         </header>
 
-        {/* Page Content — scrollable */}
-        <main className="flex-1 overflow-y-auto px-6 py-6 lg:px-10 lg:py-8">
-          <Outlet />
-        </main>
+        {/* Scrollable Area */}
+        <div className="flex-1 overflow-y-auto flex flex-col">
+          {/* Page Content */}
+          <main className="flex-1 px-6 py-6 lg:px-10 lg:py-8">
+            <Outlet />
+          </main>
 
-        {/* Footer — selalu di bawah, tidak ikut scroll */}
-        <footer className="flex-shrink-0 border-t border-slate-100 bg-white px-6 lg:px-10 py-3 flex flex-col sm:flex-row items-center justify-between gap-1">
-          <p className="text-[12px] text-slate-400">
-            © 2026 <span className="font-semibold text-[#0a0f44]">KonekDin</span>. Semua hak dilindungi.
-          </p>
-          <div className="flex items-center gap-4 text-[12px] text-slate-400">
-            <a href="#" className="hover:text-teal-600 transition-colors">Ketentuan Layanan</a>
-            <span className="text-slate-200">|</span>
-            <a href="#" className="hover:text-teal-600 transition-colors">Kebijakan Privasi</a>
-            <span className="text-slate-200">|</span>
-            <a href="#" className="hover:text-teal-600 transition-colors">Bantuan</a>
-          </div>
-        </footer>
+          {/* Footer — scroll bersama konten */}
+          <footer className="border-t border-slate-100 bg-white px-6 lg:px-10 py-3 flex flex-col sm:flex-row items-center justify-between gap-1">
+            <p className="text-[12px] text-slate-400">
+              © 2026 <span className="font-semibold text-[#0a0f44]">KonekDin</span>. Semua hak dilindungi.
+            </p>
+            <div className="flex items-center gap-4 text-[12px] text-slate-400">
+              <a href="#" className="hover:text-teal-600 transition-colors">Ketentuan Layanan</a>
+              <span className="text-slate-200">|</span>
+              <a href="#" className="hover:text-teal-600 transition-colors">Kebijakan Privasi</a>
+              <span className="text-slate-200">|</span>
+              <a href="#" className="hover:text-teal-600 transition-colors">Bantuan</a>
+            </div>
+          </footer>
+        </div>
       </div>
     </div>
   )
