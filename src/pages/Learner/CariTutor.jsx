@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Search,
   SlidersHorizontal,
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import PesanSesiModal from '@/components/Learner/PesanSesiModal'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -46,10 +48,13 @@ const mockTutors = [
 const ITEMS_PER_PAGE = 9
 
 export default function CariTutor() {
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [activeSearchTerm, setActiveSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedTutor, setSelectedTutor] = useState(null)
 
   // Filter State
   const [filterCourse, setFilterCourse] = useState('semua')
@@ -269,10 +274,16 @@ export default function CariTutor() {
 
                 {/* Actions */}
                 <div className="flex gap-3 mt-auto">
-                  <Button className="flex-[1.2] rounded-[12px] h-10 bg-[#25D366] hover:bg-[#20b858] text-white font-bold shadow-none text-sm px-0">
+                  <Button 
+                    onClick={() => { setSelectedTutor(tutor); setIsModalOpen(true); }}
+                    className="flex-[1.2] rounded-[12px] h-10 bg-[#25D366] hover:bg-[#20b858] text-white font-bold shadow-none text-sm px-0"
+                  >
                     Pesan Sesi
                   </Button>
-                  <Button className="flex-[1.4] rounded-[12px] h-10 bg-[#E6F1EF] text-[#006B5F] hover:bg-[#d6e8e5] font-bold shadow-none text-sm px-0">
+                  <Button 
+                    onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}
+                    className="flex-[1.4] rounded-[12px] h-10 bg-[#E6F1EF] text-[#006B5F] hover:bg-[#d6e8e5] font-bold shadow-none text-sm px-0"
+                  >
                     Lihat Profil
                   </Button>
                 </div>
@@ -333,6 +344,13 @@ export default function CariTutor() {
         </Pagination>
       </div>
 
+      {isModalOpen && selectedTutor && (
+        <PesanSesiModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          tutor={selectedTutor} 
+        />
+      )}
     </div>
   )
 }
