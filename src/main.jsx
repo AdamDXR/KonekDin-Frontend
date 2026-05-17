@@ -33,7 +33,7 @@ import CariTutor from '@/pages/Learner/CariTutor'
 // import DetailPesanan from '@/pages/Learner/DetailPesanan'
 import JadwalBelajar from '@/pages/Learner/JadwalBelajar'
 import RiwayatBelajar from '@/pages/Learner/RiwayatBelajar'
-// import Notifikasi from '@/pages/Learner/Notifikasi'
+import Notifikasi from '@/pages/Learner/Notifikasi'
 // import ProfilTutor from '@/pages/Learner/ProfilTutor'
 // import ProfilLearner from '@/pages/Learner/ProfilLearner'
 // import BeriUlasan from '@/pages/Learner/BeriUlasan'
@@ -76,12 +76,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="cari-tutor" element={<CariTutor />} />
           <Route path="jadwal-belajar" element={<JadwalBelajar />} />
           <Route path="riwayat-belajar" element={<RiwayatBelajar />} />
+          <Route path="notifikasi" element={<Notifikasi />} />
           {/*
           <Route path="profil-tutor/:id" element={<ProfilTutor />} />
           <Route path="profil-learner" element={<ProfilLearner />} />
           <Route path="detail-pesanan" element={<DetailPesanan />} />
           <Route path="beri-ulasan/:id" element={<BeriUlasan />} />
-          <Route path="notifikasi" element={<Notifikasi />} /> 
           */}
         </Route>
       </Routes>
