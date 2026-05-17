@@ -122,7 +122,7 @@ export default function DetailPesanan() {
                        Lunas
                      </div>
                      <Button 
-                       onClick={() => navigate('/learner/dashboard')}
+                       onClick={() => navigate('/learner/jadwal-belajar')}
                        className="w-full md:w-auto bg-slate-100 hover:bg-slate-200 text-[#000666] rounded-xl px-6 h-11 font-bold"
                      >
                        Lihat Jadwal
@@ -167,7 +167,7 @@ export default function DetailPesanan() {
                    Lunas
                  </div>
                  <Button 
-                   onClick={() => navigate('/learner/dashboard')}
+                   onClick={() => navigate('/learner/jadwal-belajar')}
                    className="w-full md:w-auto bg-slate-100 hover:bg-slate-200 text-[#000666] rounded-xl px-6 h-11 font-bold"
                  >
                    Lihat Jadwal
@@ -210,7 +210,7 @@ export default function DetailPesanan() {
                    Lunas
                  </div>
                  <Button 
-                   onClick={() => navigate('/learner/dashboard')}
+                   onClick={() => navigate('/learner/jadwal-belajar')}
                    className="w-full md:w-auto bg-slate-100 hover:bg-slate-200 text-[#000666] rounded-xl px-6 h-11 font-bold"
                  >
                    Lihat Jadwal

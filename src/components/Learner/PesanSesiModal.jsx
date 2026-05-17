@@ -18,10 +18,10 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
       {/* Modal Container */}
-      <div className="bg-white rounded-[32px] w-full max-w-[448px] overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-[32px] w-full max-w-[448px] overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         
         {/* Header - Dark Blue */}
-        <div className="bg-[#000666] pt-10 pb-8 px-8 flex flex-col items-center text-center relative">
+        <div className="bg-[#000666] pt-8 pb-6 px-8 flex flex-col items-center text-center relative shrink-0">
           <button 
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
@@ -29,15 +29,17 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
             <X className="w-5 h-5" />
           </button>
           
-          <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4">
-            <FileText className="w-8 h-8 text-[#AFFFED]" />
+          <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4">
+            <FileText className="w-6 h-6 text-[#AFFFED]" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Ringkasan Pesanan</h2>
+          <h2 className="text-xl font-bold text-white mb-2">Ringkasan Pesanan</h2>
           <p className="text-white/80 text-sm">Konfirmasi rincian sesi mentorship Anda</p>
         </div>
 
-        {/* Body - White */}
-        <div className="px-8 py-6 space-y-4">
+        {/* Scrollable Content Area */}
+        <div className="overflow-y-auto">
+          {/* Body - White */}
+          <div className="px-8 py-6 space-y-4">
           
           {/* Subject Info */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center">
@@ -98,6 +100,7 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
           </Button>
         </div>
 
+        </div>
       </div>
     </div>
   )
