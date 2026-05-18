@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   Calendar,
   Clock,
-  Bell,
   CheckCircle2,
   Plus,
   MessageSquare,
@@ -23,18 +22,8 @@ const jadwalList = [
     jamMulai: '12.30',
     jamSelesai: '14.10',
     timezone: 'WIB',
-    pengingat: ['H-1 HARI', 'H-30 MENIT'],
   },
 ]
-
-function PengingatBadge({ label }) {
-  return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#e6f4f1] text-[#0d7c6b] text-[11px] font-semibold">
-      {label}
-      <CheckCircle2 className="h-3.5 w-3.5 text-[#0d7c6b]" />
-    </span>
-  )
-}
 
 function JadwalCard({ jadwal, onHubungi }) {
   return (
@@ -94,14 +83,6 @@ function JadwalCard({ jadwal, onHubungi }) {
               <span className="text-sm font-medium text-slate-700">
                 {jadwal.jamMulai} - {jadwal.jamSelesai} {jadwal.timezone}
               </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-slate-400" />
-              <span className="text-xs font-medium text-slate-500 mr-1">Pengingat:</span>
-              {jadwal.pengingat.map((p) => (
-                <PengingatBadge key={p} label={p} />
-              ))}
             </div>
           </div>
         </div>
