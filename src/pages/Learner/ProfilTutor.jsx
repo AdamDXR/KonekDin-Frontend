@@ -164,7 +164,7 @@ export default function ProfilTutor() {
           <div className="w-full lg:w-[380px] space-y-6">
             
             {/* CTA Card */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-8">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <div className="text-slate-500 font-medium mb-1">Tarif Sesi mulai dari</div>
               <div className="text-3xl font-bold text-slate-900 mb-6">Rp {tutor.price.toLocaleString('id-ID')}<span className="text-base font-normal text-slate-500">/jam</span></div>
               
