@@ -24,6 +24,7 @@ const riwayatList = [
     jam: '09:30 - 12:00',
     ratingUser: 4,
     sudahDiulas: true,
+    textUlasan: 'Sangat mudah dipahami dan sabar dalam menjelaskan materi yang sulit.',
   },
   {
     id: '2',
@@ -35,6 +36,7 @@ const riwayatList = [
     jam: '07:00 - 08.40',
     ratingUser: 4,
     sudahDiulas: true,
+    textUlasan: 'Materinya sangat daging, tapi mungkin bisa sedikit diperlambat tempo mengajarnya.',
   },
   {
     id: '3',
@@ -119,7 +121,7 @@ function RiwayatCard({ item, onBeriUlasan, onBelajarLagi }) {
               {item.mataKuliah}
             </h3>
             <p className="text-sm text-slate-600 font-medium mt-0.5">{item.tutorNama}</p>
-            <div className="flex flex-wrap items-center gap-3 mt-2">
+            <div className="flex flex-wrap items-center gap-3 mt-2 mb-2">
               <span className="flex items-center gap-1.5 text-xs text-slate-500">
                 <Calendar className="h-3.5 w-3.5" />
                 {item.tanggal}
@@ -129,6 +131,15 @@ function RiwayatCard({ item, onBeriUlasan, onBelajarLagi }) {
                 {item.jam}
               </span>
             </div>
+            
+            {/* Teks Ulasan */}
+            {item.sudahDiulas && item.textUlasan && (
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2">
+                <p className="text-sm text-slate-600 italic leading-relaxed">
+                  "{item.textUlasan}"
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Rating user jika sudah diulas */}
@@ -177,7 +188,7 @@ function FormUlasan({ tutor, onBack, onSubmit }) {
     // TODO: ganti dengan API call
     console.log('Submit ulasan:', { tutorId: tutor.id, rating, ulasan })
     setSubmitted(true)
-    setTimeout(() => onSubmit(tutor.id, rating), 1500)
+    setTimeout(() => onSubmit(tutor.id, rating, ulasan), 1500)
   }
 
   return (
@@ -283,12 +294,12 @@ export default function RiwayatBelajar() {
     setSelectedItem(null)
   }
 
-  // Setelah submit: tandai item sebagai sudah diulas + simpan rating
-  const handleSubmitUlasan = (tutorId, rating) => {
+  // Setelah submit: tandai item sebagai sudah diulas + simpan rating dan teks ulasan
+  const handleSubmitUlasan = (tutorId, rating, textUlasan) => {
     setData((prev) =>
       prev.map((item) =>
         item.id === tutorId
-          ? { ...item, sudahDiulas: true, ratingUser: rating }
+          ? { ...item, sudahDiulas: true, ratingUser: rating, textUlasan }
           : item
       )
     )
