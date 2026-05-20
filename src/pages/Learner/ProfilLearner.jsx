@@ -1,12 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
+import Cropper from 'react-easy-crop'
+import getCroppedImg from '@/utils/cropImage'
 import { useNavigate } from 'react-router-dom'
 import {
   University,
   CalendarDays,
   History,
-  CheckCircle2,
-  Clock3,
-  BookOpen,
   Pencil,
   Save,
 } from 'lucide-react'
@@ -23,88 +22,6 @@ const profilData = {
   nim: 'A11.2024.12345',
   jurusan: 'Teknik Informatika',
   fakultas: 'Ilmu Komputer',
-}
-
-const statData = [
-  {
-    id: 'sesi',
-    icon: <CheckCircle2 className="h-5 w-5 text-[#0d7c6b]" />,
-    label: 'TOTAL SESI SELESAI',
-    nilai: '12',
-    growth: '+12.5%',
-  },
-  {
-    id: 'jam',
-    icon: <Clock3 className="h-5 w-5 text-[#0d7c6b]" />,
-    label: 'JAM BELAJAR',
-    nilai: '18 jam',
-    growth: '+18.5%',
-  },
-  {
-    id: 'matkul',
-    icon: <BookOpen className="h-5 w-5 text-orange-400" />,
-    label: 'MATA KULIAH DIPELAJARI',
-    nilai: '3',
-    growth: '+7%',
-  },
-]
-
-const progressData = [
-  { sesi: 'SESI 1', status: 'SELESAI', matkul: 'Basis Data', selesai: true },
-  { sesi: 'SESI 2', status: 'SELESAI', matkul: 'Logika Informatika', selesai: true },
-  { sesi: 'SESI 3', status: 'MENDATANG', matkul: 'Algoritma & Struktur Data', selesai: false },
-]
-
-// ─── StatCard ─────────────────────────────────────────────────────────────────
-function StatCard({ item }) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-4 flex-1 min-w-0">
-      <div className="flex items-start justify-between mb-3">
-        <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-          {item.icon}
-        </div>
-        <span className="text-xs font-semibold text-emerald-500">{item.growth}</span>
-      </div>
-      <p className="text-[10px] font-semibold tracking-widest text-slate-400 uppercase mb-1">
-        {item.label}
-      </p>
-      <p className="text-2xl font-extrabold text-[#0a0f44]">{item.nilai}</p>
-    </div>
-  )
-}
-
-// ─── ProgressItem ─────────────────────────────────────────────────────────────
-function ProgressItem({ item, isLast }) {
-  return (
-    <div className="flex gap-3">
-      {/* Dot + line */}
-      <div className="flex flex-col items-center">
-        <div
-          className={`h-3 w-3 rounded-full flex-shrink-0 mt-0.5 ${
-            item.selesai ? 'bg-[#0d7c6b]' : 'bg-slate-300'
-          }`}
-        />
-        {!isLast && <div className="w-0.5 flex-1 mt-1 bg-slate-200" />}
-      </div>
-      {/* Teks */}
-      <div className="pb-5">
-        <p
-          className={`text-[10px] font-bold tracking-wider ${
-            item.selesai ? 'text-[#0d7c6b]' : 'text-slate-400'
-          }`}
-        >
-          {item.sesi} – {item.status}
-        </p>
-        <p
-          className={`text-sm font-semibold mt-0.5 ${
-            item.selesai ? 'text-[#0a0f44]' : 'text-slate-400'
-          }`}
-        >
-          {item.matkul}
-        </p>
-      </div>
-    </div>
-  )
 }
 
 // ─── InputField ───────────────────────────────────────────────────────────────
@@ -133,10 +50,47 @@ function InputField({ label, value, onChange, readOnly }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ProfilLearner() {
   const navigate = useNavigate()
+  const fileInputRef = useRef(null)
 
   const [profil, setProfil] = useState(profilData)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(profilData)
+
+  // ── State for Cropper ──
+  const [imageSrc, setImageSrc] = useState(null)
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels)
+  }, [])
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImageSrc(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
+    // Reset input value so the same file can be selected again if needed
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleSaveCrop = async () => {
+    try {
+      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels)
+      setProfil((prev) => ({ ...prev, foto: croppedImage }))
+      setDraft((prev) => ({ ...prev, foto: croppedImage }))
+      setImageSrc(null)
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   const handleEdit = () => {
     setDraft(profil)
@@ -166,7 +120,17 @@ export default function ProfilLearner() {
             alt={profil.nama}
             className="h-[140px] w-[120px] object-cover rounded-2xl border border-slate-100 shadow-sm"
           />
-          <button className="absolute bottom-2 right-2 h-7 w-7 bg-[#0d7c6b] hover:bg-[#0a5c4e] rounded-full flex items-center justify-center shadow transition">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFotoChange} 
+            accept="image/*" 
+            className="hidden" 
+          />
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute bottom-2 right-2 h-7 w-7 bg-[#0d7c6b] hover:bg-[#0a5c4e] rounded-full flex items-center justify-center shadow transition"
+          >
             <Pencil className="h-3.5 w-3.5 text-white" />
           </button>
         </div>
@@ -201,18 +165,11 @@ export default function ProfilLearner() {
         </div>
       </div>
 
-      {/* ── Stat Cards ── */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        {statData.map((item) => (
-          <StatCard key={item.id} item={item} />
-        ))}
-      </div>
+      {/* ── Informasi Pribadi ── */}
+      <div>
 
-      {/* ── Informasi Pribadi + Progress Belajar ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-        {/* Informasi Pribadi — 2/3 lebar */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+        {/* Informasi Pribadi */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-[#0a0f44]">Informasi Pribadi</h2>
             {editing ? (
@@ -277,20 +234,6 @@ export default function ProfilLearner() {
             />
           </div>
         </div>
-
-        {/* Progress Belajar — 1/3 lebar */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-          <h2 className="text-base font-bold text-[#0a0f44] mb-5">Progress Belajar</h2>
-          <div>
-            {progressData.map((item, i) => (
-              <ProgressItem
-                key={item.sesi}
-                item={item}
-                isLast={i === progressData.length - 1}
-              />
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* ── Banner CTA ── */}
@@ -308,6 +251,61 @@ export default function ProfilLearner() {
         </Button>
       </div>
 
+      {/* ── Modal Crop Foto ── */}
+      {imageSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+            <div className="p-4 border-b border-slate-100">
+              <h3 className="text-lg font-bold text-slate-900">Sesuaikan Foto Profil</h3>
+              <p className="text-sm text-slate-500">Geser dan perbesar foto Anda</p>
+            </div>
+            
+            <div className="relative h-72 w-full bg-slate-900">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={120 / 140}
+                showGrid={true}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+            
+            <div className="p-4 space-y-4">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-slate-500">Zoom</span>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(e.target.value)}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#0d7c6b]"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button
+                  onClick={() => setImageSrc(null)}
+                  variant="outline"
+                  className="flex-1 font-semibold rounded-xl text-slate-600 border-slate-300"
+                >
+                  Batal
+                </Button>
+                <Button
+                  onClick={handleSaveCrop}
+                  className="flex-1 font-semibold rounded-xl bg-[#0d7c6b] hover:bg-[#0a5c4e] text-white"
+                >
+                  Simpan
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
