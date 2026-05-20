@@ -45,7 +45,7 @@ const notifikasiData = [
     items: [
       {
         id: '3',
-        tipe: 'info',
+        tipe: 'pengingat',
         judul: 'Sesi Mulai dalam 30 Menit!',
         waktu: '1 hari yang lalu',
         isBaru: false,
@@ -100,9 +100,7 @@ function NotifikasiCard({ item, isLama, onCtaClick }) {
 
   return (
     <div
-      className={`rounded-2xl border border-slate-100 overflow-hidden shadow-sm ${
-        isLama ? 'bg-slate-50' : 'bg-white'
-      }`}
+      className="rounded-2xl border border-slate-100 overflow-hidden shadow-sm bg-white"
     >
       <div className="flex">
         {/* Accent bar kiri */}
