@@ -192,22 +192,6 @@ export default function ProfilLearner() {
           </div>
 
           <div className="space-y-4">
-            {/* Email + Phone — 2 kolom */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField
-                label="Email"
-                value={current.email}
-                onChange={setField('email')}
-                readOnly={!editing}
-              />
-              <InputField
-                label="Phone Number"
-                value={current.phone}
-                onChange={setField('phone')}
-                readOnly={!editing}
-              />
-            </div>
-
             <InputField
               label="Nama"
               value={current.nama}
@@ -230,6 +214,18 @@ export default function ProfilLearner() {
               label="Fakultas"
               value={current.fakultas}
               onChange={setField('fakultas')}
+              readOnly={!editing}
+            />
+            <InputField
+              label="Email"
+              value={current.email}
+              onChange={setField('email')}
+              readOnly={!editing}
+            />
+            <InputField
+              label="Nomor Telepon"
+              value={current.phone}
+              onChange={setField('phone')}
               readOnly={!editing}
             />
           </div>

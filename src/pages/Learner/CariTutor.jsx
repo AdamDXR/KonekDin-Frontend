@@ -31,18 +31,18 @@ import {
 
 // Mock Data Tutor
 const mockTutors = [
-  { id: 1, name: 'Irkham Wildan', university: 'Universitas Dian Nuswantoro', courses: ['Basis Data', 'Struktur Data'], rating: 4.9, isTopTutor: true, availableTimes: ['07:00', '12:30', '15:30'], price: 50000, image: 'https://i.pravatar.cc/150?img=11' },
-  { id: 2, name: 'Mery Zahra', university: 'Universitas Indonesia', courses: ['UI/UX Design', 'Desain Produk'], rating: 4.8, isTopTutor: false, availableTimes: ['09:00', '14:00'], price: 60000, image: 'https://i.pravatar.cc/150?img=5' },
-  { id: 3, name: 'Arhan Pradana', university: 'Institut Teknologi Bandung', courses: ['Algoritma', 'Pemrograman C++'], rating: 5.0, isTopTutor: true, availableTimes: ['08:00', '10:00', '16:00'], price: 75000, image: 'https://i.pravatar.cc/150?img=12' },
-  { id: 4, name: 'Siti Aminah', university: 'Universitas Gadjah Mada', courses: ['Fisika Dasar', 'Kalkulus'], rating: 4.7, isTopTutor: false, availableTimes: ['13:00', '15:00'], price: 45000, image: 'https://i.pravatar.cc/150?img=9' },
-  { id: 5, name: 'Budi Santoso', university: 'Universitas Diponegoro', courses: ['Pemrograman Web', 'Jaringan Komputer'], rating: 4.6, isTopTutor: false, availableTimes: ['10:30', '14:30'], price: 40000, image: 'https://i.pravatar.cc/150?img=15' },
-  { id: 6, name: 'Rafi Ardan', university: 'Universitas Dian Nuswantoro', courses: ['Analisis Bisnis', 'Manajemen Proyek'], rating: 4.9, isTopTutor: true, availableTimes: ['07:00', '11:00', '15:30'], price: 55000, image: 'https://i.pravatar.cc/150?img=33' },
-  { id: 7, name: 'Dewi Lestari', university: 'Universitas Sebelas Maret', courses: ['Kalkulus Lanjut', 'Aljabar Linear'], rating: 4.8, isTopTutor: false, availableTimes: ['08:30', '12:00'], price: 50000, image: 'https://i.pravatar.cc/150?img=42' },
-  { id: 8, name: 'Andi Wijaya', university: 'Universitas Brawijaya', courses: ['Struktur Data', 'Kecerdasan Buatan'], rating: 4.5, isTopTutor: false, availableTimes: ['09:30', '16:30'], price: 45000, image: 'https://i.pravatar.cc/150?img=50' },
-  { id: 9, name: 'Nina Wati', university: 'Universitas Airlangga', courses: ['Statistika Dasar', 'Probabilitas'], rating: 4.9, isTopTutor: true, availableTimes: ['07:30', '13:30', '18:00'], price: 60000, image: 'https://i.pravatar.cc/150?img=21' },
-  { id: 10, name: 'Dimas Aditya', university: 'Universitas Dian Nuswantoro', courses: ['Menggambar Teknik', 'CAD'], rating: 4.7, isTopTutor: false, availableTimes: ['10:00', '15:00'], price: 55000, image: 'https://i.pravatar.cc/150?img=13' },
-  { id: 11, name: 'Ayu Kartika', university: 'Universitas Padjadjaran', courses: ['Pengantar Akuntansi', 'Ekonomi'], rating: 4.8, isTopTutor: false, availableTimes: ['11:30', '14:00'], price: 50000, image: 'https://i.pravatar.cc/150?img=28' },
-  { id: 12, name: 'Fajar Nugroho', university: 'Universitas Negeri Semarang', courses: ['Public Speaking', 'Komunikasi Massa'], rating: 4.9, isTopTutor: true, availableTimes: ['08:00', '12:30', '16:00'], price: 65000, image: 'https://i.pravatar.cc/150?img=59' },
+  { id: 1, name: 'Irkham Wildan', university: "Informatika '21", courses: ['Basis Data', 'Struktur Data'], rating: 4.9, isTopTutor: true, availableTimes: ['07.00 - 07.50', '12.30 - 13.20', '15.30 - 16.20', '17.10 - 18.00'], availableDays: ['Senin', 'Rabu', 'Jumat'], price: 50000, image: 'https://i.pravatar.cc/150?img=11' },
+  { id: 2, name: 'Mery Zahra', university: "Informatika '22", courses: ['UI/UX Design', 'Desain Produk'], rating: 4.8, isTopTutor: false, availableTimes: ['09.30 - 10.20', '14.10 - 15.00'], availableDays: ['Selasa', 'Kamis'], price: 60000, image: 'https://i.pravatar.cc/150?img=5' },
+  { id: 3, name: 'Arhan Pradana', university: "Informatika '21", courses: ['Algoritma', 'Pemrograman C++'], rating: 5.0, isTopTutor: true, availableTimes: ['08.40 - 09.30', '10.20 - 11.10', '16.20 - 17.10'], availableDays: ['Senin', 'Selasa', 'Rabu'], price: 75000, image: 'https://i.pravatar.cc/150?img=12' },
+  { id: 4, name: 'Siti Aminah', university: "Informatika '23", courses: ['Fisika Dasar', 'Kalkulus'], rating: 4.7, isTopTutor: false, availableTimes: ['13.20 - 14.10', '15.30 - 16.20'], availableDays: ['Kamis', 'Jumat'], price: 45000, image: 'https://i.pravatar.cc/150?img=9' },
+  { id: 5, name: 'Budi Santoso', university: "Informatika '22", courses: ['Pemrograman Web', 'Jaringan Komputer'], rating: 4.6, isTopTutor: false, availableTimes: ['10.20 - 11.10', '14.10 - 15.00'], availableDays: ['Senin', 'Kamis'], price: 40000, image: 'https://i.pravatar.cc/150?img=15' },
+  { id: 6, name: 'Rafi Ardan', university: "Informatika '21", courses: ['Analisis Bisnis', 'Manajemen Proyek'], rating: 4.9, isTopTutor: true, availableTimes: ['07.00 - 07.50', '11.10 - 12.00', '15.30 - 16.20'], availableDays: ['Selasa', 'Jumat', 'Sabtu'], price: 55000, image: 'https://i.pravatar.cc/150?img=33' },
+  { id: 7, name: 'Dewi Lestari', university: "Informatika '24", courses: ['Kalkulus Lanjut', 'Aljabar Linear'], rating: 4.8, isTopTutor: false, availableTimes: ['08.40 - 09.30', '12.30 - 13.20'], availableDays: ['Rabu', 'Sabtu'], price: 50000, image: 'https://i.pravatar.cc/150?img=42' },
+  { id: 8, name: 'Andi Wijaya', university: "Informatika '22", courses: ['Struktur Data', 'Kecerdasan Buatan'], rating: 4.5, isTopTutor: false, availableTimes: ['09.30 - 10.20', '16.20 - 17.10'], availableDays: ['Senin', 'Selasa'], price: 45000, image: 'https://i.pravatar.cc/150?img=50' },
+  { id: 9, name: 'Nina Wati', university: "Informatika '23", courses: ['Statistika Dasar', 'Probabilitas'], rating: 4.9, isTopTutor: true, availableTimes: ['07.50 - 08.40', '13.20 - 14.10', '17.10 - 18.00'], availableDays: ['Rabu', 'Kamis', 'Minggu'], price: 60000, image: 'https://i.pravatar.cc/150?img=21' },
+  { id: 10, name: 'Dimas Aditya', university: "Informatika '21", courses: ['Menggambar Teknik', 'CAD'], rating: 4.7, isTopTutor: false, availableTimes: ['10.20 - 11.10', '14.10 - 15.00'], availableDays: ['Senin', 'Jumat'], price: 55000, image: 'https://i.pravatar.cc/150?img=13' },
+  { id: 11, name: 'Ayu Kartika', university: "Informatika '24", courses: ['Pengantar Akuntansi', 'Ekonomi'], rating: 4.8, isTopTutor: false, availableTimes: ['11.10 - 12.00', '13.20 - 14.10'], availableDays: ['Selasa', 'Rabu'], price: 50000, image: 'https://i.pravatar.cc/150?img=28' },
+  { id: 12, name: 'Fajar Nugroho', university: "Informatika '22", courses: ['Public Speaking', 'Komunikasi Massa'], rating: 4.9, isTopTutor: true, availableTimes: ['08.40 - 09.30', '12.30 - 13.20', '16.20 - 17.10'], availableDays: ['Jumat', 'Sabtu', 'Minggu'], price: 65000, image: 'https://i.pravatar.cc/150?img=59' },
 ]
 
 const ITEMS_PER_PAGE = 9
@@ -50,7 +50,6 @@ const ITEMS_PER_PAGE = 9
 export default function CariTutor() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const [activeSearchTerm, setActiveSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -58,32 +57,22 @@ export default function CariTutor() {
 
   // Filter State
   const [filterCourse, setFilterCourse] = useState('semua')
-  const [filterPrice, setFilterPrice] = useState('semua')
+  const [filterDay, setFilterDay] = useState('semua')
   const [filterTime, setFilterTime] = useState('semua')
 
   // Derived State
   const filteredTutors = useMemo(() => {
     const filtered = mockTutors.filter(tutor => {
-      const matchSearch = tutor.name.toLowerCase().includes(activeSearchTerm.toLowerCase()) || 
-                          tutor.courses.some(course => course.toLowerCase().includes(activeSearchTerm.toLowerCase()))
+      const matchSearch = tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          tutor.courses.some(course => course.toLowerCase().includes(searchTerm.toLowerCase()))
       
       const matchCourse = filterCourse === 'semua' || tutor.courses.includes(filterCourse)
       
-      let matchPrice = true
-      if (filterPrice === '<50k') matchPrice = tutor.price < 50000
-      else if (filterPrice === '50k-70k') matchPrice = tutor.price >= 50000 && tutor.price <= 70000
-      else if (filterPrice === '>70k') matchPrice = tutor.price > 70000
+      const matchDay = filterDay === 'semua' || tutor.availableDays.includes(filterDay)
 
-      let matchTime = true
-      if (filterTime === 'pagi') {
-        matchTime = tutor.availableTimes.some(t => t >= '06:00' && t <= '11:59')
-      } else if (filterTime === 'siang') {
-        matchTime = tutor.availableTimes.some(t => t >= '12:00' && t <= '14:59')
-      } else if (filterTime === 'sore') {
-        matchTime = tutor.availableTimes.some(t => t >= '15:00' && t <= '18:00')
-      }
+      const matchTime = filterTime === 'semua' || tutor.availableTimes.includes(filterTime)
 
-      return matchSearch && matchCourse && matchPrice && matchTime
+      return matchSearch && matchCourse && matchDay && matchTime
     })
 
     // Sort seluruh data sebelum di-paginasi (seperti sistem Makanan Best Seller)
@@ -95,10 +84,14 @@ export default function CariTutor() {
       // 2. Jika sama-sama Top Tutor ATAU sama-sama bukan, urutkan dari rating tertinggi ke terendah
       return b.rating - a.rating;
     });
-  }, [activeSearchTerm, filterCourse, filterPrice, filterTime])
+  }, [searchTerm, filterCourse, filterDay, filterTime])
 
   const totalPages = Math.max(1, Math.ceil(filteredTutors.length / ITEMS_PER_PAGE))
   const paginatedTutors = filteredTutors.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+
+  const activeFilterCount = (filterCourse !== 'semua' ? 1 : 0) + 
+                            (filterDay !== 'semua' ? 1 : 0) + 
+                            (filterTime !== 'semua' ? 1 : 0)
 
   // Handle page change safely
   const handlePageChange = (newPage) => {
@@ -110,7 +103,7 @@ export default function CariTutor() {
   // Reset page when filters change
   useMemo(() => {
     setCurrentPage(1)
-  }, [activeSearchTerm, filterCourse, filterPrice, filterTime])
+  }, [searchTerm, filterCourse, filterDay, filterTime])
 
   return (
     <div className="flex flex-col min-h-full">
@@ -130,24 +123,20 @@ export default function CariTutor() {
               className="pl-11 h-12 rounded-xl border-slate-200 focus-visible:ring-teal-500 bg-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') setActiveSearchTerm(searchTerm)
-              }}
             />
           </div>
           <Button 
             variant={showFilters ? "secondary" : "outline"} 
-            className={`h-12 px-5 rounded-xl border-slate-200 transition-colors ${showFilters ? 'bg-slate-100' : 'bg-white'}`}
+            className={`relative h-12 px-5 rounded-xl border-slate-200 transition-colors ${showFilters ? 'bg-slate-100' : 'bg-white'}`}
             onClick={() => setShowFilters(!showFilters)}
           >
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Filter
-          </Button>
-          <Button 
-            className="h-12 px-8 rounded-xl bg-[#0a0f44] hover:bg-[#0a0f44]/90 text-white shadow-md"
-            onClick={() => setActiveSearchTerm(searchTerm)}
-          >
-            Cari
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-teal-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                {activeFilterCount}
+              </span>
+            )}
           </Button>
         </div>
 
@@ -171,16 +160,20 @@ export default function CariTutor() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Harga / Jam</label>
-                <Select value={filterPrice} onValueChange={setFilterPrice}>
+                <label className="text-sm font-medium text-slate-700">Pilih Hari</label>
+                <Select value={filterDay} onValueChange={setFilterDay}>
                   <SelectTrigger className="w-full h-10 rounded-lg">
-                    <SelectValue placeholder="Pilih Harga" />
+                    <SelectValue placeholder="Pilih Hari" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="semua">Semua Harga</SelectItem>
-                    <SelectItem value="<50k">Kurang dari Rp 50.000</SelectItem>
-                    <SelectItem value="50k-70k">Rp 50.000 - Rp 70.000</SelectItem>
-                    <SelectItem value=">70k">Lebih dari Rp 70.000</SelectItem>
+                    <SelectItem value="semua">Semua Hari</SelectItem>
+                    <SelectItem value="Senin">Senin</SelectItem>
+                    <SelectItem value="Selasa">Selasa</SelectItem>
+                    <SelectItem value="Rabu">Rabu</SelectItem>
+                    <SelectItem value="Kamis">Kamis</SelectItem>
+                    <SelectItem value="Jumat">Jumat</SelectItem>
+                    <SelectItem value="Sabtu">Sabtu</SelectItem>
+                    <SelectItem value="Minggu">Minggu</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -193,19 +186,32 @@ export default function CariTutor() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="semua">Semua Jam</SelectItem>
-                    <SelectItem value="pagi">Pagi (06:00 - 11:59)</SelectItem>
-                    <SelectItem value="siang">Siang (12:00 - 14:59)</SelectItem>
-                    <SelectItem value="sore">Sore (15:00 - 18:00)</SelectItem>
+                    <SelectItem value="07.00 - 07.50">07.00 - 07.50</SelectItem>
+                    <SelectItem value="07.50 - 08.40">07.50 - 08.40</SelectItem>
+                    <SelectItem value="08.40 - 09.30">08.40 - 09.30</SelectItem>
+                    <SelectItem value="09.30 - 10.20">09.30 - 10.20</SelectItem>
+                    <SelectItem value="10.20 - 11.10">10.20 - 11.10</SelectItem>
+                    <SelectItem value="11.10 - 12.00">11.10 - 12.00</SelectItem>
+                    <SelectItem value="12.30 - 13.20">12.30 - 13.20</SelectItem>
+                    <SelectItem value="13.20 - 14.10">13.20 - 14.10</SelectItem>
+                    <SelectItem value="14.10 - 15.00">14.10 - 15.00</SelectItem>
+                    <SelectItem value="15.30 - 16.20">15.30 - 16.20</SelectItem>
+                    <SelectItem value="16.20 - 17.10">16.20 - 17.10</SelectItem>
+                    <SelectItem value="17.10 - 18.00">17.10 - 18.00</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex items-end">
                 <Button 
-                  className="w-full h-10 rounded-lg bg-teal-500 hover:bg-teal-600 text-white"
-                  onClick={() => setShowFilters(false)}
+                  className="w-full h-10 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+                  onClick={() => {
+                    setFilterCourse('semua')
+                    setFilterDay('semua')
+                    setFilterTime('semua')
+                  }}
                 >
-                  Terapkan Filter
+                  Reset Filter
                 </Button>
               </div>
             </div>
@@ -258,15 +264,35 @@ export default function CariTutor() {
                   ))}
                 </div>
 
-                {/* Jam Tersedia */}
+                {/* Hari & Jam Tersedia */}
                 <div className="mb-6">
-                  <p className="text-[11px] font-semibold text-[#767683] mb-3 tracking-wider">JAM TERSEDIA</p>
-                  <div className="flex flex-wrap gap-2">
-                    {tutor.availableTimes.map((time, index) => (
-                      <div key={index} className="bg-[#E6E8EA] text-[#454652] font-semibold text-xs px-3.5 py-1.5 rounded-full">
-                        {time}
-                      </div>
-                    ))}
+                  <div className="mb-4">
+                    <p className="text-[11px] font-semibold text-[#767683] mb-2 tracking-wider">HARI TERSEDIA</p>
+                    <div className="flex flex-wrap gap-2">
+                      {tutor.availableDays.map((day, index) => (
+                        <div key={index} className="bg-emerald-50 text-emerald-700 font-semibold text-[11px] px-3 py-1 rounded-md">
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-[#767683] mb-2 tracking-wider">JAM TERSEDIA</p>
+                    <div className="flex flex-wrap gap-2">
+                      {tutor.availableTimes.slice(0, 3).map((time, index) => (
+                        <div key={index} className="bg-[#E6E8EA] text-[#454652] font-semibold text-[11px] px-3 py-1 rounded-md">
+                          {time}
+                        </div>
+                      ))}
+                      {tutor.availableTimes.length > 3 && (
+                        <button 
+                          onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}
+                          className="bg-blue-50 text-blue-600 font-semibold text-[11px] px-3 py-1 rounded-md hover:bg-blue-100 transition-colors cursor-pointer"
+                        >
+                          +{tutor.availableTimes.length - 3} Lainnya
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 

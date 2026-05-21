@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, CheckCircle2, Info, ArrowRight } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Info, ArrowRight, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 // ─── Data dummy ───────────────────────────────────────────────────────────────
@@ -45,7 +45,7 @@ const notifikasiData = [
     items: [
       {
         id: '3',
-        tipe: 'pengingat',
+        tipe: 'pengingat_30m',
         judul: 'Sesi Mulai dalam 30 Menit!',
         waktu: '1 hari yang lalu',
         isBaru: false,
@@ -64,16 +64,25 @@ const tipeConfig = {
     accent: 'bg-orange-400',
     iconBg: 'bg-orange-100',
     icon: <CalendarDays className="h-5 w-5 text-orange-500" />,
+    titleColor: 'text-orange-500',
   },
   pembayaran: {
     accent: 'bg-[#0d7c6b]',
     iconBg: 'bg-[#e6f4f1]',
     icon: <CheckCircle2 className="h-5 w-5 text-[#0d7c6b]" />,
+    titleColor: 'text-[#0d7c6b]',
   },
   info: {
     accent: 'bg-slate-300',
     iconBg: 'bg-slate-200',
     icon: <Info className="h-5 w-5 text-slate-500" />,
+    titleColor: 'text-slate-600',
+  },
+  pengingat_30m: {
+    accent: 'bg-[#0a0f44]',
+    iconBg: 'bg-[#93c5fd]',
+    icon: <Timer className="h-5 w-5 text-[#0a0f44]" />,
+    titleColor: 'text-[#0a0f44]',
   },
 }
 
@@ -109,7 +118,7 @@ function NotifikasiCard({ item, isLama, onCtaClick }) {
         <div className="flex-1 px-5 py-4">
           {/* Baris atas: judul + waktu/badge */}
           <div className="flex items-start justify-between gap-4 mb-2">
-            <h3 className="text-sm font-bold text-[#0d7c6b] leading-tight">
+            <h3 className={`text-sm font-bold leading-tight ${cfg.titleColor || 'text-[#0d7c6b]'}`}>
               {item.judul}
             </h3>
             {item.isBaru ? (

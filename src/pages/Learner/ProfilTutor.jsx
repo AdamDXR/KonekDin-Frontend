@@ -22,10 +22,10 @@ const MOCK_TUTOR_DETAIL = {
   ],
   skills: ['Clean Code', 'BackEnd Development', 'JavaScript Expert', 'Express.js', 'React', 'Node.js', 'REST API'],
   schedule: [
-    { day: 'Senin', time: '12:30 - 15:00' },
-    { day: 'Rabu', time: '09:30 - 12:00' },
-    { day: 'Sabtu', time: '07:00 - 12:00' },
-    { day: 'Minggu', time: '07:00 - 18:00' }
+    { day: 'Senin', times: ['12.30 - 13.20', '14.10 - 15.00'] },
+    { day: 'Rabu', times: ['09.30 - 10.20', '11.10 - 12.00'] },
+    { day: 'Sabtu', times: ['07.00 - 07.50', '07.50 - 08.40', '08.40 - 09.30'] },
+    { day: 'Minggu', times: ['15.30 - 16.20', '16.20 - 17.10'] }
   ],
   reviews: [
     { name: 'Andi Pratama', role: 'Teknik Informatika\'22', text: 'Sangat jelas! Kak Irkham membantu saya memahami konsep Asynchronous di JS dengan sangat mudah.' },
@@ -200,9 +200,13 @@ export default function ProfilTutor() {
               </h3>
               <div className="space-y-3">
                 {tutor.schedule.map((slot, idx) => (
-                  <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
-                    <span className="font-medium text-slate-700">{slot.day}</span>
-                    <span className="text-slate-600 bg-teal-50 px-3 py-1 rounded-md text-sm">{slot.time}</span>
+                  <div key={idx} className="flex flex-col py-3 border-b border-slate-100 last:border-0 gap-2">
+                    <span className="font-bold text-slate-700">{slot.day}</span>
+                    <div className="flex flex-wrap gap-2">
+                      {slot.times.map((time, tIdx) => (
+                         <span key={tIdx} className="text-slate-600 bg-teal-50 px-3 py-1 rounded-md text-[11px] font-semibold">{time}</span>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
