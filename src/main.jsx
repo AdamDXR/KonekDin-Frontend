@@ -24,6 +24,7 @@ import Landing from '@/pages/Landing/Landing'
 // import LogTransaksi from '@/pages/Admin/LogTransaksi'
 
 // Tutor Pages
+import TutorDashboard from '@/pages/Tutor/Dashboard'
 import JadwalMengajar from '@/pages/Tutor/JadwalMengajar'
 
 // Learner Pages
@@ -59,6 +60,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
         {/* Tutor Routes */}
         <Route path="/tutor" element={<TutorLayout />}>
+          <Route index element={<Navigate to="/tutor/dashboard" replace />} />
+          <Route path="dashboard" element={<TutorDashboard />} />
           <Route path="jadwal-mengajar" element={<JadwalMengajar />} />
         </Route>
 
