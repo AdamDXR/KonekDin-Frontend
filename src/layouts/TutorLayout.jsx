@@ -31,7 +31,7 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
 
     {/* User Profile — clickable → Profil Tutor */}
     <NavLink
-      to="/tutor/profil-tutor"
+      to="/tutor/profil"
       onClick={() => setIsMobileMenuOpen(false)}
       className={({ isActive }) =>
         `flex items-center gap-3 px-5 pb-4 rounded-xl transition-all ${

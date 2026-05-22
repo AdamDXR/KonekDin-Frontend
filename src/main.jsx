@@ -30,7 +30,7 @@ import RiwayatMengajar from "@/pages/Tutor/RiwayatMengajar";
 import PengaturanJadwal from "@/pages/Tutor/PengaturanJadwal";
 import Ulasan from '@/pages/Tutor/Ulasan'
 import NotifikasiTutor from '@/pages/Tutor/Notifikasi'
-import ProfilTutor from '@/pages/Tutor/ProfilTutor'
+import Profil from '@/pages/Tutor/Profil'
 
 // Learner Pages
 import LearnerDashboard from '@/pages/Learner/Dashboard'
@@ -71,7 +71,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="pengaturan-jadwal" element={<PengaturanJadwal />} />
           <Route path="ulasan" element={<Ulasan />} />
           <Route path="notifikasi" element={<NotifikasiTutor />} />
-          <Route path="profil-tutor" element={<ProfilTutor />} />
+          <Route path="profil" element={<Profil />} />
         </Route>
 
         {/* Learner Routes */}
@@ -84,7 +84,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="riwayat-belajar" element={<RiwayatBelajar />} />
           <Route path="notifikasi" element={<Notifikasi />} />
           <Route path="profil-learner" element={<ProfilLearner />} />
-          <Route path="profil-tutor/:id" element={<ProfilTutor />} />
+          <Route path="profil-tutor/:id" element={<Profil />} />
           <Route path="detail-pesanan" element={<DetailPesanan />} />
           {/*
           <Route path="beri-ulasan/:id" element={<BeriUlasan />} />
