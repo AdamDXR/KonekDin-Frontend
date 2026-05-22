@@ -1,19 +1,19 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import './index.css'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import "./index.css";
 
 // Layouts
-import AdminLayout from '@/layouts/AdminLayout'
-import TutorLayout from '@/layouts/TutorLayout'
-import LearnerLayout from '@/layouts/LearnerLayout'
+import AdminLayout from "@/layouts/AdminLayout";
+import TutorLayout from "@/layouts/TutorLayout";
+import LearnerLayout from "@/layouts/LearnerLayout";
 
 // Auth Pages
-import Login from '@/pages/Auth/Login'
-import Register from '@/pages/Auth/Register'
+import Login from "@/pages/Auth/Login";
+import Register from "@/pages/Auth/Register";
 
 // Landing Page
-import Landing from '@/pages/Landing/Landing'
+import Landing from "@/pages/Landing/Landing";
 
 // Admin Pages
 // import AdminDashboard from '@/pages/Admin/Dashboard'
@@ -24,22 +24,23 @@ import Landing from '@/pages/Landing/Landing'
 // import LogTransaksi from '@/pages/Admin/LogTransaksi'
 
 // Tutor Pages
-import TutorDashboard from '@/pages/Tutor/Dashboard'
-import JadwalMengajar from '@/pages/Tutor/JadwalMengajar'
-import RiwayatMengajar from '@/pages/Tutor/RiwayatMengajar'
+import TutorDashboard from "@/pages/Tutor/Dashboard";
+import JadwalMengajar from "@/pages/Tutor/JadwalMengajar";
+import RiwayatMengajar from "@/pages/Tutor/RiwayatMengajar";
+import PengaturanJadwal from "@/pages/Tutor/PengaturanJadwal";
 
 // Learner Pages
 // import LearnerDashboard from '@/pages/Learner/Dashboard'
-import CariTutor from '@/pages/Learner/CariTutor'
+import CariTutor from "@/pages/Learner/CariTutor";
 // import DetailPesanan from '@/pages/Learner/DetailPesanan'
-import JadwalBelajar from '@/pages/Learner/JadwalBelajar'
-import RiwayatBelajar from '@/pages/Learner/RiwayatBelajar'
-import Notifikasi from '@/pages/Learner/Notifikasi'
+import JadwalBelajar from "@/pages/Learner/JadwalBelajar";
+import RiwayatBelajar from "@/pages/Learner/RiwayatBelajar";
+import Notifikasi from "@/pages/Learner/Notifikasi";
 // import ProfilTutor from '@/pages/Learner/ProfilTutor'
-import ProfilLearner from '@/pages/Learner/ProfilLearner'
+import ProfilLearner from "@/pages/Learner/ProfilLearner";
 // import BeriUlasan from '@/pages/Learner/BeriUlasan'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
@@ -65,6 +66,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="dashboard" element={<TutorDashboard />} />
           <Route path="jadwal-mengajar" element={<JadwalMengajar />} />
           <Route path="riwayat-mengajar" element={<RiwayatMengajar />} />
+          <Route path="pengaturan-jadwal" element={<PengaturanJadwal />} />
         </Route>
 
         {/* Learner Routes */}
@@ -88,4 +90,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
-)
+);
