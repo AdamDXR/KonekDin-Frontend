@@ -28,6 +28,7 @@ import TutorDashboard from "@/pages/Tutor/Dashboard";
 import JadwalMengajar from "@/pages/Tutor/JadwalMengajar";
 import RiwayatMengajar from "@/pages/Tutor/RiwayatMengajar";
 import PengaturanJadwal from "@/pages/Tutor/PengaturanJadwal";
+import Ulasan from '@/pages/Tutor/Ulasan'
 
 // Learner Pages
 // import LearnerDashboard from '@/pages/Learner/Dashboard'
@@ -67,6 +68,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="jadwal-mengajar" element={<JadwalMengajar />} />
           <Route path="riwayat-mengajar" element={<RiwayatMengajar />} />
           <Route path="pengaturan-jadwal" element={<PengaturanJadwal />} />
+          <Route path="ulasan" element={<Ulasan />} />
         </Route>
 
         {/* Learner Routes */}
