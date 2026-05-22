@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet } from "react-router-dom";
 import {
   Home,
   CalendarDays,
@@ -7,13 +7,13 @@ import {
   MessageSquare,
   Bell,
   LogOut,
-  Menu
-} from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+  Menu,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
   <div className="flex flex-col h-full bg-white">
@@ -31,20 +31,27 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
 
     {/* User Profile — clickable → Profil Tutor */}
     <NavLink
-      to="/tutor/profil"
+      to="/tutor/profil-tutor"
       onClick={() => setIsMobileMenuOpen(false)}
       className={({ isActive }) =>
         `flex items-center gap-3 px-5 pb-4 rounded-xl transition-all ${
-          isActive ? 'opacity-100' : 'opacity-90 hover:opacity-100'
+          isActive ? "opacity-100" : "opacity-90 hover:opacity-100"
         }`
       }
     >
       <Avatar className="h-11 w-11 border-2 border-slate-100">
-        <AvatarImage src="https://i.pravatar.cc/150?img=11" alt="Irkham Wildan" />
-        <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">IW</AvatarFallback>
+        <AvatarImage
+          src="https://i.pravatar.cc/150?img=11"
+          alt="Irkham Wildan"
+        />
+        <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">
+          IW
+        </AvatarFallback>
       </Avatar>
       <div>
-        <p className="text-sm font-bold text-[#0a0f44] leading-tight">Irkham Wildan</p>
+        <p className="text-sm font-bold text-[#0a0f44] leading-tight">
+          Irkham Wildan
+        </p>
         <p className="text-xs text-slate-400">Informatika '21</p>
       </div>
     </NavLink>
@@ -59,14 +66,17 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all duration-150 ${
               isActive
-                ? 'bg-[#e8f5f2] text-[#0d7c6b] font-semibold'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium'
+                ? "bg-[#e8f5f2] text-[#0d7c6b] font-semibold"
+                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium"
             }`
           }
         >
           {({ isActive }) => (
             <>
-              <item.icon className="h-[18px] w-[18px] flex-shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
+              <item.icon
+                className="h-[18px] w-[18px] flex-shrink-0"
+                strokeWidth={isActive ? 2.2 : 1.8}
+              />
               {item.name}
             </>
           )}
@@ -78,7 +88,7 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
     <div className="px-3 pb-5 space-y-0.5">
       <div className="h-px bg-slate-100 mx-2 mb-3"></div>
       <button
-        onClick={() => navigate('/login')}
+        onClick={() => navigate("/login")}
         className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full transition-colors"
       >
         <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
@@ -86,26 +96,42 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
       </button>
     </div>
   </div>
-)
+);
 
 export default function TutorLayout() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const navigate = useNavigate()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navigation = [
-    { name: 'Dashboard', href: '/tutor/dashboard', icon: Home },
-    { name: 'Jadwal Mengajar', href: '/tutor/jadwal-mengajar', icon: CalendarDays },
-    { name: 'Riwayat Mengajar', href: '/tutor/riwayat-mengajar', icon: History },
-    { name: 'Pengaturan Jadwal', href: '/tutor/pengaturan-jadwal', icon: Sliders },
-    { name: 'Ulasan', href: '/tutor/ulasan', icon: MessageSquare },
-    { name: 'Notifikasi', href: '/tutor/notifikasi', icon: Bell },
-  ]
+    { name: "Dashboard", href: "/tutor/dashboard", icon: Home },
+    {
+      name: "Jadwal Mengajar",
+      href: "/tutor/jadwal-mengajar",
+      icon: CalendarDays,
+    },
+    {
+      name: "Riwayat Mengajar",
+      href: "/tutor/riwayat-mengajar",
+      icon: History,
+    },
+    {
+      name: "Pengaturan Jadwal",
+      href: "/tutor/pengaturan-jadwal",
+      icon: Sliders,
+    },
+    { name: "Ulasan", href: "/tutor/ulasan", icon: MessageSquare },
+    { name: "Notifikasi", href: "/tutor/notifikasi", icon: Bell },
+  ];
 
   return (
     <div className="flex h-screen bg-[#f7f9fb] overflow-hidden">
       {/* Sidebar Desktop */}
       <aside className="w-[250px] border-r border-slate-100 hidden lg:flex flex-col flex-shrink-0 bg-white">
-        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} />
+        <SidebarContent
+          navigation={navigation}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+          navigate={navigate}
+        />
       </aside>
 
       {/* Main Area: header + content + footer */}
@@ -119,12 +145,23 @@ export default function TutorLayout() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-[250px] border-r-0">
-              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} />
+              <SidebarContent
+                navigation={navigation}
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+                navigate={navigate}
+              />
             </SheetContent>
           </Sheet>
-          <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
+          <img
+            src="/images/logo_konekdin(background_putih).png"
+            alt="KonekDin"
+            className="h-8 w-auto"
+          />
           <Avatar className="h-8 w-8">
-            <AvatarImage src="https://i.pravatar.cc/150?img=11" alt="Irkham Wildan" />
+            <AvatarImage
+              src="https://i.pravatar.cc/150?img=11"
+              alt="Irkham Wildan"
+            />
             <AvatarFallback>IW</AvatarFallback>
           </Avatar>
         </header>
@@ -139,18 +176,26 @@ export default function TutorLayout() {
           {/* Footer — scroll bersama konten */}
           <footer className="border-t border-slate-100 bg-white px-6 lg:px-10 py-3 flex flex-col sm:flex-row items-center justify-between gap-1">
             <p className="text-[12px] text-slate-400">
-              © 2026 <span className="font-semibold text-[#0a0f44]">KonekDin</span>. Semua hak dilindungi.
+              © 2026{" "}
+              <span className="font-semibold text-[#0a0f44]">KonekDin</span>.
+              Semua hak dilindungi.
             </p>
             <div className="flex items-center gap-4 text-[12px] text-slate-400">
-              <a href="#" className="hover:text-teal-600 transition-colors">Ketentuan Layanan</a>
+              <a href="#" className="hover:text-teal-600 transition-colors">
+                Ketentuan Layanan
+              </a>
               <span className="text-slate-200">|</span>
-              <a href="#" className="hover:text-teal-600 transition-colors">Kebijakan Privasi</a>
+              <a href="#" className="hover:text-teal-600 transition-colors">
+                Kebijakan Privasi
+              </a>
               <span className="text-slate-200">|</span>
-              <a href="#" className="hover:text-teal-600 transition-colors">Bantuan</a>
+              <a href="#" className="hover:text-teal-600 transition-colors">
+                Bantuan
+              </a>
             </div>
           </footer>
         </div>
       </div>
     </div>
-  )
+  );
 }
