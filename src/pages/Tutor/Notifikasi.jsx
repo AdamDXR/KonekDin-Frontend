@@ -1,6 +1,6 @@
-import { Calendar, CheckCircle, Clock } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
+import { Calendar, CheckCircle, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -8,35 +8,37 @@ const NOTIFIKASI = {
   hariIni: [
     {
       id: 1,
-      title: 'Pengingat Sesi Besok',
+      title: "Pengingat Sesi Besok",
       message: (
         <>
-          Persiapkan diri Anda untuk sesi <strong>Algoritma & Struktur Data</strong> bersama{' '}
-          <strong>Budi Santoso</strong> pada pukul <strong>12.30</strong>. Siapkan materi yang
-          ingin diajarkan besok.
+          Persiapkan diri Anda untuk sesi{" "}
+          <strong>Algoritma & Struktur Data</strong> bersama{" "}
+          <strong>Budi Santoso</strong> pada pukul <strong>12.30</strong>.
+          Siapkan materi yang ingin diajarkan besok.
         </>
       ),
-      time: 'BARU',
+      time: "BARU",
       isNew: true,
-      accentColor: '#f97316',
+      accentColor: "#f97316",
       icon: <Calendar className="h-5 w-5 text-white" />,
-      iconBg: 'bg-[#fb923c]',
+      iconBg: "bg-[#fb923c]",
       action: null,
     },
     {
       id: 2,
-      title: 'Pembayaran Berhasil!',
+      title: "Pembayaran Berhasil!",
       message: (
         <>
-          Sesi Algoritma dengan <strong>Budi Santoso</strong> telah dikonfirmasi. Pastikan Anda
-          sudah menyiapkan materi yang ingin didiskusikan.
+          Sesi Algoritma dengan <strong>Budi Santoso</strong> telah
+          dikonfirmasi. Pastikan Anda sudah menyiapkan materi yang ingin
+          didiskusikan.
         </>
       ),
-      time: '5 menit yang lalu',
+      time: "5 menit yang lalu",
       isNew: false,
-      accentColor: '#0d7c6b',
+      accentColor: "#0d7c6b",
       icon: <CheckCircle className="h-5 w-5 text-white" />,
-      iconBg: 'bg-[#0d7c6b]',
+      iconBg: "bg-[#0d7c6b]",
       action: (
         <Link to="/tutor/jadwal-mengajar">
           <Button className="bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-5 py-2.5 h-auto rounded-xl text-sm gap-2 flex items-center transition-colors duration-150 mt-3">
@@ -50,18 +52,18 @@ const NOTIFIKASI = {
   kemarin: [
     {
       id: 3,
-      title: 'Sesi Mulai dalam 30 Menit!',
+      title: "Sesi Mulai dalam 30 Menit!",
       message:
-        'Sesi belajarmu akan dimulai dalam 30 menit. Yuk siapkan dirimu dari sekarang, cek kembali materi yang ingin kamu ajarkan ke pelajar nanti.',
-      time: '1 hari yang lalu',
+        "Sesi belajarmu akan dimulai dalam 30 menit. Yuk siapkan dirimu dari sekarang, cek kembali materi yang ingin kamu ajarkan ke pelajar nanti.",
+      time: "1 hari yang lalu",
       isNew: false,
-      accentColor: '#0a0f44',
+      accentColor: "#0a0f44",
       icon: <Clock className="h-5 w-5 text-white" />,
-      iconBg: 'bg-[#0a0f44]',
+      iconBg: "bg-[#0a0f44]",
       action: null,
     },
   ],
-}
+};
 
 // ─── Komponen Kartu Notifikasi ─────────────────────────────────────────────────
 
@@ -82,7 +84,7 @@ function NotifCard({ item }) {
           </h3>
           <span
             className={`text-[10px] font-extrabold flex-shrink-0 ${
-              item.isNew ? 'text-[#f97316]' : 'text-slate-400'
+              item.isNew ? "text-[#f97316]" : "text-slate-400"
             }`}
           >
             {item.time}
@@ -101,7 +103,7 @@ function NotifCard({ item }) {
         {item.icon}
       </div>
     </div>
-  )
+  );
 }
 
 // ─── Halaman Utama ─────────────────────────────────────────────────────────────
@@ -143,5 +145,5 @@ export default function NotifikasiTutor() {
         </div>
       </div>
     </div>
-  )
+  );
 }
