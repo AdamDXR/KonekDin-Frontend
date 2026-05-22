@@ -84,7 +84,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="riwayat-belajar" element={<RiwayatBelajar />} />
           <Route path="notifikasi" element={<Notifikasi />} />
           <Route path="profil-learner" element={<ProfilLearner />} />
-          <Route path="profil-tutor/:id" element={<Profil />} />
+          <Route path="profil-tutor/:id" element={<ProfilTutor />} />
           <Route path="detail-pesanan" element={<DetailPesanan />} />
           {/*
           <Route path="beri-ulasan/:id" element={<BeriUlasan />} />
