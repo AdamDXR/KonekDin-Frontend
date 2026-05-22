@@ -24,8 +24,13 @@ import Landing from '@/pages/Landing/Landing'
 // import LogTransaksi from '@/pages/Admin/LogTransaksi'
 
 // Tutor Pages
-// import TutorDashboard from '@/pages/Tutor/Dashboard'
-// import JadwalMengajar from '@/pages/Tutor/JadwalMengajar'
+import TutorDashboard from '@/pages/Tutor/Dashboard'
+import JadwalMengajar from '@/pages/Tutor/JadwalMengajar'
+import RiwayatMengajar from '@/pages/Tutor/RiwayatMengajar'
+import PengaturanJadwal from '@/pages/Tutor/PengaturanJadwal'
+import Ulasan from '@/pages/Tutor/Ulasan'
+import TutorNotifikasi from '@/pages/Tutor/Notifikasi'
+import ProfilTutor from '@/pages/Tutor/ProfilTutor'
 
 // Learner Pages
 // import LearnerDashboard from '@/pages/Learner/Dashboard'
@@ -60,10 +65,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
         {/* Tutor Routes */}
         <Route path="/tutor" element={<TutorLayout />}>
-          {/* 
-          <Route index element={<TutorDashboard />} />
-          <Route path="jadwal-mengajar" element={<JadwalMengajar />} /> 
-          */}
+          <Route index element={<Navigate to="/tutor/dashboard" replace />} />
+          <Route path="dashboard" element={<TutorDashboard />} />
+          <Route path="jadwal-mengajar" element={<JadwalMengajar />} />
+          <Route path="riwayat-mengajar" element={<RiwayatMengajar />} />
+          <Route path="pengaturan-jadwal" element={<PengaturanJadwal />} />
+          <Route path="ulasan" element={<Ulasan />} />
+          <Route path="notifikasi" element={<TutorNotifikasi />} />
+          <Route path="profil" element={<ProfilTutor />} />
         </Route>
 
         {/* Learner Routes */}
