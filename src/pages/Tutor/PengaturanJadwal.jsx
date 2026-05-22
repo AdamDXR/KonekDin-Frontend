@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Clock, RotateCcw, Plus, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// ─── Data ────────────────────────────────────────────────────────────────────
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
 const HARI_OPTIONS = [
   "Senin",
@@ -129,7 +129,7 @@ const INITIAL_JADWAL = [
   },
 ];
 
-// ─── Badge Status ─────────────────────────────────────────────────────────────
+// ─── Badge Status ──────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }) {
   if (status === "AVAILABLE") {
@@ -156,18 +156,23 @@ function StatusBadge({ status }) {
   );
 }
 
-// ─── Modal Edit Jadwal ────────────────────────────────────────────────────────
+// ─── Modal Edit Jadwal ─────────────────────────────────────────────────────────
 
 function EditJadwalModal({ onClose, onSave }) {
   const [formHari, setFormHari] = useState("Senin");
-  const [formJam, setFormJam] = useState("16.20 - 17.10");
-  const [formMatkul, setFormMatkul] = useState("Jaringan Komputer");
+  const [formJam, setFormJam] = useState("07.00 - 07.50");
+  const [formMatkul, setFormMatkul] = useState("Basis Data");
   const [formStatus, setFormStatus] = useState("Available");
+  const [error, setError] = useState("");
 
   const selectClass =
-    "w-full bg-[#f1f3f5] text-[#0a0f44] text-sm font-medium rounded-2xl px-4 py-3.5 appearance-none border-none outline-none cursor-pointer";
+    "w-full bg-[#f1f3f5] text-[#0a0f44] text-sm font-medium rounded-2xl px-4 py-3 appearance-none border-none outline-none cursor-pointer";
 
   const handleSave = () => {
+    if (!formHari || !formJam || !formMatkul || !formStatus) {
+      setError("Semua field harus diisi.");
+      return;
+    }
     onSave({
       hari: formHari,
       jam: formJam,
@@ -178,31 +183,27 @@ function EditJadwalModal({ onClose, onSave }) {
   };
 
   return (
-    /* Backdrop */
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
       <div
-        className="bg-white rounded-3xl shadow-2xl p-5 relative"
+        className="bg-white rounded-3xl shadow-2xl p-5 pb-4 relative"
         style={{ width: "380px" }}
       >
-        {/* Tombol tutup */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors"
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600"
         >
           <X className="h-5 w-5" />
         </button>
 
-        {/* Judul */}
-        <h2 className="text-2xl font-extrabold text-[#0a0f44]">Edit Jadwal</h2>
-        <p className="text-sm text-slate-400 mt-1 mb-7">
+        <h2 className="text-xl font-extrabold text-[#0a0f44]">Edit Jadwal</h2>
+        <p className="text-sm text-slate-400 mt-0.5 mb-4">
           Tentukan waktu ketersediaan mengajar Anda.
         </p>
 
-        {/* Form */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-3">
           {/* Pilih Hari */}
           <div>
-            <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block">
+            <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5 block">
               Pilih Hari
             </label>
             <div className="relative">
@@ -225,7 +226,7 @@ function EditJadwalModal({ onClose, onSave }) {
 
           {/* Pilih Jam */}
           <div>
-            <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block">
+            <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5 block">
               Pilih Jam
             </label>
             <div className="relative">
@@ -248,7 +249,7 @@ function EditJadwalModal({ onClose, onSave }) {
 
           {/* Pilih Mata Kuliah */}
           <div>
-            <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block">
+            <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5 block">
               Pilih Mata Kuliah
             </label>
             <div className="relative">
@@ -271,7 +272,7 @@ function EditJadwalModal({ onClose, onSave }) {
 
           {/* Pilih Status */}
           <div>
-            <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block">
+            <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5 block">
               Pilih Status
             </label>
             <div className="relative">
@@ -292,8 +293,13 @@ function EditJadwalModal({ onClose, onSave }) {
             </div>
           </div>
 
+          {/* Error */}
+          {error && (
+            <p className="text-xs text-red-500 font-semibold">{error}</p>
+          )}
+
           {/* Info Box */}
-          <div className="flex items-start gap-3 bg-[#fff3e8] rounded-2xl p-4">
+          <div className="flex items-start gap-3 bg-[#fff3e8] rounded-2xl p-3">
             <Info className="h-4 w-4 text-[#f57c00] flex-shrink-0 mt-0.5" />
             <p className="text-xs text-[#b45309] leading-relaxed">
               Pastikan waktu yang Anda pilih tidak bertabrakan dengan jadwal
@@ -303,16 +309,16 @@ function EditJadwalModal({ onClose, onSave }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-6 mt-1 pt-1 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-6 mt-3 pt-3 border-t border-slate-100">
           <button
             onClick={onClose}
-            className="text-sm font-semibold text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-sm font-semibold text-slate-400 hover:text-slate-600"
           >
             Batal
           </button>
           <Button
             onClick={handleSave}
-            className="bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-7 py-3 h-auto rounded-2xl text-sm transition-colors duration-150"
+            className="bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-6 py-2.5 h-auto rounded-2xl text-sm"
           >
             Simpan Jadwal
           </Button>
@@ -322,27 +328,46 @@ function EditJadwalModal({ onClose, onSave }) {
   );
 }
 
-// ─── Halaman Utama ────────────────────────────────────────────────────────────
+// ─── Halaman Utama ─────────────────────────────────────────────────────────────
 
 export default function PengaturanJadwal() {
   const [jadwal, setJadwal] = useState(INITIAL_JADWAL);
   const [filterHari, setFilterHari] = useState("Senin");
   const [filterStatus, setFilterStatus] = useState("Semua Status");
   const [showModal, setShowModal] = useState(false);
+  const [nextId, setNextId] = useState(100);
 
   const handleSaveJadwal = ({ hari, jam, matkul, status }) => {
-    setJadwal((prev) =>
-      prev.map((item) => {
-        if (item.hari === hari && item.waktu === jam) {
-          return {
-            ...item,
-            matkul: status === "Non Available" ? null : matkul,
-            status: status === "Available" ? "AVAILABLE" : "NON AVAILABLE",
-          };
-        }
-        return item;
-      }),
+    const statusUpper = status === "Available" ? "AVAILABLE" : "NON AVAILABLE";
+    const matkulValue = status === "Non Available" ? null : matkul;
+
+    // Cek apakah hari + jam sudah ada → update baris itu
+    const exists = jadwal.find(
+      (item) => item.hari === hari && item.waktu === jam,
     );
+
+    if (exists) {
+      setJadwal((prev) =>
+        prev.map((item) =>
+          item.hari === hari && item.waktu === jam
+            ? { ...item, matkul: matkulValue, status: statusUpper }
+            : item,
+        ),
+      );
+    } else {
+      // Belum ada → tambah baris baru
+      setJadwal((prev) => [
+        ...prev,
+        {
+          id: nextId,
+          hari,
+          waktu: jam,
+          matkul: matkulValue,
+          status: statusUpper,
+        },
+      ]);
+      setNextId((n) => n + 1);
+    }
   };
 
   const handleResetFilter = () => {
@@ -353,9 +378,13 @@ export default function PengaturanJadwal() {
   const filtered = jadwal.filter((item) => {
     const hariMatch = item.hari === filterHari;
     const statusMatch =
-      filterStatus === "Semua Status" ||
-      item.status === filterStatus.toUpperCase().replace(" ", " ");
+      filterStatus === "Semua Status" || item.status === filterStatus;
     return hariMatch && statusMatch;
+  });
+
+  // Urutkan berdasarkan JAM_OPTIONS
+  const sorted = [...filtered].sort((a, b) => {
+    return JAM_OPTIONS.indexOf(a.waktu) - JAM_OPTIONS.indexOf(b.waktu);
   });
 
   const selectClass =
@@ -382,7 +411,7 @@ export default function PengaturanJadwal() {
       {/* Tombol Edit Jadwal */}
       <Button
         onClick={() => setShowModal(true)}
-        className="bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-6 py-3 h-auto rounded-2xl text-sm gap-2 flex items-center transition-colors duration-150 mb-7"
+        className="bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-6 py-3 h-auto rounded-2xl text-sm gap-2 flex items-center mb-7"
       >
         <Plus className="h-4 w-4" />
         Edit Jadwal
@@ -449,7 +478,6 @@ export default function PengaturanJadwal() {
 
       {/* Tabel */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        {/* Header tabel */}
         <div className="grid grid-cols-[60px_1fr_1fr_1fr_1fr] px-6 py-3 border-b border-slate-100">
           <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
             No
@@ -468,30 +496,35 @@ export default function PengaturanJadwal() {
           </span>
         </div>
 
-        {/* Baris */}
-        {filtered.map((item, index) => (
-          <div
-            key={item.id}
-            className="grid grid-cols-[60px_1fr_1fr_1fr_1fr] px-6 py-4 border-b border-slate-50 hover:bg-slate-50 transition-colors duration-100 items-center"
-          >
-            <span className="text-sm text-slate-400 font-semibold">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <span className="text-sm font-extrabold text-[#0a0f44]">
-              {item.hari}
-            </span>
-            <span className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-              <Clock className="h-3.5 w-3.5 text-[#0d7c6b]" />
-              {item.waktu}
-            </span>
-            <span className="text-sm font-bold text-[#0a0f44]">
-              {item.matkul ?? (
-                <span className="text-slate-300 font-normal">-</span>
-              )}
-            </span>
-            <StatusBadge status={item.status} />
+        {sorted.length === 0 ? (
+          <div className="py-16 text-center text-sm text-slate-400">
+            Tidak ada jadwal untuk filter ini.
           </div>
-        ))}
+        ) : (
+          sorted.map((item, index) => (
+            <div
+              key={item.id}
+              className="grid grid-cols-[60px_1fr_1fr_1fr_1fr] px-6 py-4 border-b border-slate-50 hover:bg-slate-50 transition-colors items-center"
+            >
+              <span className="text-sm text-slate-400 font-semibold">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="text-sm font-extrabold text-[#0a0f44]">
+                {item.hari}
+              </span>
+              <span className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                <Clock className="h-3.5 w-3.5 text-[#0d7c6b]" />
+                {item.waktu}
+              </span>
+              <span className="text-sm font-bold text-[#0a0f44]">
+                {item.matkul ?? (
+                  <span className="text-slate-300 font-normal">-</span>
+                )}
+              </span>
+              <StatusBadge status={item.status} />
+            </div>
+          ))
+        )}
       </div>
 
       {/* Modal */}
