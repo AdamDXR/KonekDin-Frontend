@@ -26,6 +26,7 @@ import Landing from '@/pages/Landing/Landing'
 // Tutor Pages
 import TutorDashboard from '@/pages/Tutor/Dashboard'
 import JadwalMengajar from '@/pages/Tutor/JadwalMengajar'
+import RiwayatMengajar from '@/pages/Tutor/RiwayatMengajar'
 
 // Learner Pages
 // import LearnerDashboard from '@/pages/Learner/Dashboard'
@@ -63,6 +64,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route index element={<Navigate to="/tutor/dashboard" replace />} />
           <Route path="dashboard" element={<TutorDashboard />} />
           <Route path="jadwal-mengajar" element={<JadwalMengajar />} />
+          <Route path="riwayat-mengajar" element={<RiwayatMengajar />} />
         </Route>
 
         {/* Learner Routes */}
