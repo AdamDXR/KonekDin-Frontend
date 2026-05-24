@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Plus,
   MessageSquare,
+  Star,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -44,8 +45,8 @@ function JadwalCard({ jadwal, onHubungi }) {
                     {jadwal.tutorNama.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute -top-1.5 -right-1.5 flex items-center gap-0.5 bg-amber-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
-                  ⭐ {jadwal.tutorRating}
+                <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
+                  <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> {jadwal.tutorRating}
                 </div>
               </div>
 
@@ -118,13 +119,13 @@ export default function JadwalBelajar() {
   const [jadwal] = useState(jadwalList)
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-[26px] font-extrabold text-[#0a0f44] leading-tight">
+    <div className="flex flex-col min-h-full pb-10">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
           Jadwal Sesi Belajar
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Lihat jadwal sesi belajar yang akan datang dan siapkan dirimu lebih awal.
+        <p className="text-slate-500">
+          Pantau sesi belajarmu yang akan datang.
         </p>
       </div>
 
@@ -133,7 +134,7 @@ export default function JadwalBelajar() {
           <JadwalCard
             key={item.id}
             jadwal={item}
-            onHubungi={(item) => console.log('Hubungi:', item.tutorNama)}
+            onHubungi={(item) => window.open(`https://wa.me/6281234567890?text=Halo%20Kak%20${encodeURIComponent(item.tutorNama)}`, '_blank')}
           />
         ))}
         <EmptyCard onCariTutor={() => navigate('/learner/cari-tutor')} />

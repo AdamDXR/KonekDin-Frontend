@@ -131,7 +131,7 @@ export default function LearnerLayout() {
         </header>
 
         {/* Scrollable Area */}
-        <div className="flex-1 overflow-y-auto flex flex-col">
+        <div id="learner-scroll-area" className="flex-1 overflow-y-auto flex flex-col">
           {/* Page Content */}
           <main className="flex-1 px-6 py-6 lg:px-10 lg:py-8">
             <Outlet />
