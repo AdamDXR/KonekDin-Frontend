@@ -16,9 +16,10 @@ import Register from "@/pages/Auth/Register";
 import Landing from "@/pages/Landing/Landing";
 
 // Admin Pages
-// import AdminDashboard from '@/pages/Admin/Dashboard'
+import AdminDashboard from '@/pages/Admin/Dashboard'
 import ManajemenPengguna from '@/pages/Admin/ManajemenPengguna'
 import LaporanAnalisis from '@/pages/Admin/LaporanAnalisis'
+import KomplainModerasi from '@/pages/Admin/KomplainModerasi'
 // import KelolaMatakuliah from '@/pages/Admin/KelolaMatakuliah'
 // import ValidasiBadge from '@/pages/Admin/ValidasiBadge'
 // import Settings from '@/pages/Admin/Settings'
@@ -56,8 +57,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="manajemen-pengguna" element={<ManajemenPengguna />} />
           <Route path="laporan-analisis" element={<LaporanAnalisis />} />
-          {/* 
+          <Route path="komplain" element={<KomplainModerasi />} />
           <Route index element={<AdminDashboard />} />
+          {/* 
           <Route path="kelola-matakuliah" element={<KelolaMatakuliah />} />
           <Route path="validasi-badge" element={<ValidasiBadge />} />
           <Route path="log-transaksi" element={<LogTransaksi />} />
