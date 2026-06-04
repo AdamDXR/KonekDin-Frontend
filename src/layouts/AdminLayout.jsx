@@ -1,134 +1,144 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import {
-  BarChart,
+  Home,
   Users,
-  BookOpen,
-  ShieldCheck,
-  ClipboardList,
-  Settings,
-  Search,
-  Bell,
-  HelpCircle,
+  BarChart2,
+  AlertTriangle,
+  LogOut,
   Menu
 } from 'lucide-react'
-
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
+  <div className="flex flex-col h-full bg-white">
+    {/* Logo KonekDin */}
+    <div className="px-5 pt-5 pb-4">
+      <img
+        src="/images/logo_konekdin(background_putih).png"
+        alt="KonekDin"
+        className="h-12 w-auto"
+      />
+    </div>
+
+    {/* Separator */}
+    <div className="mx-5 h-px bg-slate-100 mb-3"></div>
+
+    {/* User Profile */}
+    <div className="flex items-center gap-3 px-5 pb-4">
+      <Avatar className="h-11 w-11 border-2 border-slate-100">
+        <AvatarImage src="https://i.pravatar.cc/150?img=11" alt="Admin" />
+        <AvatarFallback className="bg-[#000666] text-white text-sm font-semibold">AD</AvatarFallback>
+      </Avatar>
+      <div>
+        <p className="text-sm font-bold text-[#000666] leading-tight">Admin</p>
+      </div>
+    </div>
+
+    {/* Navigation */}
+    <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+      {navigation.map((item) => (
+        <NavLink
+          key={item.name}
+          to={item.href}
+          end={item.href === '/admin'}
+          onClick={() => setIsMobileMenuOpen(false)}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all duration-150 ${
+              isActive
+                ? 'bg-[#e8f5f2] text-[#0d7c6b] font-semibold'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium'
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <item.icon className="h-[18px] w-[18px] flex-shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
+              {item.name}
+            </>
+          )}
+        </NavLink>
+      ))}
+    </nav>
+
+    {/* Bottom Actions */}
+    <div className="px-3 pb-5 space-y-0.5">
+      <div className="h-px bg-slate-100 mx-2 mb-3"></div>
+      <button
+        onClick={() => navigate('/login')}
+        className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full transition-colors"
+      >
+        <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
+        Keluar
+      </button>
+    </div>
+  </div>
+)
 
 export default function AdminLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const navigate = useNavigate()
 
   const navigation = [
-    { name: 'Statistik', href: '/admin', icon: BarChart },
-    { name: 'Kelola Pengguna', href: '/admin/kelola-user', icon: Users },
-    { name: 'Kelola Matakuliah', href: '/admin/kelola-matakuliah', icon: BookOpen },
-    { name: 'Validasi Badge', href: '/admin/validasi-badge', icon: ShieldCheck },
-    { name: 'Log Transaksi', href: '/admin/log-transaksi', icon: ClipboardList },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Dashboard', href: '/admin', icon: Home },
+    { name: 'Manajemen Pengguna', href: '/admin/manajemen-pengguna', icon: Users },
+    { name: 'Laporan & Analisis', href: '/admin/laporan-analisis', icon: BarChart2 },
+    { name: 'Komplain & Moderasi', href: '/admin/komplain', icon: AlertTriangle },
   ]
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-[#FAFAFA]">
-      <div className="flex flex-col items-start px-8 pt-10 pb-8">
-        <h1 className="text-2xl font-bold text-[#1e1b4b] tracking-tight">KonekDin</h1>
-        <span className="text-[11px] font-bold text-slate-400 tracking-widest mt-1 uppercase">Admin Portal</span>
-      </div>
-      
-      <nav className="flex-1 px-4 space-y-1.5 mt-2">
-        {navigation.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.href}
-            end={item.href === '/admin'}
-            onClick={() => setIsMobileMenuOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-[#EEF2FF] text-[#1D4ED8]'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-              }`
-            }
-          >
-            <item.icon className="h-5 w-5" />
-            {item.name}
-          </NavLink>
-        ))}
-      </nav>
-
-      <div className="p-6 mt-auto">
-        <Button className="w-full bg-[#0a0f44] hover:bg-[#060a2b] text-white shadow-none rounded-xl py-6 font-medium">
-          Invite Admin
-        </Button>
-      </div>
-    </div>
-  )
-
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex h-screen bg-[#f7f9fb] overflow-hidden">
       {/* Sidebar Desktop */}
-      <aside className="w-72 border-r border-slate-200 hidden lg:block flex-shrink-0">
-        <SidebarContent />
+      <aside className="w-[250px] border-r border-slate-100 hidden lg:flex flex-col flex-shrink-0 bg-white">
+        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} />
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0">
-        {/* Top Header */}
-        <header className="h-20 px-6 sm:px-10 flex items-center justify-between border-b border-slate-200 sticky top-0 bg-white z-10 gap-4">
-          <div className="flex items-center gap-4 flex-1">
-            {/* Mobile Menu Trigger */}
-            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="h-6 w-6 text-slate-600" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-72 border-r-0">
-                <SidebarContent />
-              </SheetContent>
-            </Sheet>
-
-            <div className="relative w-full max-w-md hidden sm:block">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input 
-                type="text" 
-                placeholder="Search records..." 
-                className="pl-11 bg-slate-100/60 border-transparent focus-visible:ring-1 rounded-full h-11 text-sm shadow-none"
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 hidden md:flex items-center justify-center">
-            <nav className="flex space-x-10">
-              <a href="#" className="text-sm font-semibold text-teal-600 border-b-2 border-teal-600 pb-[27px] pt-[29px]">Dashboard</a>
-              <a href="#" className="text-sm font-medium text-slate-500 hover:text-slate-900 py-[28px]">Reports</a>
-              <a href="#" className="text-sm font-medium text-slate-500 hover:text-slate-900 py-[28px]">Logs</a>
-            </nav>
-          </div>
-
-          <div className="flex items-center justify-end gap-6 flex-1">
-            <button className="relative text-slate-500 hover:text-slate-700 transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-slate-600 ring-2 ring-white"></span>
-            </button>
-            <button className="text-slate-400 hover:text-slate-700 hidden sm:block transition-colors">
-              <HelpCircle className="h-5.5 w-5.5 fill-slate-400 text-white" />
-            </button>
-            <Avatar className="h-10 w-10 ring-2 ring-slate-100 cursor-pointer">
-              <AvatarImage src="https://i.pravatar.cc/150?img=11" alt="Admin Avatar" />
-              <AvatarFallback>AD</AvatarFallback>
-            </Avatar>
-          </div>
+      {/* Main Area: header + content + footer */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Mobile Header */}
+        <header className="h-14 px-4 flex items-center justify-between border-b border-slate-100 lg:hidden bg-white flex-shrink-0">
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5 text-slate-600" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-[250px] border-r-0">
+              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} />
+            </SheetContent>
+          </Sheet>
+          <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="https://i.pravatar.cc/150?img=11" alt="User" />
+            <AvatarFallback>AD</AvatarFallback>
+          </Avatar>
         </header>
 
-        {/* Dynamic Content */}
-        <div className="flex-1 bg-[#FAFAFA] p-6 lg:p-10 overflow-auto">
-          <div className="max-w-6xl mx-auto">
+        {/* Scrollable Area */}
+        <div id="admin-scroll-area" className="flex-1 overflow-y-auto flex flex-col">
+          {/* Page Content */}
+          <main className="flex-1 px-6 py-6 lg:px-10 lg:py-8">
             <Outlet />
-          </div>
+          </main>
+
+          {/* Footer — scroll bersama konten */}
+          <footer className="border-t border-slate-100 bg-white px-6 lg:px-10 py-3 flex flex-col sm:flex-row items-center justify-between gap-1">
+            <p className="text-[12px] text-slate-400">
+              © 2026 <span className="font-semibold text-[#0a0f44]">KonekDin</span>. Semua hak dilindungi.
+            </p>
+            <div className="flex items-center gap-4 text-[12px] text-slate-400">
+              <a href="#" className="hover:text-teal-600 transition-colors">Ketentuan Layanan</a>
+              <span className="text-slate-200">|</span>
+              <a href="#" className="hover:text-teal-600 transition-colors">Kebijakan Privasi</a>
+              <span className="text-slate-200">|</span>
+              <a href="#" className="hover:text-teal-600 transition-colors">Bantuan</a>
+            </div>
+          </footer>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   Bell,
   HelpCircle,
   LogOut,
+  Home,
   Menu
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -94,7 +95,7 @@ export default function LearnerLayout() {
   const navigate = useNavigate()
 
   const navigation = [
-    { name: 'Dashboard', href: '/learner/dashboard', icon: LayoutDashboard },
+    { name: 'Dashboard', href: '/learner/dashboard', icon: Home },
     { name: 'Cari Tutor', href: '/learner/cari-tutor', icon: Search },
     { name: 'Detail Pesanan', href: '/learner/detail-pesanan', icon: ClipboardList },
     { name: 'Jadwal Belajar', href: '/learner/jadwal-belajar', icon: CalendarDays },
