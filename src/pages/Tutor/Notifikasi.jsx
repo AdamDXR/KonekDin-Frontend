@@ -1,149 +1,204 @@
-import { Calendar, CheckCircle, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useNavigate } from 'react-router-dom'
+import { CalendarDays, CheckCircle2, Info, ArrowRight, Timer } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Data dummy ───────────────────────────────────────────────────────────────
+// tipe: 'pengingat' | 'pembayaran' | 'info'
+const notifikasiData = [
+  {
+    grup: 'HARI INI',
+    items: [
+      {
+        id: '1',
+        tipe: 'pengingat',
+        judul: 'Pengingat Sesi Besok',
+        waktu: 'BARU',
+        isBaru: true,
+        pesan: [
+          'Persiapkan diri Anda untuk sesi mengajar ',
+          { bold: 'Algoritma & Struktur Data' },
+          ' bersama ',
+          { bold: 'Budi Santoso' },
+          ' pada pukul ',
+          { bold: '12.30' },
+          '. Siapkan materi yang ingin diajarkan besok.',
+        ],
+        cta: null,
+      },
+      {
+        id: '2',
+        tipe: 'pembayaran',
+        judul: 'Pesanan Baru Masuk!',
+        waktu: '5 menit yang lalu',
+        isBaru: false,
+        pesan: [
+          'Sesi ',
+          { bold: 'Algoritma & Struktur Data' },
+          ' dengan ',
+          { bold: 'Budi Santoso' },
+          ' telah dikonfirmasi dan dibayar. Pastikan Anda sudah mengecek jadwal mengajar Anda.',
+        ],
+        cta: { label: 'Lihat Jadwal Mengajar', href: '/tutor/jadwal-mengajar' },
+      },
+    ],
+  },
+  {
+    grup: 'KEMARIN',
+    items: [
+      {
+        id: '3',
+        tipe: 'pengingat_30m',
+        judul: 'Sesi Mulai dalam 30 Menit!',
+        waktu: '1 hari yang lalu',
+        isBaru: false,
+        pesan: [
+          'Sesi mengajarmu akan dimulai dalam 30 menit. Yuk bersiap dari sekarang dan pastikan koneksi internetmu stabil untuk mengajar.',
+        ],
+        cta: null,
+      },
+    ],
+  },
+]
 
-const NOTIFIKASI = {
-  hariIni: [
-    {
-      id: 1,
-      title: "Pengingat Sesi Besok",
-      message: (
-        <>
-          Persiapkan diri Anda untuk sesi{" "}
-          <strong>Algoritma & Struktur Data</strong> bersama{" "}
-          <strong>Budi Santoso</strong> pada pukul <strong>12.30</strong>.
-          Siapkan materi yang ingin diajarkan besok.
-        </>
-      ),
-      time: "BARU",
-      isNew: true,
-      accentColor: "#f97316",
-      icon: <Calendar className="h-5 w-5 text-white" />,
-      iconBg: "bg-[#fb923c]",
-      action: null,
-    },
-    {
-      id: 2,
-      title: "Pembayaran Berhasil!",
-      message: (
-        <>
-          Sesi Algoritma dengan <strong>Budi Santoso</strong> telah
-          dikonfirmasi. Pastikan Anda sudah menyiapkan materi yang ingin
-          didiskusikan.
-        </>
-      ),
-      time: "5 menit yang lalu",
-      isNew: false,
-      accentColor: "#0d7c6b",
-      icon: <CheckCircle className="h-5 w-5 text-white" />,
-      iconBg: "bg-[#0d7c6b]",
-      action: (
-        <Link to="/tutor/jadwal-mengajar">
-          <Button className="bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-5 py-2.5 h-auto rounded-xl text-sm gap-2 flex items-center transition-colors duration-150 mt-3">
-            Lihat Jadwal Mengajar
-            <span>→</span>
-          </Button>
-        </Link>
-      ),
-    },
-  ],
-  kemarin: [
-    {
-      id: 3,
-      title: "Sesi Mulai dalam 30 Menit!",
-      message:
-        "Sesi belajarmu akan dimulai dalam 30 menit. Yuk siapkan dirimu dari sekarang, cek kembali materi yang ingin kamu ajarkan ke pelajar nanti.",
-      time: "1 hari yang lalu",
-      isNew: false,
-      accentColor: "#0a0f44",
-      icon: <Clock className="h-5 w-5 text-white" />,
-      iconBg: "bg-[#0a0f44]",
-      action: null,
-    },
-  ],
-};
-
-// ─── Komponen Kartu Notifikasi ─────────────────────────────────────────────────
-
-function NotifCard({ item }) {
-  return (
-    <div className="flex items-start gap-5 py-6 border-b border-slate-100 last:border-0">
-      {/* Konten */}
-      <div
-        className="flex-1 pl-4 border-l-4"
-        style={{ borderColor: item.accentColor }}
-      >
-        <div className="flex items-center justify-between gap-4">
-          <h3
-            className="text-base font-extrabold"
-            style={{ color: item.accentColor }}
-          >
-            {item.title}
-          </h3>
-          <span
-            className={`text-[10px] font-extrabold flex-shrink-0 ${
-              item.isNew ? "text-[#f97316]" : "text-slate-400"
-            }`}
-          >
-            {item.time}
-          </span>
-        </div>
-
-        <p className="text-sm text-slate-500 leading-relaxed mt-1">
-          {item.message}
-        </p>
-
-        {item.action && item.action}
-      </div>
-
-      {/* Ikon */}
-      <div className={`${item.iconBg} p-3 rounded-full flex-shrink-0`}>
-        {item.icon}
-      </div>
-    </div>
-  );
+// ─── Konfigurasi visual per tipe ─────────────────────────────────────────────
+const tipeConfig = {
+  pengingat: {
+    accent: 'bg-orange-400',
+    iconBg: 'bg-orange-100',
+    icon: <CalendarDays className="h-5 w-5 text-orange-500" />,
+    titleColor: 'text-orange-500',
+  },
+  pembayaran: {
+    accent: 'bg-[#0d7c6b]',
+    iconBg: 'bg-[#e6f4f1]',
+    icon: <CheckCircle2 className="h-5 w-5 text-[#0d7c6b]" />,
+    titleColor: 'text-[#0d7c6b]',
+  },
+  info: {
+    accent: 'bg-slate-300',
+    iconBg: 'bg-slate-200',
+    icon: <Info className="h-5 w-5 text-slate-500" />,
+    titleColor: 'text-slate-600',
+  },
+  pengingat_30m: {
+    accent: 'bg-[#0a0f44]',
+    iconBg: 'bg-[#93c5fd]',
+    icon: <Timer className="h-5 w-5 text-[#0a0f44]" />,
+    titleColor: 'text-[#0a0f44]',
+  },
 }
 
-// ─── Halaman Utama ─────────────────────────────────────────────────────────────
-
-export default function NotifikasiTutor() {
+// ─── Helper: render pesan dengan segmen bold ──────────────────────────────────
+function RenderPesan({ segmen }) {
   return (
-    <div className="w-full">
+    <p className="text-sm text-slate-600 leading-relaxed">
+      {segmen.map((s, i) =>
+        typeof s === 'string' ? (
+          <span key={i}>{s}</span>
+        ) : (
+          <strong key={i} className="font-semibold text-slate-800">
+            {s.bold}
+          </strong>
+        )
+      )}
+    </p>
+  )
+}
+
+// ─── NotifikasiCard ───────────────────────────────────────────────────────────
+function NotifikasiCard({ item, isLama, onCtaClick }) {
+  const cfg = tipeConfig[item.tipe]
+
+  return (
+    <div
+      className="rounded-2xl border border-slate-100 overflow-hidden shadow-sm bg-white"
+    >
+      <div className="flex">
+        {/* Accent bar kiri */}
+        <div className={`w-1 flex-shrink-0 ${cfg.accent}`} />
+
+        <div className="flex-1 px-5 py-4">
+          {/* Baris atas: judul + waktu/badge */}
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <h3 className={`text-sm font-bold leading-tight ${cfg.titleColor || 'text-[#0d7c6b]'}`}>
+              {item.judul}
+            </h3>
+            {item.isBaru ? (
+              <span className="flex-shrink-0 text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                BARU
+              </span>
+            ) : (
+              <span className="flex-shrink-0 text-[11px] text-slate-400 whitespace-nowrap">
+                {item.waktu}
+              </span>
+            )}
+          </div>
+
+          {/* Isi pesan */}
+          <RenderPesan segmen={item.pesan} />
+
+          {/* CTA button (opsional) */}
+          {item.cta && (
+            <Button
+              onClick={() => onCtaClick(item.cta.href)}
+              className="mt-4 bg-[#0a0f44] hover:bg-[#141a6e] text-white font-semibold px-5 py-2 h-auto rounded-xl text-sm gap-2"
+            >
+              {item.cta.label}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
+        {/* Icon di kanan dalam lingkaran */}
+        <div className="flex items-start pt-4 pr-5">
+          <div className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${cfg.iconBg}`}>
+            {cfg.icon}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+export default function Notifikasi() {
+  const navigate = useNavigate()
+
+  return (
+    <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="mb-7">
-        <h1 className="text-2xl font-extrabold text-[#0a0f44] tracking-tight">
+      <div className="mb-8">
+        <h1 className="text-[26px] font-extrabold text-[#0a0f44] leading-tight">
           Notifikasi
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-sm text-slate-500 mt-1">
           Update terbaru untuk perjalanan akademik anda.
         </p>
       </div>
 
-      {/* Hari Ini */}
-      <div className="mb-2">
-        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">
-          Hari Ini
-        </p>
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6">
-          {NOTIFIKASI.hariIni.map((item) => (
-            <NotifCard key={item.id} item={item} />
-          ))}
-        </div>
-      </div>
+      {/* Grup per hari */}
+      <div className="flex flex-col gap-8">
+        {notifikasiData.map((grup) => (
+          <section key={grup.grup}>
+            {/* Label grup */}
+            <p className="text-[11px] font-semibold tracking-widest text-slate-400 mb-3 px-1">
+              {grup.grup}
+            </p>
 
-      {/* Kemarin */}
-      <div className="mt-6">
-        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">
-          Kemarin
-        </p>
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6">
-          {NOTIFIKASI.kemarin.map((item) => (
-            <NotifCard key={item.id} item={item} />
-          ))}
-        </div>
+            {/* List kartu */}
+            <div className="flex flex-col gap-3">
+              {grup.items.map((item) => (
+                <NotifikasiCard
+                  key={item.id}
+                  item={item}
+                  isLama={grup.grup !== 'HARI INI'}
+                  onCtaClick={(href) => navigate(href)}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
-  );
+  )
 }

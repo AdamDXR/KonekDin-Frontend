@@ -11,6 +11,10 @@ import LearnerLayout from "@/layouts/LearnerLayout";
 // Auth Pages
 import Login from "@/pages/Auth/Login";
 import Register from "@/pages/Auth/Register";
+import RegisterTutorDokumen from "@/pages/Auth/RegisterTutorDokumen";
+import RegisterTutorMataKuliah from "@/pages/Auth/RegisterTutorMataKuliah";
+import RegisterTutorKeahlian from "@/pages/Auth/RegisterTutorKeahlian";
+import RegisterTutorTinjauan from "@/pages/Auth/RegisterTutorTinjauan";
 
 // Landing Page
 import Landing from "@/pages/Landing/Landing";
@@ -52,6 +56,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register/tutor/dokumen" element={<RegisterTutorDokumen />} />
+        <Route path="/register/tutor/mata-kuliah" element={<RegisterTutorMataKuliah />} />
+        <Route path="/register/tutor/keahlian" element={<RegisterTutorKeahlian />} />
+        <Route path="/register/tutor/tinjauan" element={<RegisterTutorTinjauan />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
