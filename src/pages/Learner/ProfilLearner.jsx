@@ -109,7 +109,7 @@ export default function ProfilLearner() {
   const current = editing ? draft : profil
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="flex flex-col min-h-full space-y-6 pb-10">
 
       {/* ── Hero ── */}
       <div className="flex flex-col sm:flex-row items-start gap-6">
@@ -137,10 +137,10 @@ export default function ProfilLearner() {
 
         {/* Nama + universitas + tombol navigasi */}
         <div className="flex-1">
-          <h1 className="text-[32px] font-extrabold text-[#0a0f44] leading-tight">
+          <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
             {profil.nama}
           </h1>
-          <p className="flex items-center gap-2 text-sm text-slate-500 mt-1">
+          <p className="flex items-center gap-2 text-slate-500">
             <University className="h-4 w-4 text-slate-400" />
             {profil.universitas}
           </p>

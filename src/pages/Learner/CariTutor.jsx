@@ -32,17 +32,17 @@ import {
 // Mock Data Tutor
 const mockTutors = [
   { id: 1, name: 'Irkham Wildan', university: "Informatika '21", courses: ['Basis Data', 'Struktur Data'], rating: 4.9, isTopTutor: true, availableTimes: ['07.00 - 07.50', '12.30 - 13.20', '15.30 - 16.20', '17.10 - 18.00'], availableDays: ['Senin', 'Rabu', 'Jumat'], price: 50000, image: 'https://i.pravatar.cc/150?img=11' },
-  { id: 2, name: 'Mery Zahra', university: "Informatika '22", courses: ['UI/UX Design', 'Desain Produk'], rating: 4.8, isTopTutor: false, availableTimes: ['09.30 - 10.20', '14.10 - 15.00'], availableDays: ['Selasa', 'Kamis'], price: 60000, image: 'https://i.pravatar.cc/150?img=5' },
-  { id: 3, name: 'Arhan Pradana', university: "Informatika '21", courses: ['Algoritma', 'Pemrograman C++'], rating: 5.0, isTopTutor: true, availableTimes: ['08.40 - 09.30', '10.20 - 11.10', '16.20 - 17.10'], availableDays: ['Senin', 'Selasa', 'Rabu'], price: 75000, image: 'https://i.pravatar.cc/150?img=12' },
+  { id: 2, name: 'Mery Zahra', university: "Informatika '22", courses: ['UI/UX Design', 'Interaksi Manusia & Komputer'], rating: 4.8, isTopTutor: false, availableTimes: ['09.30 - 10.20', '14.10 - 15.00'], availableDays: ['Selasa', 'Kamis'], price: 60000, image: 'https://i.pravatar.cc/150?img=5' },
+  { id: 3, name: 'Arhan Pradana', university: "Informatika '21", courses: ['Fisika Dasar', 'Pemrograman C++'], rating: 5.0, isTopTutor: true, availableTimes: ['08.40 - 09.30', '10.20 - 11.10', '16.20 - 17.10'], availableDays: ['Senin', 'Selasa', 'Rabu'], price: 75000, image: 'https://i.pravatar.cc/150?img=12' },
   { id: 4, name: 'Siti Aminah', university: "Informatika '23", courses: ['Fisika Dasar', 'Kalkulus'], rating: 4.7, isTopTutor: false, availableTimes: ['13.20 - 14.10', '15.30 - 16.20'], availableDays: ['Kamis', 'Jumat'], price: 45000, image: 'https://i.pravatar.cc/150?img=9' },
   { id: 5, name: 'Budi Santoso', university: "Informatika '22", courses: ['Pemrograman Web', 'Jaringan Komputer'], rating: 4.6, isTopTutor: false, availableTimes: ['10.20 - 11.10', '14.10 - 15.00'], availableDays: ['Senin', 'Kamis'], price: 40000, image: 'https://i.pravatar.cc/150?img=15' },
-  { id: 6, name: 'Rafi Ardan', university: "Informatika '21", courses: ['Analisis Bisnis', 'Manajemen Proyek'], rating: 4.9, isTopTutor: true, availableTimes: ['07.00 - 07.50', '11.10 - 12.00', '15.30 - 16.20'], availableDays: ['Selasa', 'Jumat', 'Sabtu'], price: 55000, image: 'https://i.pravatar.cc/150?img=33' },
+  { id: 6, name: 'Rafi Ardan', university: "Informatika '21", courses: ['Pengembangan Startup Digital', 'Manajemen Proyek TI'], rating: 4.9, isTopTutor: true, availableTimes: ['07.00 - 07.50', '11.10 - 12.00', '15.30 - 16.20'], availableDays: ['Selasa', 'Jumat', 'Sabtu'], price: 55000, image: 'https://i.pravatar.cc/150?img=33' },
   { id: 7, name: 'Dewi Lestari', university: "Informatika '24", courses: ['Kalkulus Lanjut', 'Aljabar Linear'], rating: 4.8, isTopTutor: false, availableTimes: ['08.40 - 09.30', '12.30 - 13.20'], availableDays: ['Rabu', 'Sabtu'], price: 50000, image: 'https://i.pravatar.cc/150?img=42' },
   { id: 8, name: 'Andi Wijaya', university: "Informatika '22", courses: ['Struktur Data', 'Kecerdasan Buatan'], rating: 4.5, isTopTutor: false, availableTimes: ['09.30 - 10.20', '16.20 - 17.10'], availableDays: ['Senin', 'Selasa'], price: 45000, image: 'https://i.pravatar.cc/150?img=50' },
   { id: 9, name: 'Nina Wati', university: "Informatika '23", courses: ['Statistika Dasar', 'Probabilitas'], rating: 4.9, isTopTutor: true, availableTimes: ['07.50 - 08.40', '13.20 - 14.10', '17.10 - 18.00'], availableDays: ['Rabu', 'Kamis', 'Minggu'], price: 60000, image: 'https://i.pravatar.cc/150?img=21' },
-  { id: 10, name: 'Dimas Aditya', university: "Informatika '21", courses: ['Menggambar Teknik', 'CAD'], rating: 4.7, isTopTutor: false, availableTimes: ['10.20 - 11.10', '14.10 - 15.00'], availableDays: ['Senin', 'Jumat'], price: 55000, image: 'https://i.pravatar.cc/150?img=13' },
-  { id: 11, name: 'Ayu Kartika', university: "Informatika '24", courses: ['Pengantar Akuntansi', 'Ekonomi'], rating: 4.8, isTopTutor: false, availableTimes: ['11.10 - 12.00', '13.20 - 14.10'], availableDays: ['Selasa', 'Rabu'], price: 50000, image: 'https://i.pravatar.cc/150?img=28' },
-  { id: 12, name: 'Fajar Nugroho', university: "Informatika '22", courses: ['Public Speaking', 'Komunikasi Massa'], rating: 4.9, isTopTutor: true, availableTimes: ['08.40 - 09.30', '12.30 - 13.20', '16.20 - 17.10'], availableDays: ['Jumat', 'Sabtu', 'Minggu'], price: 65000, image: 'https://i.pravatar.cc/150?img=59' },
+  { id: 10, name: 'Dimas Aditya', university: "Informatika '21", courses: ['Arsitektur Komputer', 'Sistem Digital'], rating: 4.7, isTopTutor: false, availableTimes: ['10.20 - 11.10', '14.10 - 15.00'], availableDays: ['Senin', 'Jumat'], price: 55000, image: 'https://i.pravatar.cc/150?img=13' },
+  { id: 11, name: 'Ayu Kartika', university: "Informatika '24", courses: ['Dasar Kewirausahaan', 'Ekonomi Digital'], rating: 4.8, isTopTutor: false, availableTimes: ['11.10 - 12.00', '13.20 - 14.10'], availableDays: ['Selasa', 'Rabu'], price: 50000, image: 'https://i.pravatar.cc/150?img=28' },
+  { id: 12, name: 'Fajar Nugroho', university: "Informatika '22", courses: ['Keamanan Siber', 'Kriptografi'], rating: 4.9, isTopTutor: true, availableTimes: ['08.40 - 09.30', '12.30 - 13.20', '16.20 - 17.10'], availableDays: ['Jumat', 'Sabtu', 'Minggu'], price: 65000, image: 'https://i.pravatar.cc/150?img=59' },
 ]
 
 const ITEMS_PER_PAGE = 9
@@ -241,8 +241,8 @@ export default function CariTutor() {
                     alt={tutor.name} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-1.5 right-1.5 bg-[#FFCD29] text-white px-2 py-0.5 rounded-[8.5px] text-[10px] font-bold shadow-sm flex items-center gap-0.5">
-                    <Star className="w-2.5 h-2.5 fill-white text-white" />
+                  <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
+                    <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                     {tutor.rating}
                   </div>
                 </div>

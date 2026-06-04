@@ -110,9 +110,9 @@ function RiwayatCard({ item, onBeriUlasan, onBelajarLagi }) {
                 {item.tutorNama.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute -top-1.5 -right-1.5 flex items-center gap-0.5 bg-amber-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
-              ⭐ {item.tutorRating}
-            </div>
+            <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
+                  <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> {item.tutorRating}
+                </div>
           </div>
 
           {/* Info sesi */}
@@ -323,14 +323,16 @@ export default function RiwayatBelajar() {
   const adaLagi = tampil < data.length
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-[26px] font-extrabold text-[#0a0f44] leading-tight">
-          Riwayat Sesi Belajar
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Lihat kembali perjalanan belajar Anda dan atur sesi lanjutan dengan tutor favorit Anda.
-        </p>
+    <div className="flex flex-col min-h-full pb-10">
+      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
+            Riwayat Sesi Belajar
+          </h1>
+          <p className="text-slate-500">
+            Lihat kembali riwayat perjalanan belajarmu.
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-col gap-4">

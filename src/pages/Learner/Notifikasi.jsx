@@ -1,64 +1,8 @@
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, CheckCircle2, Info, ArrowRight, Timer } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Info, ArrowRight, Timer, Banknote, X, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-// ─── Data dummy ───────────────────────────────────────────────────────────────
-// tipe: 'pengingat' | 'pembayaran' | 'info'
-const notifikasiData = [
-  {
-    grup: 'HARI INI',
-    items: [
-      {
-        id: '1',
-        tipe: 'pengingat',
-        judul: 'Pengingat Sesi Besok',
-        waktu: 'BARU',
-        isBaru: true,
-        pesan: [
-          'Persiapkan diri Anda untuk sesi ',
-          { bold: 'Algoritma & Struktur Data' },
-          ' bersama ',
-          { bold: 'Irkham Wildan' },
-          ' pada pukul ',
-          { bold: '12.30' },
-          '. Siapkan materi yang ingin didiskusikan besok.',
-        ],
-        cta: null,
-      },
-      {
-        id: '2',
-        tipe: 'pembayaran',
-        judul: 'Pembayaran Berhasil!',
-        waktu: '5 menit yang lalu',
-        isBaru: false,
-        pesan: [
-          'Sesi Algoritma dengan ',
-          { bold: 'Irkham Wildan' },
-          ' telah dikonfirmasi. Pastikan Anda sudah menyiapkan materi yang ingin didiskusikan.',
-        ],
-        cta: { label: 'Lihat Jadwal Belajar', href: '/learner/jadwal-belajar' },
-      },
-    ],
-  },
-  {
-    grup: 'KEMARIN',
-    items: [
-      {
-        id: '3',
-        tipe: 'pengingat_30m',
-        judul: 'Sesi Mulai dalam 30 Menit!',
-        waktu: '1 hari yang lalu',
-        isBaru: false,
-        pesan: [
-          'Sesi belajarmu akan dimulai dalam 30 menit. Yuk siapkan dirimu dari sekarang, cek kembali materi, dan catat hal-hal yang masih belum kamu pahami untuk ditanyakan ke tutor nanti',
-        ],
-        cta: null,
-      },
-    ],
-  },
-]
-
-// ─── Konfigurasi visual per tipe ─────────────────────────────────────────────
 const tipeConfig = {
   pengingat: {
     accent: 'bg-orange-400',
@@ -84,9 +28,14 @@ const tipeConfig = {
     icon: <Timer className="h-5 w-5 text-[#0a0f44]" />,
     titleColor: 'text-[#0a0f44]',
   },
+  menunggu_pembayaran: {
+    accent: 'bg-yellow-400',
+    iconBg: 'bg-yellow-100',
+    icon: <Banknote className="h-5 w-5 text-yellow-600" />,
+    titleColor: 'text-yellow-600',
+  },
 }
 
-// ─── Helper: render pesan dengan segmen bold ──────────────────────────────────
 function RenderPesan({ segmen }) {
   return (
     <p className="text-sm text-slate-600 leading-relaxed">
@@ -103,20 +52,14 @@ function RenderPesan({ segmen }) {
   )
 }
 
-// ─── NotifikasiCard ───────────────────────────────────────────────────────────
-function NotifikasiCard({ item, isLama, onCtaClick }) {
+function NotifikasiCard({ item, onCtaClick, onActionClick }) {
   const cfg = tipeConfig[item.tipe]
 
   return (
-    <div
-      className="rounded-2xl border border-slate-100 overflow-hidden shadow-sm bg-white"
-    >
+    <div className="rounded-2xl border border-slate-100 overflow-hidden shadow-sm bg-white">
       <div className="flex">
-        {/* Accent bar kiri */}
         <div className={`w-1 flex-shrink-0 ${cfg.accent}`} />
-
         <div className="flex-1 px-5 py-4">
-          {/* Baris atas: judul + waktu/badge */}
           <div className="flex items-start justify-between gap-4 mb-2">
             <h3 className={`text-sm font-bold leading-tight ${cfg.titleColor || 'text-[#0d7c6b]'}`}>
               {item.judul}
@@ -131,23 +74,42 @@ function NotifikasiCard({ item, isLama, onCtaClick }) {
               </span>
             )}
           </div>
-
-          {/* Isi pesan */}
           <RenderPesan segmen={item.pesan} />
-
-          {/* CTA button (opsional) */}
-          {item.cta && (
-            <Button
-              onClick={() => onCtaClick(item.cta.href)}
-              className="mt-4 bg-[#0a0f44] hover:bg-[#141a6e] text-white font-semibold px-5 py-2 h-auto rounded-xl text-sm gap-2"
-            >
-              {item.cta.label}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+          {(item.cta || item.cta2) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {item.cta && (
+                <Button
+                  onClick={() => {
+                    if (item.cta.action) {
+                      onActionClick(item.cta.action)
+                    } else {
+                      onCtaClick(item.cta.href)
+                    }
+                  }}
+                  className="bg-[#0a0f44] hover:bg-[#141a6e] text-white font-semibold px-5 py-2 h-auto rounded-xl text-sm gap-2"
+                >
+                  {item.cta.label}
+                  {!item.cta.action && <ArrowRight className="h-4 w-4" />}
+                </Button>
+              )}
+              {item.cta2 && (
+                <Button
+                  onClick={() => {
+                    if (item.cta2.action) {
+                      onActionClick(item.cta2.action)
+                    } else {
+                      onCtaClick(item.cta2.href)
+                    }
+                  }}
+                  variant="outline"
+                  className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-5 py-2 h-auto rounded-xl text-sm"
+                >
+                  {item.cta2.label}
+                </Button>
+              )}
+            </div>
           )}
         </div>
-
-        {/* Icon di kanan dalam lingkaran */}
         <div className="flex items-start pt-4 pr-5">
           <div className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${cfg.iconBg}`}>
             {cfg.icon}
@@ -158,18 +120,142 @@ function NotifikasiCard({ item, isLama, onCtaClick }) {
   )
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Notifikasi() {
   const navigate = useNavigate()
+  const [modalType, setModalType] = useState(null)
+  
+  // Default values for VA and EWALLET popups in notification
+  const [selectedBank, setSelectedBank] = useState('BCA')
+  const [selectedEWallet, setSelectedEWallet] = useState('GOPAY')
+
+  useEffect(() => {
+    const scrollArea = document.getElementById('learner-scroll-area')
+    
+    if (modalType !== null) {
+      if (scrollArea) {
+        const scrollbarWidth = scrollArea.offsetWidth - scrollArea.clientWidth
+        if (scrollbarWidth > 0) {
+          scrollArea.style.paddingRight = `${scrollbarWidth}px`
+        }
+        scrollArea.style.overflow = 'hidden'
+      }
+      
+      const bodyScrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      if (bodyScrollbarWidth > 0) {
+        document.body.style.paddingRight = `${bodyScrollbarWidth}px`
+      }
+      document.body.style.overflow = 'hidden'
+    } else {
+      if (scrollArea) {
+        scrollArea.style.paddingRight = ''
+        scrollArea.style.overflow = ''
+      }
+      document.body.style.paddingRight = ''
+      document.body.style.overflow = ''
+    }
+    
+    return () => {
+      if (scrollArea) {
+        scrollArea.style.paddingRight = ''
+        scrollArea.style.overflow = ''
+      }
+      document.body.style.paddingRight = ''
+      document.body.style.overflow = ''
+    }
+  }, [modalType])
+
+  const notifikasiData = [
+    {
+      grup: 'HARI INI',
+      items: [
+        {
+          id: '0',
+          tipe: 'menunggu_pembayaran',
+          judul: 'Menunggu Pembayaran',
+          waktu: 'BARU',
+          isBaru: true,
+          pesan: [
+            'Pesanan sesi ',
+            { bold: 'Algoritma & Struktur Data' },
+            ' bersama ',
+            { bold: 'Irkham Wildan' },
+            ' menunggu pembayaran. Silakan selesaikan pembayaran untuk mengkonfirmasi jadwal Anda.'
+          ],
+          cta: { label: 'Bayar', action: 'BAYAR' },
+          cta2: { label: 'Ubah Metode Pembayaran', action: 'UBAH_METODE' },
+        },
+        {
+          id: '0-paid',
+          tipe: 'pembayaran',
+          judul: 'Pesanan Berhasil!',
+          waktu: '2 menit yang lalu',
+          isBaru: true,
+          pesan: [
+            'Pembayaran untuk sesi ',
+            { bold: 'Kalkulus' },
+            ' bersama ',
+            { bold: 'Kevin Sanjaya' },
+            ' telah dikonfirmasi oleh admin. Selamat belajar!'
+          ],
+          cta: { label: 'Lihat Jadwal Belajar', href: '/learner/jadwal-belajar' },
+        },
+        {
+          id: '1',
+          tipe: 'pengingat',
+          judul: 'Pengingat Sesi Besok',
+          waktu: '2 jam yang lalu',
+          isBaru: false,
+          pesan: [
+            'Persiapkan diri Anda untuk sesi ',
+            { bold: 'Pemrograman Web' },
+            ' bersama ',
+            { bold: 'Budi Santoso' },
+            ' pada pukul ',
+            { bold: '12.30' },
+            '. Siapkan materi yang ingin didiskusikan besok.',
+          ],
+          cta: null,
+        },
+      ],
+    },
+    {
+      grup: 'KEMARIN',
+      items: [
+        {
+          id: '3',
+          tipe: 'pengingat_30m',
+          judul: 'Sesi Mulai dalam 30 Menit!',
+          waktu: '1 hari yang lalu',
+          isBaru: false,
+          pesan: [
+            'Sesi belajarmu akan dimulai dalam 30 menit. Yuk siapkan dirimu dari sekarang, cek kembali materi, dan catat hal-hal yang masih belum kamu pahami untuk ditanyakan ke tutor nanti',
+          ],
+          cta: null,
+        },
+      ],
+    },
+  ]
+
+  const handleActionClick = (action) => {
+    if (action === 'BAYAR') {
+      setModalType('VA')
+    } else if (action === 'UBAH_METODE') {
+      navigate('/learner/pembayaran', { state: { returnTo: '/learner/notifikasi' } })
+    }
+  }
+
+  const handleSelesai = () => {
+    setModalType(null)
+  }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="flex flex-col min-h-full pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[26px] font-extrabold text-[#0a0f44] leading-tight">
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
           Notifikasi
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-slate-500">
           Update terbaru untuk perjalanan akademik anda.
         </p>
       </div>
@@ -178,25 +264,203 @@ export default function Notifikasi() {
       <div className="flex flex-col gap-8">
         {notifikasiData.map((grup) => (
           <section key={grup.grup}>
-            {/* Label grup */}
             <p className="text-[11px] font-semibold tracking-widest text-slate-400 mb-3 px-1">
               {grup.grup}
             </p>
-
-            {/* List kartu */}
             <div className="flex flex-col gap-3">
               {grup.items.map((item) => (
                 <NotifikasiCard
                   key={item.id}
                   item={item}
-                  isLama={grup.grup !== 'HARI INI'}
                   onCtaClick={(href) => navigate(href)}
+                  onActionClick={handleActionClick}
                 />
               ))}
             </div>
           </section>
         ))}
       </div>
+
+      {/* MODALS */}
+
+      {/* 1. VA Pop Up Modal */}
+      {modalType === 'VA' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div 
+            className="bg-white rounded-[24px] w-full max-w-[400px] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header - Dark Blue Theme */}
+            <div className="bg-[#000666] p-5 text-white relative shrink-0">
+              <button 
+                onClick={() => setModalType(null)}
+                className="absolute top-4 right-4 p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              
+              <div className="flex items-center gap-4 mb-2 mt-2">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0">
+                  <span className="font-bold text-base text-blue-800">
+                    {selectedBank}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-white/80 text-xs font-medium">Pembayaran via Virtual Account</div>
+                  <div className="font-bold text-base">Bank {selectedBank}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 md:p-6 space-y-4">
+              <div className="text-center">
+                <h3 className="text-slate-800 font-bold text-base mb-1">Selesaikan Pembayaran Anda</h3>
+                <p className="text-slate-500 text-xs">
+                  Selesaikan pembayaran Anda sebelum <span className="font-bold text-slate-700">15 Okt 2026, 12:30 WIB</span>
+                </p>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl border border-slate-100 p-4 space-y-3">
+                {/* VA Number */}
+                <div>
+                  <div className="text-slate-500 text-[10px] font-bold mb-1 uppercase tracking-wider">Nomor Virtual Account</div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xl font-bold text-slate-800 tracking-wider">
+                      8239012389102
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => navigator.clipboard.writeText('8239012389102')}
+                      className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-2"
+                    >
+                      <Copy className="w-4 h-4 mr-1.5" />
+                      Salin
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="h-px bg-slate-200 w-full"></div>
+
+                {/* Amount */}
+                <div>
+                  <div className="text-slate-500 text-[10px] font-bold mb-1 uppercase tracking-wider">Total Pembayaran</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl font-bold text-indigo-700">
+                      Rp 105.000
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => navigator.clipboard.writeText('105000')}
+                      className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-2"
+                    >
+                      <Copy className="w-4 h-4 mr-1.5" />
+                      Salin
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleSelesai}
+                className="w-full h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20"
+              >
+                Oke
+              </Button>
+
+              <p className="text-center text-[10px] text-slate-400 mt-2">
+                Pembayaran akan dikonfirmasi secara otomatis oleh sistem
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. E-Wallet Modal */}
+      {modalType === 'EWALLET' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div 
+            className="bg-white rounded-[24px] w-full max-w-[400px] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-[#000666] p-5 text-white relative shrink-0">
+              <button 
+                onClick={() => setModalType(null)}
+                className="absolute top-4 right-4 p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              
+              <div className="flex items-center gap-4 mb-2 mt-2">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0">
+                  <span className={`font-bold text-xs text-blue-800`}>
+                    {selectedEWallet}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-white/80 text-xs font-medium">Pembayaran E-Wallet</div>
+                  <div className="font-bold text-base">{selectedEWallet} QRIS / Transfer</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="text-center">
+                <h3 className="text-slate-800 font-bold text-base mb-1">Scan QRIS atau Transfer</h3>
+                <p className="text-slate-500 text-xs">
+                  Gunakan aplikasi <span className="font-bold">{selectedEWallet}</span> Anda untuk menyelesaikan pembayaran.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl border border-slate-100 p-4 space-y-3">
+                
+                {/* QR Code Placeholder */}
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-28 h-28 bg-white border-2 border-slate-200 rounded-xl p-2 mb-2 flex items-center justify-center shadow-sm">
+                    <div className="w-full h-full bg-[url('https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg')] bg-contain bg-center opacity-70"></div>
+                  </div>
+                  <p className="text-[10px] font-bold text-slate-400">QRIS A/N KONEKDIN INDONESIA</p>
+                </div>
+
+                <div className="flex items-center gap-3 py-1">
+                  <div className="h-px bg-slate-200 flex-1"></div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">ATAU TRANSFER KE</div>
+                  <div className="h-px bg-slate-200 flex-1"></div>
+                </div>
+
+                {/* E-Wallet Number */}
+                <div className="bg-white p-3 rounded-xl border border-slate-200">
+                  <div className="text-slate-500 text-[10px] font-bold mb-1 uppercase tracking-wider">Nomor Tujuan {selectedEWallet}</div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-lg font-bold text-slate-800 tracking-wider">
+                      0812-3456-7890
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => navigator.clipboard.writeText('081234567890')}
+                      className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-2"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+              </div>
+
+              <Button 
+                onClick={handleSelesai}
+                className="w-full h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 shrink-0 mt-2"
+              >
+                Oke
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

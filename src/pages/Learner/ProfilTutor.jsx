@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Star, Clock, Zap, BookOpen, UserCircle, CheckCircle2, ChevronRight, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Star, Clock, Zap, BookOpen, UserCircle, CheckCircle2, ChevronRight, MessageSquareMore } from 'lucide-react'
 import PesanSesiModal from '@/components/Learner/PesanSesiModal'
 
 const MOCK_TUTOR_DETAIL = {
@@ -17,8 +17,8 @@ const MOCK_TUTOR_DETAIL = {
   price: 45000,
   image: 'https://i.pravatar.cc/150?u=irkham',
   courses: [
-    { name: 'Pemrograman Web', grade: 'A+' },
-    { name: 'Struktur Data', grade: 'A+' }
+    { name: 'Pemrograman Web', grade: 'A' },
+    { name: 'Struktur Data', grade: 'A' }
   ],
   skills: ['Clean Code', 'BackEnd Development', 'JavaScript Expert', 'Express.js', 'React', 'Node.js', 'REST API'],
   schedule: [
@@ -29,7 +29,10 @@ const MOCK_TUTOR_DETAIL = {
   ],
   reviews: [
     { name: 'Andi Pratama', role: 'Teknik Informatika\'22', text: 'Sangat jelas! Kak Irkham membantu saya memahami konsep Asynchronous di JS dengan sangat mudah.' },
-    { name: 'Maya Lestari', role: 'Sistem Informasi\'25', text: 'Sabar banget ngajarnya, sangat recommended buat yang baru belajar.' }
+    { name: 'Maya Lestari', role: 'Sistem Informasi\'25', text: 'Sabar banget ngajarnya, sangat recommended buat yang baru belajar.' },
+    { name: 'Budi Santoso', role: 'Teknik Informatika\'23', text: 'Penyampaian materi dari Kak Irkham sangat terstruktur, bikin cepat nyambung buat ngerjain tugas akhir.' },
+    { name: 'Citra Maharani', role: 'Sistem Informasi\'24', text: 'Sangat informatif! Baru pertama kali ngerti Express.js tanpa harus pusing baca dokumentasi.' },
+    { name: 'Rizky Fadillah', role: 'Teknik Komputer\'22', text: 'Wah gila sih, sesi codingnya super praktikal. Langsung bisa buat REST API sendiri setelah belajar bareng!' }
   ]
 }
 
@@ -41,10 +44,10 @@ export default function ProfilTutor() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-16">
+    <div className="flex flex-col min-h-full">
       {/* Header / Hero Area */}
-      <div className="bg-white border-b border-slate-200 pt-6 pb-12 px-6">
-        <div className="max-w-6xl mx-auto">
+      <div className="bg-white rounded-[24px] border border-slate-200 p-8 mb-8 shadow-sm">
+        <div>
           <button 
             onClick={() => navigate(-1)}
             className="flex items-center text-slate-500 hover:text-slate-800 transition-colors mb-6 text-sm font-medium"
@@ -54,8 +57,13 @@ export default function ProfilTutor() {
           </button>
           
           <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
-            <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-lg border-4 border-white shrink-0 relative bg-teal-100">
-              <img src={tutor.image} alt={tutor.name} className="w-full h-full object-cover" />
+            <div className="relative flex-shrink-0">
+              <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-lg border-4 border-white bg-teal-100">
+                <img src={tutor.image} alt={tutor.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm border border-slate-100">
+                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" /> {tutor.rating}
+              </div>
             </div>
             
             <div className="flex-1">
@@ -65,12 +73,11 @@ export default function ProfilTutor() {
                   Tutor Terverifikasi
                 </div>
               )}
-              <h1 className="text-3xl font-bold text-slate-900 flex items-baseline gap-3">
+              <h1 className="text-3xl font-bold text-slate-900">
                 {tutor.name}
-                <span className="text-lg font-medium text-slate-500">{tutor.university}</span>
               </h1>
-              <p className="text-slate-600 mt-3 max-w-2xl leading-relaxed text-lg">
-                {tutor.bio}
+              <p className="text-lg font-medium text-slate-500 mt-1">
+                {tutor.university}
               </p>
             </div>
           </div>
@@ -78,40 +85,15 @@ export default function ProfilTutor() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="flex-1 pb-10">
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* Left Column */}
           <div className="flex-1 space-y-8">
             
-            {/* Stats */}
-            <div className="flex gap-4">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex-1 flex flex-col justify-center items-center text-center">
-                <div className="text-3xl font-bold text-slate-900 mb-1 flex items-center justify-center">
-                  <Star className="w-6 h-6 text-yellow-400 fill-yellow-400 mr-2" />
-                  {tutor.rating}
-                </div>
-                <div className="text-sm text-slate-500 font-medium">Rating Tutor</div>
-              </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex-1 flex flex-col justify-center items-center text-center">
-                <div className="text-3xl font-bold text-slate-900 mb-1 flex items-center justify-center">
-                  <BookOpen className="w-6 h-6 text-teal-600 mr-2" />
-                  {tutor.sessionsCompleted}
-                </div>
-                <div className="text-sm text-slate-500 font-medium">Sesi Selesai</div>
-              </div>
-            </div>
 
-            {/* About */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center">
-                <UserCircle className="w-6 h-6 mr-2 text-teal-600" />
-                Tentang Saya
-              </h2>
-              <p className="text-slate-600 leading-relaxed">
-                {tutor.about}
-              </p>
-            </div>
+
+
 
             {/* Academic Portfolio */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200">
@@ -131,15 +113,15 @@ export default function ProfilTutor() {
 
             {/* Reviews */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200">
-              <div className="flex items-center justify-between mb-6">
+              <div className="mb-6">
                 <h2 className="text-xl font-bold text-slate-900 flex items-center">
-                  <MessageSquare className="w-6 h-6 mr-2 text-orange-500" />
+                  <MessageSquareMore className="w-6 h-6 mr-2 text-green-800" />
                   Ulasan Mahasiswa
                 </h2>
-                <button className="text-sm font-semibold text-teal-600 hover:text-teal-700">Lihat Semua</button>
+                <p className="text-sm font-semibold text-slate-500 mt-1 ml-8">Top 5 Review</p>
               </div>
               <div className="space-y-4">
-                {tutor.reviews.map((review, idx) => (
+                {tutor.reviews.slice(0, 5).map((review, idx) => (
                   <div key={idx} className="bg-slate-50 p-4 rounded-xl">
                     <div className="flex items-center justify-between mb-2">
                       <div>
@@ -166,7 +148,7 @@ export default function ProfilTutor() {
             {/* CTA Card */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <div className="text-slate-500 font-medium mb-1">Tarif Sesi mulai dari</div>
-              <div className="text-3xl font-bold text-slate-900 mb-6">Rp {tutor.price.toLocaleString('id-ID')}<span className="text-base font-normal text-slate-500">/jam</span></div>
+              <div className="text-3xl font-bold text-slate-900 mb-6">Rp {tutor.price.toLocaleString('id-ID')}<span className="text-base font-normal text-slate-500">/sesi</span></div>
               
               <Button 
                 onClick={() => setIsModalOpen(true)}
@@ -211,43 +193,6 @@ export default function ProfilTutor() {
                 ))}
               </div>
             </div>
-            
-            {/* Learning Flow */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200">
-              <h3 className="font-bold text-slate-900 mb-4">Alur Belajar</h3>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-xs">1</div>
-                    <div className="w-0.5 h-full bg-slate-200 my-1"></div>
-                  </div>
-                  <div className="pb-4">
-                    <div className="font-bold text-slate-800 text-sm">Konsultasi Kebutuhan</div>
-                    <div className="text-xs text-slate-500 mt-1">Diskusi materi dan tujuan belajar di awal sesi.</div>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-xs">2</div>
-                    <div className="w-0.5 h-full bg-slate-200 my-1"></div>
-                  </div>
-                  <div className="pb-4">
-                    <div className="font-bold text-slate-800 text-sm">Coding Session Intensif</div>
-                    <div className="text-xs text-slate-500 mt-1">Praktik langsung dengan bimbingan terarah.</div>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-xs">3</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-800 text-sm">Review & Feedback</div>
-                    <div className="text-xs text-slate-500 mt-1">Evaluasi hasil dan pemberian saran perbaikan.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
       </div>
