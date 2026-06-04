@@ -1,25 +1,28 @@
-import { useState } from "react";
-import {
-  Calendar,
-  Clock,
-  Star,
-  TrendingUp,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Calendar, Clock, Star, TrendingUp } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const ULASAN = [
+export const ULASAN = [
+  // Page 1
   {
     id: 1,
     subject: "Basis Data",
     learnerName: "Siti Aminah",
-    avatar: "https://i.pravatar.cc/150?img=47",
+    avatar: "https://i.pravatar.cc/150?img=34",
     avatarFallback: "SA",
-    date: "25 Maret 2026",
-    time: "07:00 - 08.40",
+    date: "26 Maret 2026",
+    time: "09:30 - 11:10",
     rating: 5,
     review:
       '"Penjelasan Kak Irkham di mata kuliah Basis Data sangat membantu. Cara menjelaskan query SQL dan relasi antar tabel jadi lebih mudah dipahami, apalagi saat praktik langsung. Jadi lebih ngerti cara mengolah data dengan benar."',
@@ -28,27 +31,103 @@ const ULASAN = [
     id: 2,
     subject: "Algoritma & Struktur Data",
     learnerName: "Ahmad Raja",
-    avatar: "https://i.pravatar.cc/150?img=53",
+    avatar: "https://i.pravatar.cc/150?img=68",
     avatarFallback: "AR",
     date: "25 Maret 2026",
-    time: "07:00 - 08.40",
+    time: "07:00 - 08:40",
     rating: 5,
     review:
       '"Irkham menjelaskan konsep algoritma dengan sangat jelas, terutama saat membahas flow logika dan cara menyelesaikan masalah. Jadi lebih paham langkah-langkahnya, bukan cuma hasil akhirnya."',
   },
   {
     id: 3,
-    subject: "Algoritma & Struktur Data",
+    subject: "Pemrograman Web",
     learnerName: "Andi Wijaya",
-    avatar: "https://i.pravatar.cc/150?img=57",
+    avatar: "https://i.pravatar.cc/150?img=53",
     avatarFallback: "AW",
     date: "18 Maret 2026",
-    time: "15.30 - 17:10",
+    time: "15:30 - 17:10",
     rating: 4,
     review:
       '"Cara mengajarnya enak diikuti, khususnya saat membahas struktur data seperti stack dan queue. Dijelaskan dari dasar sampai contoh kasus, jadi lebih mudah memahami penerapannya."',
   },
+  // Page 2
+  {
+    id: 4,
+    subject: "Algoritma & Struktur Data",
+    learnerName: "Rani Ranti",
+    avatar: "https://i.pravatar.cc/150?img=5",
+    avatarFallback: "RR",
+    date: "15 Maret 2026",
+    time: "07:00 - 08:40",
+    rating: 5,
+    review:
+      '"Materi dijelaskan secara sistematis dari awal hingga akhir. Sangat membantu untuk memahami dasar-dasar algoritma dengan benar."',
+  },
+  {
+    id: 5,
+    subject: "Pemrograman Web",
+    learnerName: "Alfiana Anan",
+    avatar: "https://i.pravatar.cc/150?img=26",
+    avatarFallback: "AA",
+    date: "12 Maret 2026",
+    time: "09:30 - 10:20",
+    rating: 5,
+    review:
+      '"Penjelasannya sangat detail dan mudah dimengerti. Sesi latihan langsung pada proyek membuat konsep lebih cepat dipahami."',
+  },
+  {
+    id: 6,
+    subject: "Algoritma & Struktur Data",
+    learnerName: "Budi Santoso",
+    avatar: "https://i.pravatar.cc/150?img=15",
+    avatarFallback: "BS",
+    date: "10 Maret 2026",
+    time: "14:10 - 15:00",
+    rating: 4,
+    review:
+      '"Sesi algoritma bersama Kak Irkham sangat produktif. Cara penyampaiannya sabar dan tidak terburu-buru, cocok buat yang baru belajar."',
+  },
+  // Page 3
+  {
+    id: 7,
+    subject: "Basis Data",
+    learnerName: "Citra Lestari",
+    avatar: "https://i.pravatar.cc/150?img=49",
+    avatarFallback: "CL",
+    date: "8 Maret 2026",
+    time: "07:00 - 08:40",
+    rating: 5,
+    review:
+      '"Kak Irkham sangat membantu dalam memahami konsep relasi tabel. Contoh-contoh yang diberikan relevan dan langsung bisa diterapkan."',
+  },
+  {
+    id: 8,
+    subject: "Algoritma & Struktur Data",
+    learnerName: "Eka Putri",
+    avatar: "https://i.pravatar.cc/150?img=33",
+    avatarFallback: "EP",
+    date: "5 Maret 2026",
+    time: "12:30 - 13:20",
+    rating: 3,
+    review:
+      '"Penjelasan cukup baik, tapi agak terburu-buru di beberapa bagian. Secara keseluruhan masih sangat membantu untuk persiapan UAS."',
+  },
+  {
+    id: 9,
+    subject: "Basis Data",
+    learnerName: "Farhan Maulana",
+    avatar: "https://i.pravatar.cc/150?img=15",
+    avatarFallback: "FM",
+    date: "2 Maret 2026",
+    time: "09:30 - 10:20",
+    rating: 5,
+    review:
+      '"Sangat puas dengan sesi belajar ini. Materi disampaikan dengan urut dan logis, membuat saya benar-benar paham alur kerja query database."',
+  },
 ];
+
+const ITEMS_PER_PAGE = 3;
 
 const RATING_DIST = [
   { bintang: 5, count: 108 },
@@ -78,9 +157,14 @@ function StarRow({ rating, max = 5 }) {
 
 // ─── Kartu Ulasan ─────────────────────────────────────────────────────────────
 
-function UlasanCard({ item }) {
+function UlasanCard({ item, isHighlighted, cardRef }) {
   return (
-    <div className="py-7 border-b border-slate-100 last:border-0">
+    <div
+      ref={cardRef}
+      className={`py-7 border-b border-slate-100 last:border-0 rounded-xl transition-all duration-500 ${
+        isHighlighted ? "ring-2 ring-[#0d7c6b] bg-[#f0fbf8] px-4 -mx-4" : ""
+      }`}
+    >
       <div className="flex items-start gap-5">
         {/* Avatar */}
         <Avatar className="h-20 w-20 rounded-2xl flex-shrink-0 border border-slate-100">
@@ -98,11 +182,11 @@ function UlasanCard({ item }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-base font-extrabold text-[#0d7c6b]">
-                {item.subject}
-              </h3>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <h3 className="text-base font-extrabold text-[#0a0f44]">
                 {item.learnerName}
+              </h3>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-0.5">
+                {item.subject}
               </p>
               <div className="flex items-center gap-4 mt-1.5 text-xs text-slate-400 font-medium">
                 <span className="flex items-center gap-1">
@@ -138,14 +222,53 @@ const FILTER_TABS = [
 ];
 
 export default function Ulasan() {
+  const [searchParams] = useSearchParams();
+  const learnerParam = searchParams.get("learner");
+
   const [activeTab, setActiveTab] = useState("Semua");
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 3;
+  const [highlightedId, setHighlightedId] = useState(null);
+  const highlightRef = useRef(null);
+
+  // When arriving with ?learner=X, jump to the correct page and highlight
+  useEffect(() => {
+    if (!learnerParam) return;
+    const idx = ULASAN.findIndex(
+      (u) => u.learnerName.toLowerCase() === learnerParam.toLowerCase()
+    );
+    if (idx === -1) return;
+
+    const targetPage = Math.ceil((idx + 1) / ITEMS_PER_PAGE);
+    setActiveTab("Semua");
+    setCurrentPage(targetPage);
+    setHighlightedId(ULASAN[idx].id);
+
+    // Clear highlight after 3 seconds
+    const timer = setTimeout(() => setHighlightedId(null), 3000);
+    return () => clearTimeout(timer);
+  }, [learnerParam]);
+
+  // Scroll to highlighted card once rendered
+  useEffect(() => {
+    if (highlightedId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [highlightedId, currentPage]);
 
   const filtered =
     activeTab === "Semua"
       ? ULASAN
       : ULASAN.filter((u) => u.rating === parseInt(activeTab));
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginatedUlasan = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
 
   return (
     <div className="w-full">
@@ -243,13 +366,20 @@ export default function Ulasan() {
       </div>
 
       <p className="text-xs text-slate-400 mb-1">
-        Menampilkan {TOTAL_ULASAN} ulasan
+        Menampilkan {filtered.length} ulasan
       </p>
 
       {/* ── List Ulasan ── */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-6">
-        {filtered.length > 0 ? (
-          filtered.map((item) => <UlasanCard key={item.id} item={item} />)
+        {paginatedUlasan.length > 0 ? (
+          paginatedUlasan.map((item) => (
+            <UlasanCard
+              key={item.id}
+              item={item}
+              isHighlighted={item.id === highlightedId}
+              cardRef={item.id === highlightedId ? highlightRef : null}
+            />
+          ))
         ) : (
           <p className="text-sm text-slate-400 text-center py-12">
             Belum ada ulasan untuk filter ini.
@@ -258,37 +388,55 @@ export default function Ulasan() {
       </div>
 
       {/* ── Pagination ── */}
-      <div className="flex items-center justify-center gap-2 mt-8">
-        <button
-          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          disabled={currentPage === 1}
-          className="p-2 rounded-full border border-slate-200 text-slate-400 hover:border-[#0d7c6b] hover:text-[#0d7c6b] disabled:opacity-30 transition-colors"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
+      {totalPages > 1 && (
+        <div className="py-4 border-t border-slate-100 mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(currentPage - 1);
+                  }}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
 
-        {[...Array(totalPages)].map((_, i) => (
-          <button
-            key={i + 1}
-            onClick={() => setCurrentPage(i + 1)}
-            className={`w-9 h-9 rounded-full text-sm font-bold transition-colors duration-150 ${
-              currentPage === i + 1
-                ? "bg-[#0a0f44] text-white"
-                : "border border-slate-200 text-slate-500 hover:border-[#0a0f44] hover:text-[#0a0f44]"
-            }`}
-          >
-            {i + 1}
-          </button>
-        ))}
+              {[...Array(totalPages)].map((_, i) => (
+                <PaginationItem key={i + 1}>
+                  <PaginationLink
+                    href="#"
+                    isActive={currentPage === i + 1}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(i + 1);
+                    }}
+                    className={currentPage === i + 1 ? "bg-teal-50 text-teal-600 border-teal-200" : ""}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
 
-        <button
-          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          disabled={currentPage === totalPages}
-          className="p-2 rounded-full border border-slate-200 text-slate-400 hover:border-[#0d7c6b] hover:text-[#0d7c6b] disabled:opacity-30 transition-colors"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(currentPage + 1);
+                  }}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+
+          <div className="mt-4 text-center text-slate-600 font-medium text-sm">
+            Menampilkan <span className="font-bold text-[#1E1B4B]">{paginatedUlasan.length}</span> dari <span className="font-bold text-[#1E1B4B]">{filtered.length}</span> ulasan
+          </div>
+        </div>
+      )}
     </div>
   );
 }

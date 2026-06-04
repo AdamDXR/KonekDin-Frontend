@@ -40,7 +40,7 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
       }
     >
       <Avatar className="h-11 w-11 border-2 border-slate-100">
-        <AvatarImage src="https://i.pravatar.cc/150?img=11" alt="Irkham Wildan" />
+        <AvatarImage src="https://i.pravatar.cc/150?img=15" alt="Irkham Wildan" />
         <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">IW</AvatarFallback>
       </Avatar>
       <div>
@@ -79,7 +79,7 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
       <div className="h-px bg-slate-100 mx-2 mb-3"></div>
       <button
         onClick={() => navigate('/login')}
-        className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full transition-colors"
+        className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 w-full transition-colors"
       >
         <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
         Keluar
@@ -97,7 +97,7 @@ export default function TutorLayout() {
     { name: 'Jadwal Mengajar', href: '/tutor/jadwal-mengajar', icon: CalendarDays },
     { name: 'Riwayat Mengajar', href: '/tutor/riwayat-mengajar', icon: History },
     { name: 'Pengaturan Jadwal', href: '/tutor/pengaturan-jadwal', icon: Sliders },
-    { name: 'Ulasan', href: '/tutor/ulasan', icon: MessageSquare },
+    { name: 'Ulasan & Rating', href: '/tutor/ulasan', icon: MessageSquare },
     { name: 'Notifikasi', href: '/tutor/notifikasi', icon: Bell },
   ]
 

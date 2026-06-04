@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Clock, RotateCcw, Plus, X, Info } from "lucide-react";
+import { Clock, Plus, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -134,23 +134,20 @@ const INITIAL_JADWAL = [
 function StatusBadge({ status }) {
   if (status === "AVAILABLE") {
     return (
-      <span className="inline-flex items-center gap-1.5 bg-[#fff3e0] text-[#f57c00] text-[10px] font-extrabold px-3 py-1.5 rounded-full tracking-wider">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#f57c00]" />
+      <span className="inline-flex items-center justify-center bg-[#fdeed9] text-[#e87714] text-[10px] font-extrabold px-4 py-1.5 rounded-full tracking-wider">
         AVAILABLE
       </span>
     );
   }
   if (status === "BOOKED") {
     return (
-      <span className="inline-flex items-center gap-1.5 bg-[#e0f7f4] text-[#0d7c6b] text-[10px] font-extrabold px-3 py-1.5 rounded-full tracking-wider">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#0d7c6b]" />
+      <span className="inline-flex items-center justify-center bg-[#e5efeb] text-[#0a6d63] text-[10px] font-extrabold px-4 py-1.5 rounded-full tracking-wider">
         BOOKED
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-400 text-[10px] font-extrabold px-3 py-1.5 rounded-full tracking-wider">
-      <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+    <span className="inline-flex items-center justify-center bg-[#e8eaef] text-[#696d76] text-[10px] font-extrabold px-4 py-1.5 rounded-full tracking-wider">
       NON AVAILABLE
     </span>
   );
@@ -370,10 +367,7 @@ export default function PengaturanJadwal() {
     }
   };
 
-  const handleResetFilter = () => {
-    setFilterHari("Senin");
-    setFilterStatus("Semua Status");
-  };
+
 
   const filtered = jadwal.filter((item) => {
     const hariMatch = item.hari === filterHari;
@@ -393,19 +387,13 @@ export default function PengaturanJadwal() {
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="flex items-start justify-between mb-7 gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-extrabold text-[#0a0f44] tracking-tight">
-            Pengaturan Jadwal
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Atur ketersediaan jadwalmu mengajar.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 bg-[#f0fdf9] border border-[#b2ece0] text-[#0d7c6b] text-xs font-semibold px-4 py-2.5 rounded-xl">
-          <RotateCcw className="h-3.5 w-3.5" />
-          Jadwal otomatis reset setelah 24 jam
-        </div>
+      <div className="mb-7">
+        <h1 className="text-2xl font-extrabold text-[#0a0f44] tracking-tight">
+          Pengaturan Jadwal
+        </h1>
+        <p className="text-sm text-slate-400 mt-1">
+          Atur ketersediaan jadwalmu mengajar.
+        </p>
       </div>
 
       {/* Tombol Edit Jadwal */}
@@ -465,15 +453,6 @@ export default function PengaturanJadwal() {
           </div>
         </div>
 
-        <div className="ml-auto mt-5">
-          <button
-            onClick={handleResetFilter}
-            className="flex items-center gap-1.5 text-[#0d7c6b] text-sm font-semibold hover:underline"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Reset Filter
-          </button>
-        </div>
       </div>
 
       {/* Tabel */}
@@ -491,7 +470,7 @@ export default function PengaturanJadwal() {
           <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
             Mata Kuliah
           </span>
-          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
+          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest text-center">
             Status
           </span>
         </div>
@@ -521,7 +500,9 @@ export default function PengaturanJadwal() {
                   <span className="text-slate-300 font-normal">-</span>
                 )}
               </span>
-              <StatusBadge status={item.status} />
+              <div className="flex justify-center">
+                <StatusBadge status={item.status} />
+              </div>
             </div>
           ))
         )}
