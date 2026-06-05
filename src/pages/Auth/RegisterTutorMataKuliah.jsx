@@ -23,8 +23,8 @@ function KonekDinLogo() {
 // ─── Stepper ──────────────────────────────────────────────────────────────────
 const STEPS = [
   { label: "Unggah Dokumen", status: "done" },
-  { label: "Mata Kuliah", status: "active" },
-  { label: "Keahlian", status: "inactive" },
+  { label: "Pilih Mata Kuliah", status: "active" },
+  { label: "Input Keahlian", status: "inactive" },
 ];
 
 function Stepper() {

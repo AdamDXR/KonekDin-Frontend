@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { CheckCircle2, ShieldCheck, FileText, Pencil, Upload } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 function KonekDinLogo() {
@@ -21,46 +22,37 @@ function KonekDinLogo() {
 
 // ─── Stepper ──────────────────────────────────────────────────────────────────
 const STEPS = [
-  { label: "Registrasi Akun", status: "done" },
   { label: "Unggah Dokumen", status: "active" },
-  { label: "Verifikasi", status: "inactive" },
+  { label: "Pilih Mata Kuliah", status: "inactive" },
+  { label: "Input Keahlian", status: "inactive" },
 ];
 
 function Stepper() {
   return (
-    <div className="flex items-center justify-center gap-0 mb-10">
+    <div className="flex items-center justify-center mb-10">
       {STEPS.map((step, idx) => (
         <div key={idx} className="flex items-center">
-          {/* Circle */}
           <div className="flex flex-col items-center">
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all
-                ${step.status === "done" ? "bg-[#0d7c6b] border-[#0d7c6b] text-white" : ""}
-                ${step.status === "active" ? "bg-white border-[#0F1D8C] text-[#0F1D8C] shadow-md shadow-blue-100" : ""}
-                ${step.status === "inactive" ? "bg-white border-slate-200 text-slate-400" : ""}
-              `}
-            >
-              {step.status === "done" ? (
-                <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2.5} />
-              ) : (
-                <span>{idx + 1}</span>
-              )}
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all
+              ${step.status === "done" ? "bg-[#0d7c6b] border-[#0d7c6b] text-white" : ""}
+              ${step.status === "active" ? "bg-white border-[#0F1D8C] text-[#0F1D8C] shadow-md shadow-blue-100" : ""}
+              ${step.status === "inactive" ? "bg-white border-slate-200 text-slate-400" : ""}
+            `}>
+              {step.status === "done" ? <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2.5} /> : <span>{idx + 1}</span>}
             </div>
-            <span
-              className={`text-xs font-semibold mt-2 whitespace-nowrap
-                ${step.status === "active" ? "text-[#0F1D8C]" : "text-slate-400"}
-              `}
+            <p className={`text-[10px] font-bold mt-2 uppercase tracking-wide whitespace-nowrap
+              ${step.status === "active" ? "text-[#0F1D8C]" : "text-slate-400"}`}
+            >
+              STEP {idx + 1}
+            </p>
+            <span className={`text-xs font-semibold whitespace-nowrap
+              ${step.status === "active" ? "text-[#0F1D8C]" : "text-slate-400"}`}
             >
               {step.label}
             </span>
           </div>
-          {/* Connector */}
           {idx < STEPS.length - 1 && (
-            <div
-              className={`w-28 h-0.5 mx-3 mb-5 rounded-full
-                ${step.status === "done" ? "bg-[#0d7c6b]" : "bg-slate-200"}
-              `}
-            />
+            <div className={`w-28 h-0.5 mx-3 mb-7 rounded-full ${step.status === "done" ? "bg-[#0d7c6b]" : "bg-slate-200"}`} />
           )}
         </div>
       ))}
@@ -165,6 +157,9 @@ function DocSection({ title, description, badge, accept, maxLabel, initialFile }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function RegisterTutorDokumen() {
+  const navigate = useNavigate();
+  const [semester, setSemester] = useState("");
+
   return (
     <div className="min-h-screen bg-[#f1f3f8] font-sans">
       {/* Top Header */}
@@ -198,8 +193,41 @@ export default function RegisterTutorDokumen() {
             </div>
           </div>
 
-          {/* Upload Sections */}
+          {/* Form & Upload Sections */}
           <div className="flex flex-col gap-7">
+            {/* Semester Input */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-[#0F1D8C]">Semester Saat Ini</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Pilih semester Anda saat ini.</p>
+                </div>
+                <span className="text-[10px] font-extrabold px-3 py-1 rounded-full tracking-widest uppercase flex-shrink-0 mt-0.5 bg-red-50 text-red-500 border border-red-200">
+                  WAJIB
+                </span>
+              </div>
+              <input 
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={semester}
+                onChange={(e) => {
+                  let val = e.target.value.replace(/\D/g, ""); // Hanya izinkan angka murni
+                  if (val === "" || val === "0") {
+                    setSemester("");
+                  } else {
+                    let num = parseInt(val, 10);
+                    if (num > 16) num = 16;
+                    setSemester(num.toString());
+                  }
+                }}
+                placeholder="Masukkan semester saat ini (1 - 16)"
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 outline-none focus:bg-white focus:border-[#0F1D8C] focus:ring-2 focus:ring-blue-100 transition-all"
+              />
+            </div>
+
+            <div className="h-px bg-slate-100" />
+
             <DocSection
               title="Transkrip Nilai"
               description="Kumpulkan dokumen akademik resmi."
@@ -224,12 +252,18 @@ export default function RegisterTutorDokumen() {
 
           {/* Footer */}
           <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-100">
-            <button className="flex items-center gap-1.5 text-sm font-semibold text-[#0d7c6b] hover:text-[#0a5a4e] transition-colors">
+            <button 
+              onClick={() => navigate('/tutor/profil')}
+              className="flex items-center gap-1.5 text-sm font-semibold text-[#0d7c6b] hover:text-[#0a5a4e] transition-colors"
+            >
               <span>←</span>
               Kembali ke Informasi Awal
             </button>
-            <button className="bg-[#0F1D8C] hover:bg-[#0b166e] text-white font-bold px-8 py-3 rounded-full text-sm shadow-md hover:shadow-lg transition-all duration-150">
-              Lanjutkan Verifikasi
+            <button 
+              onClick={() => navigate('/register/tutor/mata-kuliah')}
+              className="bg-[#0F1D8C] hover:bg-[#0b166e] text-white font-bold px-8 py-3 rounded-full text-sm shadow-md hover:shadow-lg transition-all duration-150"
+            >
+              Langkah Selanjutnya
             </button>
           </div>
         </div>

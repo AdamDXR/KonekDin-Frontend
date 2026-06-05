@@ -32,24 +32,7 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
     <div className="mx-5 h-px bg-slate-100 mb-3"></div>
 
     {/* User Profile — clickable → Profil Learner */}
-    <NavLink
-      to="/learner/profil-learner"
-      onClick={() => setIsMobileMenuOpen(false)}
-      className={({ isActive }) =>
-        `flex items-center gap-3 px-5 pb-4 rounded-xl transition-all ${
-          isActive ? 'opacity-100' : 'opacity-90 hover:opacity-100'
-        }`
-      }
-    >
-      <Avatar className="h-11 w-11 border-2 border-slate-100">
-        <AvatarImage src="https://i.pravatar.cc/150?img=68" alt="Budi Santoso" />
-        <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">BS</AvatarFallback>
-      </Avatar>
-      <div>
-        <p className="text-sm font-bold text-[#0a0f44] leading-tight">Budi Santoso</p>
-        <p className="text-xs text-slate-400">Informatika '22</p>
-      </div>
-    </NavLink>
+
 
     {/* Navigation */}
     <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
@@ -59,10 +42,9 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
           to={item.href}
           onClick={() => setIsMobileMenuOpen(false)}
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all duration-150 ${
-              isActive
-                ? 'bg-[#e8f5f2] text-[#0d7c6b] font-semibold'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium'
+            `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all duration-150 ${isActive
+              ? 'bg-[#e8f5f2] text-[#0d7c6b] font-semibold'
+              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-medium'
             }`
           }
         >
@@ -76,17 +58,34 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
       ))}
     </nav>
 
-    {/* Bottom Actions */}
-    <div className="px-3 pb-5 space-y-0.5">
+    <NavLink
+      to="/learner/profil-learner"
+      onClick={() => setIsMobileMenuOpen(false)}
+      className={({ isActive }) =>
+        `flex items-center gap-3 px-5 pb-4 rounded-xl transition-all ${isActive ? 'opacity-100' : 'opacity-90 hover:opacity-100'
+        }`
+      }
+    >
+      <div className='flex space between justify-center flex-row'>
+      <Avatar className="h-11 w-11 border-2 border-slate-100">
+        <AvatarImage src="https://i.pravatar.cc/150?img=68" alt="Budi Santoso" />
+        <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">BS</AvatarFallback>
+      </Avatar>
+        <p className="text-sm font-bold text-[#0a0f44] leading-tight">Budi Santoso</p>
+        <p className="text-xs text-slate-400">Informatika '22</p>
+            <div className="px-3 pb-5 space-y-0.5">
       <div className="h-px bg-slate-100 mx-2 mb-3"></div>
       <button
         onClick={() => navigate('/login')}
         className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full transition-colors"
       >
         <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
-        Keluar
+
       </button>
     </div>
+      </div>
+    </NavLink>
+
   </div>
 )
 
