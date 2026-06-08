@@ -30,19 +30,19 @@ import {
 } from '@/components/ui/pagination'
 
 // Mock Data Tutor
-const mockTutors = [
-  { id: 1, name: 'Irkham Wildan', university: "Informatika '21", courses: ['Basis Data', 'Struktur Data'], rating: 4.9, isTopTutor: true, availableTimes: ['07.00 - 07.50', '12.30 - 13.20', '15.30 - 16.20', '17.10 - 18.00'], availableDays: ['Senin', 'Rabu', 'Jumat'], price: 50000, image: 'https://i.pravatar.cc/150?img=11' },
-  { id: 2, name: 'Mery Zahra', university: "Informatika '22", courses: ['UI/UX Design', 'Interaksi Manusia & Komputer'], rating: 4.8, isTopTutor: false, availableTimes: ['09.30 - 10.20', '14.10 - 15.00'], availableDays: ['Selasa', 'Kamis'], price: 60000, image: 'https://i.pravatar.cc/150?img=5' },
-  { id: 3, name: 'Arhan Pradana', university: "Informatika '21", courses: ['Fisika Dasar', 'Pemrograman C++'], rating: 5.0, isTopTutor: true, availableTimes: ['08.40 - 09.30', '10.20 - 11.10', '16.20 - 17.10'], availableDays: ['Senin', 'Selasa', 'Rabu'], price: 75000, image: 'https://i.pravatar.cc/150?img=12' },
-  { id: 4, name: 'Siti Aminah', university: "Informatika '23", courses: ['Fisika Dasar', 'Kalkulus'], rating: 4.7, isTopTutor: false, availableTimes: ['13.20 - 14.10', '15.30 - 16.20'], availableDays: ['Kamis', 'Jumat'], price: 45000, image: 'https://i.pravatar.cc/150?img=9' },
-  { id: 5, name: 'Budi Santoso', university: "Informatika '22", courses: ['Pemrograman Web', 'Jaringan Komputer'], rating: 4.6, isTopTutor: false, availableTimes: ['10.20 - 11.10', '14.10 - 15.00'], availableDays: ['Senin', 'Kamis'], price: 40000, image: 'https://i.pravatar.cc/150?img=15' },
-  { id: 6, name: 'Rafi Ardan', university: "Informatika '21", courses: ['Pengembangan Startup Digital', 'Manajemen Proyek TI'], rating: 4.9, isTopTutor: true, availableTimes: ['07.00 - 07.50', '11.10 - 12.00', '15.30 - 16.20'], availableDays: ['Selasa', 'Jumat', 'Sabtu'], price: 55000, image: 'https://i.pravatar.cc/150?img=33' },
-  { id: 7, name: 'Dewi Lestari', university: "Informatika '24", courses: ['Kalkulus Lanjut', 'Aljabar Linear'], rating: 4.8, isTopTutor: false, availableTimes: ['08.40 - 09.30', '12.30 - 13.20'], availableDays: ['Rabu', 'Sabtu'], price: 50000, image: 'https://i.pravatar.cc/150?img=42' },
-  { id: 8, name: 'Andi Wijaya', university: "Informatika '22", courses: ['Struktur Data', 'Kecerdasan Buatan'], rating: 4.5, isTopTutor: false, availableTimes: ['09.30 - 10.20', '16.20 - 17.10'], availableDays: ['Senin', 'Selasa'], price: 45000, image: 'https://i.pravatar.cc/150?img=50' },
-  { id: 9, name: 'Nina Wati', university: "Informatika '23", courses: ['Statistika Dasar', 'Probabilitas'], rating: 4.9, isTopTutor: true, availableTimes: ['07.50 - 08.40', '13.20 - 14.10', '17.10 - 18.00'], availableDays: ['Rabu', 'Kamis', 'Minggu'], price: 60000, image: 'https://i.pravatar.cc/150?img=21' },
-  { id: 10, name: 'Dimas Aditya', university: "Informatika '21", courses: ['Arsitektur Komputer', 'Sistem Digital'], rating: 4.7, isTopTutor: false, availableTimes: ['10.20 - 11.10', '14.10 - 15.00'], availableDays: ['Senin', 'Jumat'], price: 55000, image: 'https://i.pravatar.cc/150?img=13' },
-  { id: 11, name: 'Ayu Kartika', university: "Informatika '24", courses: ['Dasar Kewirausahaan', 'Ekonomi Digital'], rating: 4.8, isTopTutor: false, availableTimes: ['11.10 - 12.00', '13.20 - 14.10'], availableDays: ['Selasa', 'Rabu'], price: 50000, image: 'https://i.pravatar.cc/150?img=28' },
-  { id: 12, name: 'Fajar Nugroho', university: "Informatika '22", courses: ['Keamanan Siber', 'Kriptografi'], rating: 4.9, isTopTutor: true, availableTimes: ['08.40 - 09.30', '12.30 - 13.20', '16.20 - 17.10'], availableDays: ['Jumat', 'Sabtu', 'Minggu'], price: 65000, image: 'https://i.pravatar.cc/150?img=59' },
+export const mockTutors = [
+  { id: 1, name: 'Irkham Wildan', university: "Informatika '21", courses: ['Basis Data', 'Algoritma dan Struktur Data'], rating: 4.9, isTopTutor: true, schedule: [{ day: 'Senin', times: ['07.00 - 07.50', '12.30 - 13.20'] }, { day: 'Rabu', times: ['15.30 - 16.20'] }, { day: 'Jumat', times: ['17.10 - 18.00'] }], price: 50000, image: 'https://i.pravatar.cc/150?img=11' },
+  { id: 2, name: 'Mery Zahra', university: "Informatika '22", courses: ['Pemrograman Berbasis Web', 'Interaksi Manusia dan Komputer'], rating: 4.8, isTopTutor: false, schedule: [{ day: 'Selasa', times: ['09.30 - 10.20'] }, { day: 'Kamis', times: ['14.10 - 15.00'] }], price: 60000, image: 'https://i.pravatar.cc/150?img=5' },
+  { id: 3, name: 'Arhan Pradana', university: "Informatika '21", courses: ['Fisika', 'Dasar Pemrograman'], rating: 5.0, isTopTutor: true, schedule: [{ day: 'Senin', times: ['08.40 - 09.30'] }, { day: 'Selasa', times: ['10.20 - 11.10'] }, { day: 'Rabu', times: ['16.20 - 17.10'] }], price: 75000, image: 'https://i.pravatar.cc/150?img=12' },
+  { id: 4, name: 'Siti Aminah', university: "Informatika '23", courses: ['Fisika', 'Kalkulus'], rating: 4.7, isTopTutor: false, schedule: [{ day: 'Kamis', times: ['13.20 - 14.10'] }, { day: 'Jumat', times: ['15.30 - 16.20'] }], price: 45000, image: 'https://i.pravatar.cc/150?img=9' },
+  { id: 5, name: 'Budi Santoso', university: "Informatika '22", courses: ['Pemrograman Berbasis Web', 'Jaringan Komputer'], rating: 4.6, isTopTutor: false, schedule: [{ day: 'Senin', times: ['10.20 - 11.10'] }, { day: 'Kamis', times: ['14.10 - 15.00'] }], price: 40000, image: 'https://i.pravatar.cc/150?img=15' },
+  { id: 6, name: 'Rafi Ardan', university: "Informatika '21", courses: ['Pengembangan Startup Digital', 'Manajemen Proyek Teknologi Informasi'], rating: 4.9, isTopTutor: true, schedule: [{ day: 'Selasa', times: ['07.00 - 07.50'] }, { day: 'Jumat', times: ['11.10 - 12.00'] }, { day: 'Sabtu', times: ['15.30 - 16.20'] }], price: 55000, image: 'https://i.pravatar.cc/150?img=33' },
+  { id: 7, name: 'Dewi Lestari', university: "Informatika '24", courses: ['Komputasi Numerik', 'Matriks dan Ruang Vektor'], rating: 4.8, isTopTutor: false, schedule: [{ day: 'Rabu', times: ['08.40 - 09.30'] }, { day: 'Sabtu', times: ['12.30 - 13.20'] }], price: 50000, image: 'https://i.pravatar.cc/150?img=42' },
+  { id: 8, name: 'Andi Wijaya', university: "Informatika '22", courses: ['Algoritma dan Struktur Data', 'Kecerdasan Buatan (Artificial Intelligence)'], rating: 4.5, isTopTutor: false, schedule: [{ day: 'Senin', times: ['09.30 - 10.20'] }, { day: 'Selasa', times: ['16.20 - 17.10'] }], price: 45000, image: 'https://i.pravatar.cc/150?img=50' },
+  { id: 9, name: 'Nina Wati', university: "Informatika '23", courses: ['Probabilitas dan Statistik'], rating: 4.9, isTopTutor: true, schedule: [{ day: 'Rabu', times: ['07.50 - 08.40'] }, { day: 'Kamis', times: ['13.20 - 14.10'] }, { day: 'Minggu', times: ['17.10 - 18.00'] }], price: 60000, image: 'https://i.pravatar.cc/150?img=21' },
+  { id: 10, name: 'Dimas Aditya', university: "Informatika '21", courses: ['Organisasi dan Arsitektur Komputer', 'Rangkaian Logika Digital'], rating: 4.7, isTopTutor: false, schedule: [{ day: 'Senin', times: ['10.20 - 11.10'] }, { day: 'Jumat', times: ['14.10 - 15.00'] }], price: 55000, image: 'https://i.pravatar.cc/150?img=13' },
+  { id: 11, name: 'Ayu Kartika', university: "Informatika '24", courses: ['Dasar Kewirausahaan', 'Technopreneurship'], rating: 4.8, isTopTutor: false, schedule: [{ day: 'Selasa', times: ['11.10 - 12.00'] }, { day: 'Rabu', times: ['13.20 - 14.10'] }], price: 50000, image: 'https://i.pravatar.cc/150?img=28' },
+  { id: 12, name: 'Fajar Nugroho', university: "Informatika '22", courses: ['Keamanan Sistem dan Siber', 'Kriptografi'], rating: 4.9, isTopTutor: true, schedule: [{ day: 'Jumat', times: ['08.40 - 09.30'] }, { day: 'Sabtu', times: ['12.30 - 13.20'] }, { day: 'Minggu', times: ['16.20 - 17.10'] }], price: 65000, image: 'https://i.pravatar.cc/150?img=59' },
 ]
 
 const ITEMS_PER_PAGE = 9
@@ -68,9 +68,8 @@ export default function CariTutor() {
       
       const matchCourse = filterCourse === 'semua' || tutor.courses.includes(filterCourse)
       
-      const matchDay = filterDay === 'semua' || tutor.availableDays.includes(filterDay)
-
-      const matchTime = filterTime === 'semua' || tutor.availableTimes.includes(filterTime)
+      const matchDay = filterDay === 'semua' || tutor.schedule.some(s => s.day === filterDay)
+      const matchTime = filterTime === 'semua' || tutor.schedule.some(s => s.times.includes(filterTime))
 
       return matchSearch && matchCourse && matchDay && matchTime
     })
@@ -153,8 +152,8 @@ export default function CariTutor() {
                   <SelectContent>
                     <SelectItem value="semua">Semua Mata Kuliah</SelectItem>
                     <SelectItem value="Basis Data">Basis Data</SelectItem>
-                    <SelectItem value="Algoritma">Algoritma</SelectItem>
-                    <SelectItem value="Pemrograman Web">Pemrograman Web</SelectItem>
+                    <SelectItem value="Algoritma dan Struktur Data">Algoritma dan Struktur Data</SelectItem>
+                    <SelectItem value="Pemrograman Berbasis Web">Pemrograman Berbasis Web</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -264,35 +263,34 @@ export default function CariTutor() {
                   ))}
                 </div>
 
-                {/* Hari & Jam Tersedia */}
+                {/* Jadwal Tersedia */}
                 <div className="mb-6">
-                  <div className="mb-4">
-                    <p className="text-[11px] font-semibold text-[#767683] mb-2 tracking-wider">HARI TERSEDIA</p>
-                    <div className="flex flex-wrap gap-2">
-                      {tutor.availableDays.map((day, index) => (
-                        <div key={index} className="bg-emerald-50 text-emerald-700 font-semibold text-[11px] px-3 py-1 rounded-md">
-                          {day}
+                  <p className="text-[11px] font-semibold text-[#767683] mb-3 tracking-wider">
+                    JADWAL TERSEDIA
+                  </p>
+                  <div className="space-y-2.5">
+                    {tutor.schedule.slice(0, 2).map((slot, index) => (
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+                        <span className="bg-[#EAF0E4] text-[#4A5D23] font-bold text-[10px] px-2.5 py-1 rounded-lg w-fit shrink-0 uppercase tracking-wide">
+                          {slot.day}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {slot.times.map((time, tIdx) => (
+                            <span key={tIdx} className="bg-white border border-slate-200 text-slate-600 font-semibold text-[10px] px-2 py-1 rounded-md shadow-sm">
+                              {time}
+                            </span>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-semibold text-[#767683] mb-2 tracking-wider">JAM TERSEDIA</p>
-                    <div className="flex flex-wrap gap-2">
-                      {tutor.availableTimes.slice(0, 3).map((time, index) => (
-                        <div key={index} className="bg-[#E6E8EA] text-[#454652] font-semibold text-[11px] px-3 py-1 rounded-md">
-                          {time}
-                        </div>
-                      ))}
-                      {tutor.availableTimes.length > 3 && (
-                        <button 
-                          onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}
-                          className="bg-blue-50 text-blue-600 font-semibold text-[11px] px-3 py-1 rounded-md hover:bg-blue-100 transition-colors cursor-pointer"
-                        >
-                          +{tutor.availableTimes.length - 3} Lainnya
-                        </button>
-                      )}
-                    </div>
+                      </div>
+                    ))}
+                    {tutor.schedule.length > 2 && (
+                      <button 
+                        onClick={() => navigate(`/learner/profil-tutor/${tutor.id}#jadwal-ketersediaan`)}
+                        className="w-full mt-2 text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 py-2 rounded-lg transition-colors border border-transparent hover:border-blue-100 text-center"
+                      >
+                        Lihat {tutor.schedule.length - 2} hari lainnya
+                      </button>
+                    )}
                   </div>
                 </div>
 

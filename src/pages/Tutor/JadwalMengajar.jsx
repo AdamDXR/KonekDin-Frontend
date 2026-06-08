@@ -26,11 +26,11 @@ export const SESSIONS = [
   {
     id: 1,
     learnerName: 'Dimas Pratama',
-    subject: 'Pemrograman Web',
+    subject: 'Pemrograman Berbasis Web',
     subjectType: 'code',
     schedule: 'Senin, 14 Okt 2026',
     time: '07:00 - 09:30 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=60',
     avatarFallback: 'DP',
     whatsappNumber: '6281234567890',
@@ -38,11 +38,11 @@ export const SESSIONS = [
   {
     id: 2,
     learnerName: 'Mas Adam',
-    subject: 'Algoritma & Struktur Data',
+    subject: 'Algoritma dan Struktur Data',
     subjectType: 'code',
     schedule: 'Senin, 14 Okt 2026',
     time: '12:30 - 14:10 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=11',
     avatarFallback: 'MA',
     whatsappNumber: '6289876543210',
@@ -50,11 +50,11 @@ export const SESSIONS = [
   {
     id: 3,
     learnerName: 'Aisyah Ratuliu',
-    subject: 'Pemrograman Web',
+    subject: 'Pemrograman Berbasis Web',
     subjectType: 'book',
     schedule: 'Kamis, 17 Okt 2026',
     time: '07:00 - 09:30 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=47',
     avatarFallback: 'AR',
     whatsappNumber: '6285551234567',
@@ -62,11 +62,11 @@ export const SESSIONS = [
   {
     id: 4,
     learnerName: 'Maia Amellia',
-    subject: 'Pemrograman Web',
+    subject: 'Pemrograman Berbasis Web',
     subjectType: 'book',
     schedule: 'Kamis, 19 Okt 2026',
     time: '07:00 - 09:30 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=26',
     avatarFallback: 'MA',
     whatsappNumber: '628111222333',
@@ -78,7 +78,7 @@ export const SESSIONS = [
     subjectType: 'book',
     schedule: 'Kamis, 22 Okt 2026',
     time: '09:30 - 10:20 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=68',
     avatarFallback: 'JK',
     whatsappNumber: '628999888777',
@@ -88,11 +88,11 @@ export const SESSIONS = [
   {
     id: 6,
     learnerName: 'Rina Sari',
-    subject: 'Pemrograman Web',
+    subject: 'Pemrograman Berbasis Web',
     subjectType: 'book',
     schedule: 'Jumat, 23 Okt 2026',
     time: '08:00 - 10:30 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=45',
     avatarFallback: 'RS',
     whatsappNumber: '6281234567891',
@@ -100,11 +100,11 @@ export const SESSIONS = [
   {
     id: 7,
     learnerName: 'Budi Santoso',
-    subject: 'Algoritma & Struktur Data',
+    subject: 'Algoritma dan Struktur Data',
     subjectType: 'code',
     schedule: 'Senin, 26 Okt 2026',
     time: '13:00 - 15:00 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=52',
     avatarFallback: 'BS',
     whatsappNumber: '6289876543212',
@@ -116,7 +116,7 @@ export const SESSIONS = [
     subjectType: 'book',
     schedule: 'Selasa, 27 Okt 2026',
     time: '09:30 - 11:30 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=49',
     avatarFallback: 'CL',
     whatsappNumber: '6285551234563',
@@ -124,11 +124,11 @@ export const SESSIONS = [
   {
     id: 9,
     learnerName: 'Dedi Kurniawan',
-    subject: 'Pemrograman Web',
+    subject: 'Pemrograman Berbasis Web',
     subjectType: 'code',
     schedule: 'Kamis, 29 Okt 2026',
     time: '07:00 - 09:30 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=51',
     avatarFallback: 'DK',
     whatsappNumber: '628111222334',
@@ -136,11 +136,11 @@ export const SESSIONS = [
   {
     id: 10,
     learnerName: 'Eka Putri',
-    subject: 'Algoritma & Struktur Data',
+    subject: 'Algoritma dan Struktur Data',
     subjectType: 'code',
     schedule: 'Jumat, 30 Okt 2026',
     time: '13:30 - 15:10 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=33',
     avatarFallback: 'EP',
     whatsappNumber: '628999888775',
@@ -154,7 +154,7 @@ export const SESSIONS = [
     subjectType: 'book',
     schedule: 'Senin, 02 Nov 2026',
     time: '09:30 - 11:30 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=15',
     avatarFallback: 'FM',
     whatsappNumber: '6281234567893',
@@ -162,11 +162,11 @@ export const SESSIONS = [
   {
     id: 12,
     learnerName: 'Gita Rahayu',
-    subject: 'Pemrograman Web',
+    subject: 'Pemrograman Berbasis Web',
     subjectType: 'code',
     schedule: 'Rabu, 04 Nov 2026',
     time: '07:00 - 09:30 WIB',
-    location: 'via WhatsApp',
+    location: 'Menyesuaikan',
     avatarUrl: 'https://i.pravatar.cc/150?img=28',
     avatarFallback: 'GR',
     whatsappNumber: '6289876543214',
@@ -314,13 +314,13 @@ export default function JadwalMengajar() {
   }
 
   return (
-    <div className="w-full">
+    <div className="flex flex-col min-h-full pb-10">
       {/* Header */}
-      <div className="mb-7">
-        <h1 className="text-2xl font-extrabold text-[#0a0f44] tracking-tight">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
           Jadwal Mengajar
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-slate-500">
           Yuk siapkan materi dan pastikan semuanya sudah siap.
         </p>
       </div>

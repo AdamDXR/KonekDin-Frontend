@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { mockTutors } from '@/pages/Learner/CariTutor';
 import { 
   CheckCircle, 
   Clock, 
@@ -159,7 +160,7 @@ export default function LearnerDashboard() {
                 </div>
                 
                 <Button 
-                  onClick={() => navigate('/learner/jadwal-belajar')}
+                  onClick={() => navigate('/learner/jadwal-belajar?tutor=Irkham Wildan')}
                   className="w-full sm:w-auto bg-[#000666] hover:bg-blue-900 text-white rounded-xl h-12 px-6 font-bold"
                 >
                   Rincian Sesi
@@ -222,63 +223,30 @@ export default function LearnerDashboard() {
 
             <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-6 space-y-5">
               
-              {/* Tutor 1 */}
-              <div className="flex items-center justify-between group cursor-pointer" onClick={() => navigate('/learner/profil-tutor/1')}>
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-shrink-0">
-                    <img src="https://i.pravatar.cc/150?img=47" alt="Tutor" className="w-24 h-24 rounded-xl object-cover border border-slate-100 group-hover:ring-2 ring-teal-500 ring-offset-2 transition-all" />
-                    <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
-                      <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> 4.9
+              {mockTutors.filter(t => t.isTopTutor).slice(0, 3).map((tutor, index, arr) => (
+                <div key={tutor.id}>
+                  <div className="flex items-center justify-between group cursor-pointer" onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}>
+                    <div className="flex items-center gap-4">
+                      <div className="relative flex-shrink-0">
+                        <img src={tutor.image} alt={tutor.name} className="w-24 h-24 rounded-xl object-cover border border-slate-100 group-hover:ring-2 ring-teal-500 ring-offset-2 transition-all" />
+                        <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
+                          <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> {tutor.rating}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-lg mb-0.5 group-hover:text-teal-600 transition-colors">{tutor.name}</h3>
+                        <div className="text-md text-slate-500 font-medium">{tutor.courses[0]}</div>
+                        <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">({120 - index * 15} Ulasan)</div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-lg mb-0.5 group-hover:text-teal-600 transition-colors">Mery Zahra</h3>
-                    <div className="text-md text-slate-500 font-medium">UI/UX Design</div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">(120 Ulasan)</div>
-                  </div>
+
+                  {index < arr.length - 1 && (
+                    <div className="h-px bg-slate-100 w-full mt-5"></div>
+                  )}
                 </div>
-              </div>
-
-              <div className="h-px bg-slate-100 w-full"></div>
-
-              {/* Tutor 2 */}
-              <div className="flex items-center justify-between group cursor-pointer" onClick={() => navigate('/learner/profil-tutor/2')}>
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-shrink-0">
-                    <img src="https://i.pravatar.cc/150?img=15" alt="Tutor" className="w-24 h-24 rounded-xl object-cover border border-slate-100 group-hover:ring-2 ring-teal-500 ring-offset-2 transition-all" />
-                    <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
-                      <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> 4.8
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-lg mb-0.5 group-hover:text-teal-600 transition-colors">Arhan Pradana</h3>
-                    <div className="text-md text-slate-500 font-medium">Fisika Dasar</div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">(98 Ulasan)</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="h-px bg-slate-100 w-full"></div>
-
-              {/* Tutor 3 */}
-              <div className="flex items-center justify-between group cursor-pointer" onClick={() => navigate('/learner/profil-tutor/3')}>
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-shrink-0">
-                    <img src="https://i.pravatar.cc/150?img=33" alt="Tutor" className="w-24 h-24 rounded-xl object-cover border border-slate-100 group-hover:ring-2 ring-teal-500 ring-offset-2 transition-all" />
-                    <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
-                      <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> 4.7
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-lg mb-0.5 group-hover:text-teal-600 transition-colors">Rafi Ardan</h3>
-                    <div className="text-md text-slate-500 font-medium">Pengembangan Startup Digital</div>
-                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">(85 Ulasan)</div>
-                  </div>
-                </div>
-              </div>
+              ))}
 
             </div>
 

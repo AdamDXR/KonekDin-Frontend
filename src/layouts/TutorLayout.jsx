@@ -29,26 +29,6 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
     {/* Separator */}
     <div className="mx-5 h-px bg-slate-100 mb-3"></div>
 
-    {/* User Profile — clickable → Profil Tutor */}
-    <NavLink
-      to="/tutor/profil"
-      onClick={() => setIsMobileMenuOpen(false)}
-      className={({ isActive }) =>
-        `flex items-center gap-3 px-5 pb-4 rounded-xl transition-all ${
-          isActive ? 'opacity-100' : 'opacity-90 hover:opacity-100'
-        }`
-      }
-    >
-      <Avatar className="h-11 w-11 border-2 border-slate-100">
-        <AvatarImage src="https://i.pravatar.cc/150?img=15" alt="Irkham Wildan" />
-        <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">IW</AvatarFallback>
-      </Avatar>
-      <div>
-        <p className="text-sm font-bold text-[#0a0f44] leading-tight">Irkham Wildan</p>
-        <p className="text-xs text-slate-400">Informatika '21</p>
-      </div>
-    </NavLink>
-
     {/* Navigation */}
     <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
       {navigation.map((item) => (
@@ -74,16 +54,38 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
       ))}
     </nav>
 
-    {/* Bottom Actions */}
-    <div className="px-3 pb-5 space-y-0.5">
-      <div className="h-px bg-slate-100 mx-2 mb-3"></div>
-      <button
-        onClick={() => navigate('/login')}
-        className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 w-full transition-colors"
-      >
-        <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
-        Keluar
-      </button>
+    <div className="px-5 pb-5">
+      <div className="flex items-center justify-between">
+        <NavLink
+          to="/tutor/profil"
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <Avatar className="h-11 w-11 border-2 border-slate-100 flex-shrink-0">
+            <AvatarImage src="https://i.pravatar.cc/150?img=15" alt="Irkham Wildan" />
+            <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">IW</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <p className="text-sm font-bold text-[#0a0f44] leading-tight">Irkham Wildan</p>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Informatika {
+                (() => {
+                  const userEmail = "111202112345@mhs.dinus.ac.id"; // Contoh email
+                  const match = userEmail.match(/^\d{3}(\d{4})/);
+                  return match ? `'${match[1].slice(-2)}` : "";
+                })()
+              }
+            </p>
+          </div>
+        </NavLink>
+        <button
+          onClick={() => navigate('/login')}
+          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors ml-2 flex-shrink-0"
+          title="Keluar"
+        >
+          <LogOut className="h-5 w-5" strokeWidth={2} />
+        </button>
+      </div>
     </div>
   </div>
 )

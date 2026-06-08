@@ -385,13 +385,13 @@ export default function PengaturanJadwal() {
     "bg-white border border-slate-200 text-[#0a0f44] text-sm font-semibold rounded-xl px-4 py-2.5 appearance-none outline-none cursor-pointer pr-8";
 
   return (
-    <div className="w-full">
+    <div className="flex flex-col min-h-full pb-10">
       {/* Header */}
-      <div className="mb-7">
-        <h1 className="text-2xl font-extrabold text-[#0a0f44] tracking-tight">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
           Pengaturan Jadwal
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-slate-500">
           Atur ketersediaan jadwalmu mengajar.
         </p>
       </div>
@@ -399,7 +399,7 @@ export default function PengaturanJadwal() {
       {/* Tombol Edit Jadwal */}
       <Button
         onClick={() => setShowModal(true)}
-        className="bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-6 py-3 h-auto rounded-2xl text-sm gap-2 flex items-center mb-7"
+        className="w-fit bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-6 py-3 h-auto rounded-2xl text-sm gap-2 flex items-center mb-7"
       >
         <Plus className="h-4 w-4" />
         Edit Jadwal

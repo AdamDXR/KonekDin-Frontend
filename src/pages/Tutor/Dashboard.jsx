@@ -41,22 +41,12 @@ export default function TutorDashboard() {
           <h1 className="text-2xl md:text-[32px] font-extrabold text-white tracking-tight leading-tight">
             Selamat Datang Kembali,
             <br />
-            <span className="text-[#05eb8a]">Irkham Wildan</span>!
+            <span className="text-[#05eb8a]"> Irkham Wildan</span>!
           </h1>
           <p className="text-white/80 text-sm mt-4 leading-relaxed font-medium">
             Dedikasi Anda dalam mengajar telah membantu 12 mahasiswa mencapai
             target akademik mereka bulan ini. Teruslah menginspirasi!
           </p>
-        </div>
-
-        {/* Edit Jadwal Button */}
-        <div className="relative z-10 flex-shrink-0">
-          <Link
-            to="/tutor/pengaturan-jadwal"
-            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-[#0a0f44] font-bold px-6 py-3 rounded-full text-sm shadow-md transition-all duration-150"
-          >
-            + Edit Jadwal
-          </Link>
         </div>
       </div>
 
@@ -167,31 +157,6 @@ export default function TutorDashboard() {
                   </button>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Edit Tarif Mengajar Card */}
-          <div className="bg-[#f0fbf9] border-l-4 border-[#0d7c6b] rounded-2xl p-6 shadow-sm flex flex-col gap-4">
-            <div className="flex items-start gap-4">
-              <div className="p-2.5 bg-[#e8f5f2] text-[#0d7c6b] rounded-xl flex-shrink-0">
-                <Banknote className="h-5 w-5" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-bold text-[#0d7c6b] flex items-center gap-2">
-                  Edit Tarif Mengajar
-                </h3>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Perbarui informasi tarif mengajar kapan saja. Pastikan tarif yang digunakan selalu akurat dan terkini.
-                </p>
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <Link
-                to="/tutor/profil"
-                className="text-xs font-bold text-[#0d7c6b] tracking-wider hover:underline"
-              >
-                EDIT TARIF
-              </Link>
             </div>
           </div>
         </div>

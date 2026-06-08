@@ -19,7 +19,7 @@ const riwayatList = [
     tutorNama: 'Arhan Pradana',
     tutorFoto: 'https://i.pravatar.cc/150?img=11',
     tutorRating: 4.9,
-    mataKuliah: 'Pemrograman Web',
+    mataKuliah: 'Pemrograman Berbasis Web',
     tanggal: '1 April 2026',
     jam: '09:30 - 12:00',
     ratingUser: 4,

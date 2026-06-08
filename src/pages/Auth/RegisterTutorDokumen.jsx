@@ -1,21 +1,12 @@
 import { useState, useRef } from "react";
-import { CheckCircle2, ShieldCheck, FileText, Pencil, Upload } from "lucide-react";
+import { CheckCircle2, ShieldCheck, FileText, Pencil, Upload, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 function KonekDinLogo() {
   return (
-    <div className="flex items-center gap-2">
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="36" height="36" rx="8" fill="#0F1D8C" fillOpacity="0.08" />
-        <path d="M8 18C8 12.477 12.477 8 18 8s10 4.477 10 10-4.477 10-10 10S8 23.523 8 18Z" fill="#0F1D8C" fillOpacity="0.15" />
-        <path d="M13 13l5 5-5 5M18 13h5v5" stroke="#0F1D8C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M18 18l5 5" stroke="#0d7c6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <span className="text-xl font-extrabold tracking-tight">
-        <span className="text-[#0F1D8C]">Konek</span>
-        <span className="text-[#0d7c6b]">Din</span>
-      </span>
+    <div className="flex items-center">
+      <img src="/images/logo_konekdin.png" alt="KonekDin" className="h-8 w-auto object-contain" />
     </div>
   );
 }
@@ -61,15 +52,32 @@ function Stepper() {
 }
 
 // ─── Upload Zone ──────────────────────────────────────────────────────────────
-function UploadZone({ onFile }) {
+function UploadZone({ onFile, accept = ".pdf", formatText = "Format PDF (Maks. 5MB)", onError }) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef(null);
+
+  const validateFile = (f) => {
+    if (!f) return;
+    
+    if (onError) onError("");
+
+    if (accept.includes(".pdf") && f.type !== "application/pdf" && !f.name.toLowerCase().endsWith(".pdf")) {
+      if (onError) onError("File harus berformat PDF.");
+      return;
+    }
+    
+    if (accept.includes(".jpg") && !f.type.startsWith("image/")) {
+      if (onError) onError("File harus berformat gambar (JPG/PNG).");
+      return;
+    }
+    
+    onFile(f);
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setDragging(false);
-    const f = e.dataTransfer.files[0];
-    if (f) onFile(f);
+    validateFile(e.dataTransfer.files[0]);
   };
 
   return (
@@ -86,13 +94,13 @@ function UploadZone({ onFile }) {
         <Upload className="w-5 h-5 text-[#0F1D8C]" strokeWidth={1.8} />
       </div>
       <p className="text-sm font-semibold text-slate-600">Klik untuk unggah atau seret file ke sini</p>
-      <p className="text-xs text-slate-400">Format PDF (Maks. 5MB)</p>
+      <p className="text-xs text-slate-400">{formatText}</p>
       <input
         ref={inputRef}
         type="file"
-        accept=".pdf"
+        accept={accept}
         className="hidden"
-        onChange={(e) => { if (e.target.files[0]) onFile(e.target.files[0]); }}
+        onChange={(e) => validateFile(e.target.files[0])}
       />
     </div>
   );
@@ -124,9 +132,7 @@ function UploadedCard({ fileName, onRemove }) {
 }
 
 // ─── Document Section ─────────────────────────────────────────────────────────
-function DocSection({ title, description, badge, accept, maxLabel, initialFile }) {
-  const [file, setFile] = useState(initialFile || null);
-
+function DocSection({ title, description, badge, accept, formatText, file, setFile, error, onError }) {
   const badgeStyle =
     badge === "WAJIB"
       ? "bg-red-50 text-red-500 border border-red-200"
@@ -147,9 +153,18 @@ function DocSection({ title, description, badge, accept, maxLabel, initialFile }
 
       {/* Upload area or uploaded card */}
       {file ? (
-        <UploadedCard fileName={file.name || file} onRemove={() => setFile(null)} />
+        <UploadedCard 
+          fileName={file.name || file.fileName || file} 
+          onRemove={() => {
+            setFile(null);
+            if (onError) onError("");
+          }} 
+        />
       ) : (
-        <UploadZone onFile={setFile} />
+        <UploadZone onFile={setFile} accept={accept} formatText={formatText} onError={onError} />
+      )}
+      {error && (
+        <p className="text-xs text-red-500 font-semibold mt-1">{error}</p>
       )}
     </div>
   );
@@ -159,6 +174,22 @@ function DocSection({ title, description, badge, accept, maxLabel, initialFile }
 export default function RegisterTutorDokumen() {
   const navigate = useNavigate();
   const [semester, setSemester] = useState("");
+  const [semesterError, setSemesterError] = useState("");
+
+  const [transkripFile, setTranskripFile] = useState(null);
+  const [transkripError, setTranskripError] = useState("");
+
+  const [portofolio, setPortofolio] = useState("");
+
+  const [sertifikatFile, setSertifikatFile] = useState(null);
+  const [sertifikatError, setSertifikatError] = useState("");
+
+  const isTranskripValid = transkripFile !== null && transkripError === "";
+  const isPortofolioValid = portofolio.trim() !== "";
+  const isSemesterValid = semester.trim() !== "" && semesterError === "";
+  const isSertifikatValid = sertifikatError === "";
+
+  const isFormValid = isTranskripValid && isPortofolioValid && isSemesterValid && isSertifikatValid;
 
   return (
     <div className="min-h-screen bg-[#f1f3f8] font-sans">
@@ -188,7 +219,7 @@ export default function RegisterTutorDokumen() {
             <div>
               <p className="text-xs font-bold text-[#0d7c6b] mb-0.5">Privasi Terjamin</p>
               <p className="text-xs text-[#3d8c75] leading-relaxed">
-                Dokumen Anda hanya akan digunakan untuk keperluan verifikasi oleh tim internal KonekDin dan tidak akan dipublikasikan ke publik. Pastikan dokumen dalam format <strong>PDF</strong> dan terlihat jelas serta valid.
+                Dokumen Anda hanya akan digunakan untuk keperluan verifikasi oleh tim internal KonekDin dan tidak akan dipublikasikan ke publik. Pastikan file dan tautan yang diunggah terlihat jelas serta valid.
               </p>
             </div>
           </div>
@@ -206,24 +237,47 @@ export default function RegisterTutorDokumen() {
                   WAJIB
                 </span>
               </div>
+              
+              {/* Syarat Semester Info */}
+              <div className="flex items-start gap-2.5 bg-[#eef2ff] border border-[#c7d2fe] p-3 rounded-xl mb-1">
+                <Info className="w-4 h-4 text-[#4f46e5] flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-[#4338ca] leading-relaxed">
+                  Syarat minimal mendaftar menjadi tutor adalah <strong>Semester 3</strong>.
+                </p>
+              </div>
+
               <input 
                 type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
                 value={semester}
                 onChange={(e) => {
-                  let val = e.target.value.replace(/\D/g, ""); // Hanya izinkan angka murni
-                  if (val === "" || val === "0") {
-                    setSemester("");
+                  const val = e.target.value;
+                  setSemester(val);
+                  
+                  if (val === "") {
+                    setSemesterError("");
+                  } else if (/[^0-9]/.test(val)) {
+                    setSemesterError("Harus berupa angka.");
                   } else {
-                    let num = parseInt(val, 10);
-                    if (num > 16) num = 16;
-                    setSemester(num.toString());
+                    const num = parseInt(val, 10);
+                    if (num > 14) {
+                      setSemesterError("Maksimal semester 14.");
+                    } else if (num < 3) {
+                      setSemesterError("Minimal semester 3.");
+                    } else {
+                      setSemesterError("");
+                    }
                   }
                 }}
-                placeholder="Masukkan semester saat ini (1 - 16)"
-                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 outline-none focus:bg-white focus:border-[#0F1D8C] focus:ring-2 focus:ring-blue-100 transition-all"
+                placeholder="Masukkan semester saat ini (3 - 14)"
+                className={`w-full h-12 px-4 rounded-xl border bg-slate-50 text-sm text-slate-700 outline-none focus:bg-white focus:ring-2 transition-all ${
+                  semesterError 
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100" 
+                    : "border-slate-200 focus:border-[#0F1D8C] focus:ring-blue-100"
+                }`}
               />
+              {semesterError && (
+                <p className="text-xs text-red-500 font-semibold mt-1">{semesterError}</p>
+              )}
             </div>
 
             <div className="h-px bg-slate-100" />
@@ -232,36 +286,66 @@ export default function RegisterTutorDokumen() {
               title="Transkrip Nilai"
               description="Kumpulkan dokumen akademik resmi."
               badge="WAJIB"
-              initialFile={{ name: "TRANSKRIP_NILAI_MAHASISWA.pdf" }}
+              accept=".pdf"
+              formatText="Format PDF (Maks. 5MB)"
+              file={transkripFile}
+              setFile={setTranskripFile}
+              error={transkripError}
+              onError={setTranskripError}
             />
             <div className="h-px bg-slate-100" />
-            <DocSection
-              title="Portofolio"
-              description="Kumpulan karya atau proyek relevan. Dapat mengunggah lebih dari satu file."
-              badge="WAJIB"
-              initialFile={{ name: "PORTFOLIO_AISKA.pdf" }}
-            />
+            
+            {/* Portofolio Input Link */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-[#0F1D8C]">Portofolio</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Kumpulan karya atau proyek relevan (tautan website/github/dsb).</p>
+                </div>
+                <span className="text-[10px] font-extrabold px-3 py-1 rounded-full tracking-widest uppercase flex-shrink-0 mt-0.5 bg-red-50 text-red-500 border border-red-200">
+                  WAJIB
+                </span>
+              </div>
+              <input 
+                type="url"
+                placeholder="https://contoh-portofolio.com"
+                value={portofolio}
+                onChange={(e) => setPortofolio(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 outline-none focus:bg-white focus:border-[#0F1D8C] focus:ring-2 focus:ring-blue-100 transition-all"
+              />
+            </div>
+            
             <div className="h-px bg-slate-100" />
             <DocSection
               title="Sertifikat"
-              description="Kumpulkan sertifikasi profesional atau pelatihan. Dapat mengunggah lebih dari satu file."
+              description="Kumpulkan sertifikasi profesional atau pelatihan. Dapat mengunggah file gambar."
               badge="OPSIONAL"
-              initialFile={{ name: "Sertifikat_Data_Science.pdf" }}
+              accept=".jpg,.jpeg,.png"
+              formatText="Format JPG/PNG (Maks. 5MB)"
+              file={sertifikatFile}
+              setFile={setSertifikatFile}
+              error={sertifikatError}
+              onError={setSertifikatError}
             />
           </div>
 
           {/* Footer */}
           <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-100">
             <button 
-              onClick={() => navigate('/tutor/profil')}
+              onClick={() => navigate('/learner/profil')}
               className="flex items-center gap-1.5 text-sm font-semibold text-[#0d7c6b] hover:text-[#0a5a4e] transition-colors"
             >
               <span>←</span>
               Kembali ke Informasi Awal
             </button>
             <button 
-              onClick={() => navigate('/register/tutor/mata-kuliah')}
-              className="bg-[#0F1D8C] hover:bg-[#0b166e] text-white font-bold px-8 py-3 rounded-full text-sm shadow-md hover:shadow-lg transition-all duration-150"
+              onClick={() => navigate('/register/tutor/mata-kuliah', { state: { semester: parseInt(semester, 10) } })}
+              disabled={!isFormValid}
+              className={`text-white font-bold px-8 py-3 rounded-full text-sm shadow-md transition-all duration-150 ${
+                isFormValid 
+                  ? "bg-[#0F1D8C] hover:bg-[#0b166e] hover:shadow-lg" 
+                  : "bg-slate-300 cursor-not-allowed"
+              }`}
             >
               Langkah Selanjutnya
             </button>

@@ -138,7 +138,7 @@ export default function Register() {
                       onChange={handleChange}
                       required
                       className="block w-full h-12 pl-11 pr-3 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] focus-visible:bg-white focus-visible:border-slate-200 transition-all font-medium"
-                      placeholder="nama@email.com"
+                      placeholder="email@mhs.dinus.ac.id"
                     />
                   </div>
                 </div>
@@ -159,6 +159,7 @@ export default function Register() {
                       value={form.password}
                       onChange={handleChange}
                       required
+                      minLength={8}
                       className="block w-full h-12 pl-11 pr-10 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] focus-visible:bg-white focus-visible:border-slate-200 transition-all font-medium"
                       placeholder="Masukkan kata sandi"
                     />
@@ -190,6 +191,7 @@ export default function Register() {
                       value={form.confirmPassword}
                       onChange={handleChange}
                       required
+                      minLength={8}
                       className={`block w-full h-12 pl-11 pr-10 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:bg-white transition-all font-medium ${
                         !isPasswordMatch ? 'focus-visible:ring-red-500 border-red-300 bg-red-50' : 'focus-visible:ring-[#1a1a4b] focus-visible:border-slate-200'
                       }`}

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Calendar,
   Clock,
@@ -26,9 +26,9 @@ const jadwalList = [
   },
 ]
 
-function JadwalCard({ jadwal, onHubungi }) {
+function JadwalCard({ jadwal, onHubungi, isHighlighted, cardRef }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div ref={cardRef} className={`rounded-2xl shadow-sm border border-slate-100 overflow-hidden transition-all duration-500 hover:shadow-md ${isHighlighted ? "ring-2 ring-[#0d7c6b] bg-[#f0fbf8] -translate-y-1" : "bg-white"}`}>
       <div className="flex">
         {/* Accent bar kiri */}
         <div className="w-1.5 bg-[#0d7c6b] rounded-l-2xl flex-shrink-0" />
@@ -116,7 +116,31 @@ function EmptyCard({ onCariTutor }) {
 
 export default function JadwalBelajar() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const tutorParam = searchParams.get('tutor')
+
   const [jadwal] = useState(jadwalList)
+  const [highlightedId, setHighlightedId] = useState(null)
+  const highlightRef = useRef(null)
+
+  useEffect(() => {
+    if (!tutorParam) return;
+    const idx = jadwal.findIndex(
+      (j) => j.tutorNama.toLowerCase() === tutorParam.toLowerCase()
+    );
+    if (idx === -1) return;
+
+    setHighlightedId(jadwal[idx].id);
+
+    const timer = setTimeout(() => setHighlightedId(null), 3000);
+    return () => clearTimeout(timer);
+  }, [tutorParam, jadwal]);
+
+  useEffect(() => {
+    if (highlightedId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlightedId]);
 
   return (
     <div className="flex flex-col min-h-full pb-10">
@@ -134,6 +158,8 @@ export default function JadwalBelajar() {
           <JadwalCard
             key={item.id}
             jadwal={item}
+            isHighlighted={item.id === highlightedId}
+            cardRef={item.id === highlightedId ? highlightRef : null}
             onHubungi={(item) => window.open(`https://wa.me/6281234567890?text=Halo%20Kak%20${encodeURIComponent(item.tutorNama)}`, '_blank')}
           />
         ))}

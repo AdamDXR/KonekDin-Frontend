@@ -58,33 +58,31 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
       ))}
     </nav>
 
-    <NavLink
-      to="/learner/profil-learner"
-      onClick={() => setIsMobileMenuOpen(false)}
-      className={({ isActive }) =>
-        `flex items-center gap-3 px-5 pb-4 rounded-xl transition-all ${isActive ? 'opacity-100' : 'opacity-90 hover:opacity-100'
-        }`
-      }
-    >
-      <div className='flex space between justify-center flex-row'>
-      <Avatar className="h-11 w-11 border-2 border-slate-100">
-        <AvatarImage src="https://i.pravatar.cc/150?img=68" alt="Budi Santoso" />
-        <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">BS</AvatarFallback>
-      </Avatar>
-        <p className="text-sm font-bold text-[#0a0f44] leading-tight">Budi Santoso</p>
-        <p className="text-xs text-slate-400">Informatika '22</p>
-            <div className="px-3 pb-5 space-y-0.5">
-      <div className="h-px bg-slate-100 mx-2 mb-3"></div>
-      <button
-        onClick={() => navigate('/login')}
-        className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full transition-colors"
-      >
-        <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
-
-      </button>
-    </div>
+    <div className="px-5 pb-5">
+      <div className="flex items-center justify-between">
+        <NavLink
+          to="/learner/profil-learner"
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <Avatar className="h-11 w-11 border-2 border-slate-100 flex-shrink-0">
+            <AvatarImage src="https://i.pravatar.cc/150?img=68" alt="Budi Santoso" />
+            <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">BS</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <p className="text-sm font-bold text-[#0a0f44] leading-tight">Budi Santoso</p>
+            <p className="text-xs text-slate-400 mt-0.5">Informatika</p>
+          </div>
+        </NavLink>
+        <button
+          onClick={() => navigate('/login')}
+          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors ml-2 flex-shrink-0"
+          title="Keluar"
+        >
+          <LogOut className="h-5 w-5" strokeWidth={2} />
+        </button>
       </div>
-    </NavLink>
+    </div>
 
   </div>
 )

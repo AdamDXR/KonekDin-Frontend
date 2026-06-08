@@ -32,7 +32,7 @@ const RIWAYAT = [
     learnerName: "Ahmad Raja",
     avatar: "https://i.pravatar.cc/150?img=68",
     avatarFallback: "AR",
-    subject: "Algoritma & Struktur Data",
+    subject: "Algoritma dan Struktur Data",
     date: "5 Okt 2026",
     time: "14:10 - 15:00",
     durasi: "50 Menit",
@@ -43,7 +43,7 @@ const RIWAYAT = [
     learnerName: "Rani Ranti",
     avatar: "https://i.pravatar.cc/150?img=5",
     avatarFallback: "RR",
-    subject: "Algoritma & Struktur Data",
+    subject: "Algoritma dan Struktur Data",
     date: "2 Okt 2026",
     time: "09:30 - 10:20",
     durasi: "100 Menit",
@@ -54,7 +54,7 @@ const RIWAYAT = [
     learnerName: "Andi Wijaya",
     avatar: "https://i.pravatar.cc/150?img=53",
     avatarFallback: "AW",
-    subject: "Pemrograman Web",
+    subject: "Pemrograman Berbasis Web",
     date: "1 Okt 2026",
     time: "14:10 - 15:00",
     durasi: "50 Menit",
@@ -65,7 +65,7 @@ const RIWAYAT = [
     learnerName: "Alfiana Anan",
     avatar: "https://i.pravatar.cc/150?img=26",
     avatarFallback: "AA",
-    subject: "Pemrograman Web",
+    subject: "Pemrograman Berbasis Web",
     date: "1 Okt 2026",
     time: "09:30 - 10:20",
     durasi: "50 Menit",
@@ -78,7 +78,7 @@ const RIWAYAT = [
     learnerName: "Budi Santoso",
     avatar: "https://i.pravatar.cc/150?img=15",
     avatarFallback: "BS",
-    subject: "Algoritma & Struktur Data",
+    subject: "Algoritma dan Struktur Data",
     date: "30 Sep 2026",
     time: "14:10 - 15:00",
     durasi: "50 Menit",
@@ -100,7 +100,7 @@ const RIWAYAT = [
     learnerName: "Dedi Kurniawan",
     avatar: "https://i.pravatar.cc/150?img=51",
     avatarFallback: "DK",
-    subject: "Pemrograman Web",
+    subject: "Pemrograman Berbasis Web",
     date: "28 Sep 2026",
     time: "14:10 - 15:50",
     durasi: "100 Menit",
@@ -111,7 +111,7 @@ const RIWAYAT = [
     learnerName: "Eka Putri",
     avatar: "https://i.pravatar.cc/150?img=33",
     avatarFallback: "EP",
-    subject: "Algoritma & Struktur Data",
+    subject: "Algoritma dan Struktur Data",
     date: "27 Sep 2026",
     time: "09:30 - 10:20",
     durasi: "50 Menit",
@@ -135,7 +135,7 @@ const RIWAYAT = [
     learnerName: "Gita Rahayu",
     avatar: "https://i.pravatar.cc/150?img=28",
     avatarFallback: "GR",
-    subject: "Pemrograman Web",
+    subject: "Pemrograman Berbasis Web",
     date: "25 Sep 2026",
     time: "09:30 - 10:20",
     durasi: "50 Menit",
@@ -146,7 +146,7 @@ const RIWAYAT = [
     learnerName: "Rina Sari",
     avatar: "https://i.pravatar.cc/150?img=45",
     avatarFallback: "RS",
-    subject: "Pemrograman Web",
+    subject: "Pemrograman Berbasis Web",
     date: "24 Sep 2026",
     time: "14:10 - 15:00",
     durasi: "50 Menit",
@@ -214,16 +214,6 @@ function RiwayatCard({ item, navigate, onShowNoReview }) {
           {item.pendapatan}
         </p>
       </div>
-
-      {/* Tombol */}
-      <div className="flex-shrink-0">
-        <Button
-          onClick={handleLihatUlasan}
-          className="border border-[#0d7c6b] text-[#0d7c6b] bg-white hover:bg-[#0d7c6b]/5 font-bold px-5 py-2.5 h-auto rounded-xl text-sm transition-colors duration-150"
-        >
-          Lihat Ulasan
-        </Button>
-      </div>
     </div>
   );
 }
@@ -280,13 +270,13 @@ export default function RiwayatMengajar() {
   }
 
   return (
-    <div className="w-full">
+    <div className="flex flex-col min-h-full pb-10">
       {/* Header */}
-      <div className="mb-7">
-        <h1 className="text-2xl font-extrabold text-[#0a0f44] tracking-tight">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
           Riwayat Mengajar
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-slate-500">
           Lihat kembali perjalanan mengajar Anda dan mulai sesi mengajar lagi.
         </p>
       </div>

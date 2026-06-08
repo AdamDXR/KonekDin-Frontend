@@ -93,7 +93,7 @@ export default function Login() {
                     type="email"
                     required
                     className="block w-full h-12 pl-10 pr-3 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] dark:focus-visible:ring-blue-500 transition-colors"
-                    placeholder="nama@email.com"
+                    placeholder="email@mhs.dinus.ac.id"
                   />
                 </div>
               </div>
@@ -111,6 +111,7 @@ export default function Login() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     required
+                    minLength={8}
                     className="block w-full h-12 pl-10 pr-10 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] dark:focus-visible:ring-blue-500 transition-colors"
                     placeholder="••••••••"
                   />

@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Star, Clock, Zap, BookOpen, UserCircle, CheckCircle2, ChevronRight, MessageSquareMore } from 'lucide-react'
 import PesanSesiModal from '@/components/Learner/PesanSesiModal'
+import { mockTutors } from '@/pages/Learner/CariTutor'
 
 const MOCK_TUTOR_DETAIL = {
   id: 1,
@@ -16,6 +17,7 @@ const MOCK_TUTOR_DETAIL = {
   sessionsCompleted: 128,
   price: 45000,
   image: 'https://i.pravatar.cc/150?u=irkham',
+  ipk: 3.85,
   courses: [
     { name: 'Pemrograman Web', grade: 'A' },
     { name: 'Struktur Data', grade: 'A' }
@@ -39,9 +41,37 @@ const MOCK_TUTOR_DETAIL = {
 export default function ProfilTutor() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const tutor = MOCK_TUTOR_DETAIL
+  const location = useLocation()
+  
+  // Cari data tutor berdasarkan id dari parameter URL
+  const foundTutor = mockTutors.find((t) => t.id === parseInt(id, 10))
+  
+  // Gabungkan data statis (bio, about, reviews) dengan data dinamis (nama, jadwal, matkul, dsb)
+  const tutor = foundTutor 
+    ? { 
+        ...MOCK_TUTOR_DETAIL, 
+        ...foundTutor,
+        // Pastikan courses tetap array of objects jika diperlukan, atau render array of strings
+        courses: foundTutor.courses.map(c => typeof c === 'string' ? { name: c, grade: 'A' } : c)
+      } 
+    : MOCK_TUTOR_DETAIL
   
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  React.useEffect(() => {
+    if (location.hash === '#jadwal-ketersediaan') {
+      setTimeout(() => {
+        const element = document.getElementById('jadwal-ketersediaan')
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.classList.add('ring-2', 'ring-teal-500', 'ring-offset-2', 'transition-all', 'duration-500')
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-teal-500', 'ring-offset-2')
+          }, 3000)
+        }
+      }, 100)
+    }
+  }, [location])
 
   return (
     <div className="flex flex-col min-h-full">
@@ -95,19 +125,20 @@ export default function ProfilTutor() {
 
 
 
-            {/* Academic Portfolio */}
+            {/* IPK */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200">
               <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center">
                 <BookOpen className="w-6 h-6 mr-2 text-indigo-600" />
-                Portofolio Akademik
+                IPK (Indeks Prestasi Kumulatif)
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {tutor.courses.map((course, idx) => (
-                  <div key={idx} className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex items-center justify-between">
-                    <span className="font-semibold text-indigo-900">{course.name}</span>
-                    <span className="px-3 py-1 bg-white text-indigo-700 font-bold rounded-lg shadow-sm">{course.grade}</span>
-                  </div>
-                ))}
+              <div className="flex items-center gap-4">
+                <div className="bg-indigo-50 border border-indigo-100 px-6 py-4 rounded-xl flex items-baseline justify-center">
+                  <span className="text-3xl font-extrabold text-indigo-700">{tutor.ipk || (Math.random() * (4.0 - 3.5) + 3.5).toFixed(2)}</span>
+                  <span className="text-base font-bold text-indigo-400 ml-1.5">/ 4.00</span>
+                </div>
+                <p className="text-slate-500 text-sm font-medium flex-1">
+                  Tutor ini memiliki riwayat akademik yang memuaskan dan telah terverifikasi oleh KonekDin.
+                </p>
               </div>
             </div>
 
@@ -175,7 +206,7 @@ export default function ProfilTutor() {
             </div>
 
             {/* Schedule */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200">
+            <div id="jadwal-ketersediaan" className="bg-white p-6 rounded-2xl border border-slate-200 scroll-mt-24">
               <h3 className="font-bold text-slate-900 mb-4 flex items-center">
                 <Clock className="w-5 h-5 mr-2 text-teal-600" />
                 Jadwal Ketersediaan

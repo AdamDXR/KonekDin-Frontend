@@ -1,21 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { CheckCircle2, Lightbulb, X, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // ─── Shared Logo ──────────────────────────────────────────────────────────────
 function KonekDinLogo() {
   return (
-    <div className="flex items-center gap-2">
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <rect width="36" height="36" rx="8" fill="#0F1D8C" fillOpacity="0.08" />
-        <path d="M8 18C8 12.477 12.477 8 18 8s10 4.477 10 10-4.477 10-10 10S8 23.523 8 18Z" fill="#0F1D8C" fillOpacity="0.15" />
-        <path d="M13 13l5 5-5 5M18 13h5v5" stroke="#0F1D8C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M18 18l5 5" stroke="#0d7c6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <span className="text-xl font-extrabold tracking-tight">
-        <span className="text-[#0F1D8C]">Konek</span>
-        <span className="text-[#0d7c6b]">Din</span>
-      </span>
+    <div className="flex items-center">
+      <img src="/images/logo_konekdin.png" alt="KonekDin" className="h-8 w-auto object-contain" />
     </div>
   );
 }
@@ -61,17 +52,35 @@ function Stepper() {
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
-const ALL_MATKUL = [
-  "Basis Data", "Pemrograman Web", "Algoritma & Struktur Data",
-  "Logika Informatika", "Kalkulus", "Jaringan Komputer",
-  "Machine Learning", "Pemrograman Berbasis Objek",
-];
+const MATKUL_PER_SEMESTER = {
+  1: ["Bahasa Indonesia", "Dasar Dasar Komputasi", "Dasar Pemrograman", "Fisika", "Kalkulus", "Keterampilan Interpersonal", "Pendidikan Agama", "Pengantar Teknologi Informasi"],
+  2: ["Algoritma dan Struktur Data", "Dasar Kewirausahaan", "Interaksi Manusia dan Komputer", "Matematika Diskrit", "Matriks dan Ruang Vektor", "Organisasi dan Arsitektur Komputer", "Pendidikan Pancasila"],
+  3: ["Basis Data", "Logika Informatika", "Pemrograman Berbasis Web", "Pendidikan Kewarganegaraan", "Probabilitas dan Statistik", "Rekayasa Perangkat Lunak", "Sistem Operasi"],
+  4: ["Jaringan Komputer", "Otomata dan Teori Bahasa", "Pembelajaran Mesin (Machine Learning)", "Pemrograman Berorientasi Objek", "Pemrograman Web Lanjut", "Rangkaian Logika Digital", "Sistem Basis Data"],
+  5: ["Kecerdasan Buatan (Artificial Intelligence)", "Kriptografi", "Manajemen Proyek Teknologi Informasi", "Penambangan Data (Data Mining)", "Sistem Informasi", "Sistem Terdistribusi", "Technopreneurship"],
+  6: ["Analisis dan Perancangan Berorientasi Objek", "Bahasa Inggris", "Keamanan Sistem dan Siber", "Komputasi Awan (Cloud Computing)", "Komputasi Numerik", "Komputer Grafik", "Literasi Informasi", "Pemrograman Perangkat Bergerak (Mobile)", "Pengembangan Startup Digital", "Pengolahan Citra Digital", "Rekayasa Kebutuhan Perangkat Lunak", "Sistem Temu Kembali Informasi", "Sistem Tertanam (Embedded System)"],
+  7: ["Analisis Data", "Bengkel Koding", "Forensik Digital", "Internet of Things (IoT)", "Jaminan Kualitas Perangkat Lunak", "Komputasi Kuantum", "Lingkungan Cerdas dan Intelijen", "Manajemen Jaringan", "Pemrograman Sisi Klien", "Pemrograman Sisi Server", "Pemrograman/Pengembangan Game", "Pemrosesan Bahasa Alami Berbasis Teks/Ucapan (NLP)", "Penglihatan Komputer dan Analisis Citra"]
+};
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function RegisterTutorMataKuliah() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selected, setSelected] = useState([]);
   const [search, setSearch] = useState("");
+
+  const maxSemester = location.state?.semester || 14;
+
+  const ALL_MATKUL = useMemo(() => {
+    let availableCourses = [];
+    // Tutor hanya bisa mengajar mata kuliah maksimal 1 semester di bawah semester saat ini
+    for (let i = 1; i <= Math.min(maxSemester - 1, 7); i++) {
+      if (MATKUL_PER_SEMESTER[i]) {
+        availableCourses = [...availableCourses, ...MATKUL_PER_SEMESTER[i]];
+      }
+    }
+    return availableCourses.sort();
+  }, [maxSemester]);
 
   const toggle = (mk) => {
     setSelected((prev) =>

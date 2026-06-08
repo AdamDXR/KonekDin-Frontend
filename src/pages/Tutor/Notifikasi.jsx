@@ -165,13 +165,13 @@ export default function Notifikasi() {
   const navigate = useNavigate()
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="flex flex-col min-h-full pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[26px] font-extrabold text-[#0a0f44] leading-tight">
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
           Notifikasi
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-slate-500">
           Update terbaru untuk perjalanan akademik anda.
         </p>
       </div>

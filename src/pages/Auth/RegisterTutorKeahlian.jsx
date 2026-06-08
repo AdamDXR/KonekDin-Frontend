@@ -4,16 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 function KonekDinLogo() {
   return (
-    <div className="flex items-center gap-2">
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <rect width="36" height="36" rx="8" fill="#0F1D8C" fillOpacity="0.08" />
-        <path d="M8 18C8 12.477 12.477 8 18 8s10 4.477 10 10-4.477 10-10 10S8 23.523 8 18Z" fill="#0F1D8C" fillOpacity="0.15" />
-        <path d="M13 13l5 5-5 5M18 13h5v5" stroke="#0F1D8C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M18 18l5 5" stroke="#0d7c6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <span className="text-xl font-extrabold tracking-tight">
-        <span className="text-[#0F1D8C]">Konek</span><span className="text-[#0d7c6b]">Din</span>
-      </span>
+    <div className="flex items-center">
+      <img src="/images/logo_konekdin.png" alt="KonekDin" className="h-8 w-auto object-contain" />
     </div>
   );
 }

@@ -271,11 +271,16 @@ export default function Ulasan() {
   };
 
   return (
-    <div className="w-full">
-      {/* Judul */}
-      <h1 className="text-2xl font-extrabold text-[#0a0f44] tracking-tight mb-6">
-        Ulasan & Rating
-      </h1>
+    <div className="flex flex-col min-h-full pb-10">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
+          Ulasan & Rating
+        </h1>
+        <p className="text-slate-500">
+          Lihat ulasan dan rating dari mahasiswa yang pernah Anda ajar.
+        </p>
+      </div>
 
       {/* ── Rating Summary Card ── */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6">
