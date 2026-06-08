@@ -1,0 +1,441 @@
+Software Requirements Specification Document
+Of Konekdin - Sistem Informasi Manajemen Reservasi Tutor belajar di lingkup kampus
+Disusun Oleh Kelompok Dev-1, beranggotakan :
+
+1.​ Adhifa Fairuz Zulfi – A11.2024.15836
+2.​ Aiska Zahra Nailani - A11.2024.16014
+3.​ Adam Haritsa Thahara - A11.2024.15556
+1.​ Introduction
+1.1.​Overview
+Konekdin adalah platform yang disediakan oleh Universitas Dian Nuswantoro untuk
+menghubungkan mahasiswa yang butuh belajar lebih dengan mahasiswa dengan
+keahlian lebih yang ingin mempunyai pemasukan tambahan. Sistem ini berfungsi
+sebagai pusat reservasi jadwal bimbingan belajar yang transparan, di mana learner
+dapat menemukan tutor yang sesuai dengan kebutuhan akademiknya. Melalui
+KonekDin, learner dapat mencari, memfilter, dan melakukan booking slot waktu tutor
+secara real-time, sementara tutor dapat mengelola jadwal ketersediaan serta
+mempublikasikan portofolio keahlian mereka. Platform ini bertujuan untuk
+mempermudah akses pendidikan tambahan, meningkatkan efisiensi administrasi
+bagi pengajar, serta menjamin keamanan data melalui sistem otentikasi (JWT) dan
+manajemen hak akses (Spatie) yang ketat.
+
+1.2.​Goals
+●​ Memudahkan mahasiswa untuk menemukan pekerjaan sampingan
+●​ Memudahkan mahasiswa untuk mencari tutor dalam belajar secara privat
+1.3.​Project objectives
+●​ Menyediakan fitur pencarian dan filter tutor berdasarkan kategori keahlian
+dan rating secara real-time.
+●​ Membuat sistem CRUD (Create, Read, Update, Delete) untuk pengelolaan
+data pengguna, jadwal tutor, dan transaksi booking.
+●​ Mengembangkan dashboard berbasis role untuk Admin, Tutor, dan Learner.
+●​ Mengimplementasikan sistem otentikasi menggunakan JWT (Stateless
+Token).
+●​ Menggunakan Spatie Permission untuk manajemen hak akses endpoint
+dan fitur sistem secara granular.
+●​ Mengintegrasikan Scramble untuk auto-generate dokumentasi API
+Swagger/OpenAPI.
+●​ Memanfaatkan Inertia.js untuk integrasi seamless antara backend Laravel
+dan frontend React.
+
+2.​ Functional Requirements
+2.1.​Use Case
+
+2.2.​User stories
+■​ Pelajar (Learner)
+●​ Ingin melakukan login ke sistem agar dapat mengakses fitur mencari tutor,
+mencari matkul yang ingin dipelajari.
+●​ Ingin mencari dan memfilter tutor berdasarkan kategori (jadwal dan
+matkul) agar lebih mudah menemukan tutor yang sesuai.
+●​ Ingin melihat profil (data diri, keahlian yang dikuasai, harga booking,
+ulasan, jadwal ketersediaan, deskripsi, portofolio) tutor yang dipilih.
+●​ Ingin melakukan booking sesi dengan tutor tertentu sesuai dengan kategori
+yang dipilih.
+●​ Ingin melihat status booking (menunggu, diterima, ditolak) agar
+mengetahui perkembangan status booking.
+●​ Ingin mendaftar sebagai tutor.
+■​ Pengajar (Tutor)
+●​ Ingin login ke sistem agar dapat mengelola fitur (jadwal mengajar,
+pengaturan jadwal, riwayat mengajar, ulasan) sebagai tutor.
+●​ Ingin mengelola profil sebagai tutor agar informasi data diri terlihat lebih
+jelas.
+●​ Ingin melihat jadwal mengajar.
+●​ Ingin mengatur jadwal mengajar agar sesuai dengan kemauan atau
+ketersediaan waktu tutor.
+●​ Ingin melihat learner yang mendaftar namun belum di setujui.
+
+●​ Ingin memperbarui status booking (diproses, diterima, ditolak) agar learner
+mengetahui status booking.
+■​ Admin
+●​ Ingin memverifikasi akun tutor baru untuk menjamin kualitas pengajar di
+platform.
+●​ Ingin melihat profil sebagai admin.
+●​ Ingin mengelola role dan permissions pengguna menggunakan Spatie.
+●​ Ingin mengakses dokumentasi API melalui Scramble untuk pemeliharaan
+sistem.
+●​ Ingin melihat komplain.
+●​ Ingin mengelola status akun pengguna.
+2.3.​User input and output specifications
+■​ Input
+●​ Data registrasi pengguna awal (nama lengkap, email, password, role:
+default learner).
+●​ Data Profil Tutor (bio singkat, daftar mata kuliah yang dikuasai, tarif
+bimbingan (jika ada), dan jadwal ketersediaan (Availability Map)).
+●​ Data Verifikasi Tutor (unggahan transkrip nilai atau tangkapan layar Siadin
+(untuk membuktikan nilai mata kuliah yang akan diajarkan)).
+●​ Data Reservasi (Booking) (pilihan mata kuliah, pilihan tanggal dan jam
+bimbingan, serta catatan tambahan untuk tutor).
+●​ Data Ulasan & Rating: Skor bintang (1-5) dan testimoni teks dari Learner
+setelah sesi bimbingan berakhir.
+●​ Aksi Verifikasi oleh Admin: Status persetujuan (Approve/Reject) terhadap
+pengajuan mahasiswa yang ingin menjadi Tutor berdasarkan bukti nilai. //
+■​
+
+Output
+●​ Hasil Pencarian Tutor: Daftar profil tutor yang difilter berdasarkan mata
+kuliah, menampilkan nama, foto, rating bintang, dan harga bimbingan per
+sesi.
+●​ Halaman Profil Publik Tutor: Tampilan detail yang menyertakan bio,
+daftar mata kuliah yang diajarkan, serta rekapitulasi statistik berupa jumlah
+total ulasan dan persentase penyelesaian sesi.
+●​ Dasbor Jadwal (Kalender): Tampilan visual jadwal bimbingan yang akan
+datang (Upcoming Sessions) dan riwayat sesi yang telah selesai bagi
+Learner maupun Tutor. //
+●​ Status Reservasi: Notifikasi perubahan status booking secara real-time
+(Contoh: "Menunggu Konfirmasi", "Diterima", atau "Ditolak oleh Tutor").
+//
+●​ Halaman Ulasan & Rating: Tampilan kumpulan testimoni dari mahasiswa
+lain pada profil tutor, serta dasbor "Ulasan Saya" bagi Tutor.
+
+●​ Laporan Admin: Ringkasan data jumlah tutor aktif, total sesi bimbingan
+yang berhasil dilakukan, dan daftar laporan kendala/dispute dari pengguna.
+//
+2.4.​System behavior //
+●​ Pendaftaran Profil: Ketika pengguna melakukan registrasi, sistem akan
+secara otomatis membuat profil sesuai dengan peran yang dipilih (Learner
+atau Tutor).
+●​ Pembaruan Data: Setiap data profil yang diperbarui oleh pengguna akan
+secara otomatis disimpan dan memperbarui waktu terakhir pembaruan
+(updated_at).
+●​ Manajemen Jadwal Tutor: Ketika Tutor menentukan slot waktu luang pada
+kalender ketersediaan (Availability Map), sistem akan secara otomatis
+menampilkan jadwal tersebut sebagai slot yang dapat dipesan oleh
+Learner.
+●​ Proses Reservasi: Ketika Learner melakukan booking pada jadwal tertentu,
+sistem akan mengirimkan notifikasi kepada Tutor dan mengubah status
+sesi menjadi "Pending" hingga mendapatkan konfirmasi.
+●​ Verifikasi Akademik: Ketika calon Tutor mengunggah bukti nilai (seperti
+screenshot Siadin), sistem akan menyimpan data tersebut di antarmuka
+Admin untuk diverifikasi sebelum label "Terverifikasi" muncul di profil
+publik Tutor.
+●​ Sistem Ulasan: Setelah sesi bimbingan dinyatakan selesai, sistem akan
+secara otomatis membuka akses bagi Learner untuk memberikan rating
+dan ulasan teks yang akan langsung memperbarui statistik performa pada
+profil Tutor.
+●​ Notifikasi Real-time: Sistem akan secara otomatis mengirimkan pengingat
+kepada kedua belah pihak (Learner dan Tutor) sesaat sebelum sesi
+bimbingan dimulai sesuai jadwal yang telah disepakati.
+3.​ Non-Functional Requirements
+●​ Performance: Sistem harus responsif dengan waktu muat kurang dari 3
+detik untuk menampilkan daftar profil tutor, jadwal ketersediaan, dan data
+sesi bimbingan pengguna.
+●​ Security: Sistem harus menggunakan autentikasi berbasis akun (login) dan
+menerapkan kontrol akses berbasis peran (Admin, Tutor, dan Learner)
+sehingga setiap pengguna hanya dapat mengakses data dan fitur yang
+sesuai dengan haknya.
+●​ Scalability: Sistem harus mampu menangani pertumbuhan jumlah
+pengguna (Learner & Tutor), data reservasi jadwal, dan pesan chat dalam
+jumlah besar tanpa penurunan performa yang signifikan.
+●​ Usability: Antarmuka sistem harus sederhana, mudah digunakan, dan
+responsif di berbagai perangkat (desktop maupun mobile), terutama pada
+bagian kalender reservasi dan dasbor ulasan.
+
+●​ Availability: Sistem harus tersedia minimal 99% uptime agar mahasiswa
+dapat mengakses layanan pencarian tutor dan jadwal bimbingan kapan
+saja.
+●​ Reliability: Sistem harus mampu menjaga konsistensi data (misalnya: satu
+slot jadwal bimbingan hanya dapat dipesan oleh satu Learner dalam satu
+waktu).
+●​ Maintainability: Sistem harus mudah dikembangkan dan dipelihara,
+dengan struktur kode dan basis data yang terorganisir untuk mendukung
+penambahan fitur akademik di masa depan.
+●​ Data Integrity: Sistem harus memastikan data yang disimpan valid dan
+konsisten melalui validasi input (seperti validasi format jam bimbingan)
+dan constraint database.
+4.​ Reference System Architecture
+4.1.​High-level architecture
+
+4.2.​Key components & Modules
+Komponen perangkat lunak utama yang akan dikembangkan meliputi :
+●​
+●​
+●​
+●​
+●​
+●​
+●​
+
+Authentication Module
+User Management Module
+Tutor Discovery Module
+Booking Module
+Schedule Management Module
+Admin Verification Module
+API Documentation Module
+
+4.3.​Technology Stack
+Berdasarkan diskusi dan kebutuhan proyek, berikut adalah tech stack yang akan kami
+gunakan dalam pengembangan sistem ini:
+●​ Backend: Laravel API-only
+
+●​
+●​
+●​
+●​
+●​
+
+Programming Language: PHP 8.3+
+Database: MySQL
+Authentication: Tymon JWT Auth
+Authorization: Spatie Permission
+Documentation: Dedoc Scramble
+
+5.​ Data requirements
+5.1.​Data Models and Key Entities
+Sistem KonekDin mengelola beberapa entitas data inti yang saling berhubungan
+untuk mendukung fungsionalitas platform reservasi bimbingan belajar antara learner,
+tutor, dan admin. Entitas-entitas kunci tersebut meliputi:
+
+●​ Users
+Data utama seluruh pengguna sistem, mencakup learner, tutor, dan admin.
+Data ini meliputi:
+○ User ID (Primary Key)​
+○ Nama lengkap​
+○ Email universitas / email aktif​
+○ Password terenkripsi​
+○ Role pengguna (Learner, Tutor, Admin)​
+○ Status akun (Aktif, Pending Verifikasi, Suspended)​
+○ Nomor kontak​
+○ Tanggal registrasi​
+○ Last login timestamp
+●​ Tutor
+Data khusus tutor yang menampilkan informasi profesional dan akademik
+tutor:
+o​ Tutor Profile ID
+o​ User ID (Foreign Key ke Users)
+o​ Bio / deskripsi tutor
+o​ Mata kuliah / bidang keahlian
+o​ Portofolio pengalaman
+o​ Tarif per sesi
+o​ Rating rata-rata
+o​ Jumlah review
+o​ Status verifikasi admin
+o​ Foto profil tutor
+●​ Subjects (Mata Kuliah)
+Data kategori mata kuliah atau topik pembelajaran yang tersedia:
+o​ Subject ID
+o​ Nama mata kuliah
+o​ Kategori akademik
+
+o​ Deskripsi singkat
+o​ Status aktif/nonaktif
+●​ Tutor Schedules
+Data jadwal ketersediaan tutor yang dapat dibooking learner:
+o​ Schedule ID
+o​ Tutor ID
+o​ Subject ID
+o​ Hari / tanggal tersedia
+o​ Jam mulai
+o​ Jam selesai
+o​ Slot kapasitas
+o​ Status slot (Tersedia, Dipesan, Ditutup)
+●​ Bookings
+Data utama reservasi sesi belajar antara learner dan tutor:
+o​ Booking ID
+o​ Learner ID
+o​ Tutor ID
+o​ Schedule ID
+o​ Subject ID
+o​ Tanggal booking
+o​ Status booking (Pending, Diproses, Diterima, Ditolak, Selesai)
+o​ Catatan learner
+o​ Harga final
+o​ Payment status (opsional jika monetisasi aktif)
+●​ Reviews
+Data referensi file yang diunggah oleh pelamar sebagai syarat lamaran,
+mencakup:
+o​ Review ID
+o​ Booking ID
+o​ Learner ID
+o​ Tutor ID
+o​ Rating (1-5)
+o​ Komentar
+o​ Tanggal review
+●​ Roles & Permissions
+
+○ Role ID
+○ Permission ID
+○ Nama role
+○ Daftar permission
+○ Guard name
+5.2.​Data Storage and Processing Methods
+
+● Metode Penyimpanan Data Primer
+Sistem menggunakan database relasional MySQL sebagai penyimpanan utama karena:
+○ Mendukung integritas data tinggi​
+○ Mendukung relasi kompleks antar entitas​
+○ Mendukung query efisien untuk pencarian tutor, jadwal, dan booking​
+○ Skalabilitas baik untuk pertumbuhan pengguna universitas
+
+● Strategi Lanjutan Data (Backup dan Recovery)
+Untuk keamanan dan keberlangsungan sistem:
+○ Backup database harian otomatis​
+○ Backup mingguan ke cloud storage/server cadangan​
+○ Backup bulanan offline​
+○ Recovery plan untuk pemulihan data jika terjadi kegagalan sistem
+
+● Prinsip Integritas Data
+○ Integritas Entitas
+
+Setiap entitas memiliki unique identifier (ID unik) agar data tidak duplikat.
+○ Integritas Referensial
+
+Relasi antar tabel dijaga dengan foreign key, misalnya:
+●​ Booking harus terkait ke learner, tutor, dan schedule valid
+●​ Tutor profile harus terkait ke user tutor
+●​ Review harus terkait ke booking selesai
+○ Validasi Data
+
+Setiap input divalidasi menggunakan Laravel Form Requests:
+
+●​ Format email valid
+●​ Password minimum security standard
+●​ Jadwal tidak bentrok
+●​ Slot booking tersedia
+●​ Role sesuai permission
+
+5.3. Reference Data Architecture
+Secara konseptual, arsitektur data KonekDin mendukung:
+
+● Data Aktif
+Data operasional harian seperti:
+○ User aktif​
+○ Jadwal tutor​
+○ Booking berjalan​
+○ Review terbaru
+
+● Data Historis / Arsip
+Data lama seperti:
+○ Riwayat booking selesai​
+○ Log aktivitas​
+○ Tutor nonaktif​
+○ Review lama
+
+● Optimasi Arsitektur
+Untuk meningkatkan performa:
+○ Indexing pada pencarian tutor​
+○ Indexing jadwal dan subject​
+○ Caching endpoint populer​
+○ API Resource standardization​
+○ Service Layer separation
+
+● Struktur Database
+Database dirancang untuk:
+○ Modular​
+○ Maintainable​
+○ Enterprise-level scalability​
+
+○ RESTful integration​
+○ Dokumentasi otomatis melalui Scramble
+6.​ Integration Requirements
+●​ IInternal integration antar modul user, tutor, booking, dan admin.
+●​ JWT authentication integration.
+●​ Spatie permission integration.
+●​ Scramble OpenAPI integration.
+
+7.​ User Requirements
+7.1.​User roles & permissions
+■​
+■​
+■​
+
+Learner: Search, booking, review.
+Tutor: Manage schedule, profile, booking.
+Admin: Verification, permission, maintenance.
+
+7.2.​Standard workflows
+
+7.3.​Reference user interfaces
+■​
+■​
+■​
+■​
+
+Learner Dashboard
+Tutor Dashboard
+Admin Dashboard
+API Documentation Interface
+
+8.​ Project Constraints and Assumptions
+8.1.​Constraints
+●​
+●​
+●​
+●​
+
+Mahasiswa memiliki akun valid.
+Tutor memberikan data yang akurat.
+Admin melakukan verifikasi manual.
+Frontend terhubung melalui REST API.
+
+8.2.​Assumptions
+●​
+●​
+●​
+●​
+
+Mahasiswa memiliki akun valid.
+Tutor memberikan data yang akurat.
+Admin melakukan verifikasi manual.
+Frontend terhubung melalui REST API.
+
+9.​ Appendices
+9.1.​Glossary
+■​
+■​
+■​
+■​
+■​
+
+JWT: JSON Web Token untuk autentikasi stateless.
+Spatie: Laravel package untuk role dan permission.
+Scramble: Generator dokumentasi API otomatis.
+CRUD: Create, Read, Update, Delete.
+API: Application Programming Interface.
+
+9.2.​Abbreviations:
+■​
+■​
+
+ERD: Entity Relationship Diagram
+UI: User Interface
+
+■​
+■​
+
+API: Application Programming Interface
+JWT: JSON Web Token
+
+10.​Lampiran
+●​ Link Prototype / UI Design (Figma)
+https://www.figma.com/proto/PlWOrG7icIPyGez95aBroL/Untitled?node-id=101558&t=nexXbeQi5XtjfsTs-1&scaling=min-zoom&content-scaling=fixed&page-id
+=0%3A1&starting-point-node-id=101%3A558 //
+●​ Link Design Figma
+https://www.figma.com/design/OlOksehoiG6sitwqi5uEvT/KonekDin-Design?nod
+e-id=84-763&t=v5o8ifkoA5scaWyc-1
+●​ Link Raw Diagram
+ERD:
+https://drive.google.com/file/d/133k5j1kJorWZeSuxgTEveJVuj4XQWIrx/view?us
+p=sharing
+​
+
+
