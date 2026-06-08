@@ -49,10 +49,8 @@ export default function Register() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f44] via-transparent to-[#0a0f44]/50"></div>
             </div>
 
-            {/* Logo / Header Branding */}
-            <div className="flex items-center space-x-2 z-10">
-              <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-10 w-10 object-contain brightness-0 invert" />
-              <span className="text-3xl font-bold tracking-tight">KonekDin</span>
+            <div className="flex items-center z-10">
+              <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-12 w-auto" />
             </div>
 
             {/* Headline Body */}
@@ -84,11 +82,8 @@ export default function Register() {
             <div className="max-w-[400px] w-full mx-auto">
               
               {/* Logo for mobile only */}
-              <div className="flex items-center space-x-2 mb-8 md:hidden">
-                <div className="bg-[#1a1a4b] p-2 rounded-lg">
-                  <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-6 w-6 object-contain brightness-0 invert" />
-                </div>
-                <span className="text-2xl font-bold text-slate-800">KonekDin</span>
+              <div className="flex items-center mb-8 md:hidden">
+                <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
               </div>
 
               <div className="text-left mb-8">
