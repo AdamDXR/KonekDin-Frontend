@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import axios from 'axios'
-import Tesseract from 'tesseract.js'
 import {
   Search,
   Eye,
