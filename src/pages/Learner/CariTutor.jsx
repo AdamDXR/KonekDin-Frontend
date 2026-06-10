@@ -103,9 +103,11 @@ export default function CariTutor() {
               name: tutor.name || 'Tutor',
               university: "Universitas Dian Nuswantoro", 
               courses: tutor.taught_courses ? tutor.taught_courses.map(c => c.course_name) : [],
+              rawCourses: tutor.taught_courses || [],
               rating: Number(tutor.rating_avg) || 0,
               isTopTutor: (Number(tutor.rating_avg) || 0) >= 4.8,
               schedule: scheduleArray,
+              rawSlots: tutor.available_slots || [],
               price: tutor.price || 0,
               image: tutor.avatar 
                  ? `http://127.0.0.1:8000/storage/${tutor.avatar}` 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Book, Calendar, X } from 'lucide-react'
+import { FileText, Book, Calendar, X, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -9,40 +9,69 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import axios from 'axios'
+
+// Helper function to get next occurrence of a day
+const getNextDateForDay = (dayName) => {
+  const days = {
+    'minggu': 0, 'senin': 1, 'selasa': 2, 'rabu': 3,
+    'kamis': 4, 'jumat': 5, 'sabtu': 6
+  }
+  
+  const targetDay = days[dayName.toLowerCase()]
+  if (targetDay === undefined) return new Date().toISOString().split('T')[0] // Fallback today
+  
+  const date = new Date()
+  const today = date.getDay()
+  let daysUntil = targetDay - today
+  
+  // Jika hari target sudah lewat atau sama dengan hari ini, ambil minggu depan
+  if (daysUntil <= 0) {
+    daysUntil += 7
+  }
+  
+  date.setDate(date.getDate() + daysUntil)
+  
+  // Kembalikan dalam format YYYY-MM-DD (menyesuaikan timezone lokal)
+  const offset = date.getTimezoneOffset()
+  date.setMinutes(date.getMinutes() - offset)
+  return date.toISOString().split('T')[0]
+}
 
 export default function PesanSesiModal({ isOpen, onClose, tutor }) {
   const navigate = useNavigate()
   
-  const [selectedCourse, setSelectedCourse] = useState("")
-  const [selectedTime, setSelectedTime] = useState("")
+  const [selectedCourseId, setSelectedCourseId] = useState("")
+  const [selectedSlotStr, setSelectedSlotStr] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState(null)
 
   const scheduleOptions = useMemo(() => {
-    if (!tutor) return []
-    
-    if (tutor.schedule) {
-      return tutor.schedule.flatMap(slot => 
-        slot.times.map(time => `${slot.day} (${time})`)
-      )
-    }
-
-    if (tutor.availableDays && tutor.availableTimes) {
-      return tutor.availableDays.flatMap((day) => 
-        tutor.availableTimes.map((time) => `${day} (${time})`)
-      )
-    }
-
-    return []
+    if (!tutor || !tutor.rawSlots) return []
+    // Combine slot info into a JSON string to keep slot_id, day, start_time, end_time
+    return tutor.rawSlots.map(slot => ({
+      id: slot.slot_id || slot.availability_id || slot.id,
+      day_of_week: slot.day_of_week,
+      label: `${slot.day_of_week} (${slot.start_time?.substring(0,5) || ''} - ${slot.end_time?.substring(0,5) || ''})`,
+      value: JSON.stringify({ id: slot.slot_id || slot.availability_id || slot.id, day: slot.day_of_week })
+    }))
   }, [tutor])
 
   const courseOptions = useMemo(() => {
-    if (!tutor || !tutor.courses) return []
-    return tutor.courses.map(course => typeof course === 'string' ? course : course.name)
+    if (!tutor || !tutor.rawCourses) return []
+    return tutor.rawCourses.map(course => ({
+      id: course.course_id || course.tutor_course_id || course.id,
+      name: course.course_name || course.name
+    }))
   }, [tutor])
 
   useEffect(() => {
     const scrollArea = document.getElementById('learner-scroll-area')
     
     if (isOpen) {
+      setErrorMsg(null)
+      setSelectedCourseId("")
+      setSelectedSlotStr("")
       if (scrollArea) {
         const scrollbarWidth = scrollArea.offsetWidth - scrollArea.clientWidth
         if (scrollbarWidth > 0) {
@@ -70,11 +99,44 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
 
   if (!isOpen) return null
 
-  const handleBuatPesanan = () => {
-    // In a real app, this would make an API call to create the order
-    // Then navigate to the order detail page
-    navigate('/learner/detail-pesanan')
-    onClose()
+  const handleBuatPesanan = async () => {
+    setIsLoading(true)
+    setErrorMsg(null)
+
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        navigate('/login')
+        return
+      }
+
+      const slotData = JSON.parse(selectedSlotStr)
+      const bookingDate = getNextDateForDay(slotData.day)
+
+      const payload = {
+        tutor_id: tutor.id,
+        course_id: parseInt(selectedCourseId),
+        booking_date: bookingDate,
+        slot_ids: [slotData.id]
+      }
+
+      const headers = { Authorization: `Bearer ${token}` }
+      await axios.post('http://127.0.0.1:8000/api/learner/bookings', payload, { headers })
+
+      onClose()
+      navigate('/learner/detail-pesanan')
+      window.scrollTo(0, 0)
+    } catch (err) {
+      console.error("Gagal membuat pesanan:", err)
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+        return
+      }
+      setErrorMsg(err.response?.data?.message || err.message || "Gagal membuat pesanan")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const serviceFee = 15000;
@@ -89,7 +151,8 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
         <div className="bg-[#000666] pt-6 pb-5 px-6 flex flex-col items-center text-center relative shrink-0">
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+            disabled={isLoading}
+            className="absolute top-4 right-4 p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
           >
             <X className="w-4 h-4" />
           </button>
@@ -104,6 +167,13 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
         {/* Content Area */}
         <div className="px-6 py-5 space-y-3">
           
+          {errorMsg && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-xl border border-red-100 flex gap-2 items-start text-xs font-medium">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           {/* Subject Info */}
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center">
             <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center shrink-0 mr-3">
@@ -111,13 +181,13 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[10px] font-bold text-slate-400 mb-0.5">MATA PELAJARAN</div>
-              <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+              <Select value={selectedCourseId} onValueChange={setSelectedCourseId} disabled={isLoading}>
                 <SelectTrigger className="w-full h-auto bg-transparent border-none p-0 text-sm font-semibold text-slate-800 focus:ring-0 focus:ring-offset-0 shadow-none text-left">
                   <SelectValue placeholder="Pilih Mata Pelajaran" />
                 </SelectTrigger>
                 <SelectContent>
-                  {courseOptions.map((course, idx) => (
-                    <SelectItem key={idx} value={course}>{course}</SelectItem>
+                  {courseOptions.map((course) => (
+                    <SelectItem key={course.id || Math.random()} value={course.id ? String(course.id) : String(Math.random())}>{course.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -131,13 +201,13 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[10px] font-bold text-slate-400 mb-0.5">WAKTU SESI</div>
-              <Select value={selectedTime} onValueChange={setSelectedTime}>
+              <Select value={selectedSlotStr} onValueChange={setSelectedSlotStr} disabled={isLoading}>
                 <SelectTrigger className="w-full h-auto bg-transparent border-none p-0 text-sm font-semibold text-slate-800 focus:ring-0 focus:ring-offset-0 shadow-none text-left">
                   <SelectValue placeholder="Pilih Waktu Sesi" />
                 </SelectTrigger>
                 <SelectContent>
                   {scheduleOptions.map((opt, idx) => (
-                    <SelectItem key={idx} value={opt}>{opt}</SelectItem>
+                    <SelectItem key={idx} value={opt.value}>{opt.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -159,7 +229,7 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
         </div>
 
         {/* Total Bar */}
-        <div className="bg-emerald-50 px-6 py-3 mx-6 rounded-xl flex justify-between items-center mb-5 mt-1">
+        <div className="bg-emerald-50 px-6 py-3 mx-6 rounded-xl flex justify-between items-center mb-5 mt-1 border border-emerald-100">
           <span className="text-sm font-bold text-emerald-800">Total Pembayaran</span>
           <span className="text-base font-bold text-emerald-700">Rp {totalPrice.toLocaleString('id-ID')}</span>
         </div>
@@ -169,16 +239,17 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
           <Button 
             variant="ghost" 
             onClick={onClose}
-            className="flex-1 h-10 text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-bold rounded-xl text-sm"
+            disabled={isLoading}
+            className="flex-1 h-10 text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-bold rounded-xl text-sm transition-colors"
           >
             Batal
           </Button>
           <Button 
             onClick={handleBuatPesanan}
-            disabled={!selectedCourse || !selectedTime}
-            className="flex-[2] h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!selectedCourseId || !selectedSlotStr || isLoading}
+            className="flex-[2] h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 text-sm disabled:opacity-60 transition-all"
           >
-            Buat Pesanan
+            {isLoading ? "Memproses..." : "Buat Pesanan"}
           </Button>
         </div>
 
