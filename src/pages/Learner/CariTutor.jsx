@@ -60,10 +60,6 @@ export default function CariTutor() {
   // Real data state
   const [tutorsData, setTutorsData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-
-  // Real data state
-  const [tutorsData, setTutorsData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState(null)
 
   // Filter State
