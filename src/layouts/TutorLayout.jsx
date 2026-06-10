@@ -12,10 +12,16 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from '@/lib/axios'
 
-const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
+const getInitials = (name) => {
+  if (!name) return 'U'
+  return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+}
+
+const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handleLogout }) => (
   <div className="flex flex-col h-full bg-white">
     {/* Logo KonekDin */}
     <div className="px-5 pt-5 pb-4">
@@ -62,27 +68,19 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
         >
           <Avatar className="h-11 w-11 border-2 border-slate-100 flex-shrink-0">
-            <AvatarImage src="https://i.pravatar.cc/150?img=15" alt="Irkham Wildan" />
-            <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">IW</AvatarFallback>
+            <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Tutor')}&background=0a0f44&color=fff`} alt={user?.name || 'Tutor'} />
+            <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">{getInitials(user?.name)}</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <p className="text-sm font-bold text-[#0a0f44] leading-tight">Irkham Wildan</p>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Informatika {
-                (() => {
-                  const userEmail = "111202112345@mhs.dinus.ac.id"; // Contoh email
-                  const match = userEmail.match(/^\d{3}(\d{4})/);
-                  return match ? `'${match[1].slice(-2)}` : "";
-                })()
-              }
-            </p>
+          <div className="flex flex-col min-w-0">
+            <p className="text-sm font-bold text-[#0a0f44] leading-tight truncate w-full">{user?.name || 'Tutor'}</p>
+            <p className="text-[11px] text-slate-400 mt-0.5 truncate w-full">{user?.email || 'tutor@konekdin.com'}</p>
           </div>
-        </NavLink>
-        <button
-          onClick={() => navigate('/login')}
-          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors ml-2 flex-shrink-0"
-          title="Keluar"
-        >
+      </NavLink>
+      <button
+        onClick={handleLogout}
+        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors ml-2 flex-shrink-0"
+        title="Keluar"
+      >
           <LogOut className="h-5 w-5" strokeWidth={2} />
         </button>
       </div>
@@ -93,6 +91,32 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate }) => (
 export default function TutorLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/login', { replace: true })
+      return
+    }
+
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      setUser(JSON.parse(savedUser))
+    }
+  }, [navigate])
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('/logout')
+    } catch (error) {
+      console.error('Logout failed on server', error)
+    } finally {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      navigate('/login', { replace: true })
+    }
+  }
 
   const navigation = [
     { name: 'Dashboard', href: '/tutor/dashboard', icon: Home },
@@ -107,7 +131,7 @@ export default function TutorLayout() {
     <div className="flex h-screen bg-[#f7f9fb] overflow-hidden">
       {/* Sidebar Desktop */}
       <aside className="w-[250px] border-r border-slate-100 hidden lg:flex flex-col flex-shrink-0 bg-white">
-        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} />
+        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} />
       </aside>
 
       {/* Main Area: header + content + footer */}
@@ -121,13 +145,13 @@ export default function TutorLayout() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-[250px] border-r-0">
-              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} />
+              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} />
             </SheetContent>
           </Sheet>
           <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
           <Avatar className="h-8 w-8">
-            <AvatarImage src="https://i.pravatar.cc/150?img=11" alt="Irkham Wildan" />
-            <AvatarFallback>IW</AvatarFallback>
+            <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Tutor')}&background=0a0f44&color=fff`} alt={user?.name || 'Tutor'} />
+            <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
           </Avatar>
         </header>
 

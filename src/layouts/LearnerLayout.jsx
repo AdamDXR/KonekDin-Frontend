@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axios from '@/lib/axios'
 
 const getInitials = (name) => {
   if (!name) return 'U'
@@ -117,11 +117,17 @@ export default function LearnerLayout() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/login', { replace: true })
+      return
+    }
+
     const savedUser = localStorage.getItem('user')
     if (savedUser) {
       setUser(JSON.parse(savedUser))
     }
-  }, [])
+  }, [navigate])
 
   const handleLogout = async () => {
     try {
@@ -131,7 +137,7 @@ export default function LearnerLayout() {
     } finally {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      navigate('/login')
+      navigate('/login', { replace: true })
     }
   }
 
