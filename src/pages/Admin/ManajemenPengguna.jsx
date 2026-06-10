@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import axios from 'axios'
+import Tesseract from 'tesseract.js'
 import {
   Search,
   Eye,
@@ -11,7 +13,8 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  X
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -24,31 +27,72 @@ import {
 } from '@/components/ui/select'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
-// Mock Data
-const initialUsers = [
-  { id: 1, name: 'Irkham Wildan', email: 'irkham@mhs.dinus.ac.id', role: 'Tutor', status: 'Aktif', joinDate: '14 Januari 2026', image: 'https://i.pravatar.cc/150?img=11' },
-  { id: 2, name: 'Budi Santoso', email: 'budi@gmail.com', role: 'Pelajar', status: 'Pending', joinDate: '12 Januari 2026', image: 'https://i.pravatar.cc/150?img=12' },
-  { id: 3, name: 'Mery Zahra', email: 'mery@gmail.com', role: 'Tutor', status: 'Suspend', joinDate: '11 Januari 2026', image: 'https://i.pravatar.cc/150?img=5' },
-  { id: 4, name: 'Rina Sari', email: 'rina@gmail.com', role: 'Pelajar', status: 'Aktif', joinDate: '10 Januari 2026', image: 'https://i.pravatar.cc/150?img=9' },
-  { id: 5, name: 'Ahmad Raja', email: 'ahmad@gmail.com', role: 'Pelajar', status: 'Aktif', joinDate: '8 Januari 2026', image: 'https://i.pravatar.cc/150?img=15' },
-  { id: 6, name: 'Rahel Sahita', email: 'rahel@mhs.dinus.ac.id', role: 'Tutor', status: 'Aktif', joinDate: '7 Januari 2026', image: 'https://i.pravatar.cc/150?img=20' },
-  { id: 7, name: 'Siti Aminah', email: 'siti@mhs.dinus.ac.id', role: 'Pelajar', status: 'Aktif', joinDate: '6 Januari 2026', image: 'https://i.pravatar.cc/150?img=25' },
-  { id: 8, name: 'Joko Anwar', email: 'joko@gmail.com', role: 'Tutor', status: 'Pending', joinDate: '5 Januari 2026', image: 'https://i.pravatar.cc/150?img=32' },
-  { id: 9, name: 'Lina Marlina', email: 'lina.m@yahoo.com', role: 'Pelajar', status: 'Suspend', joinDate: '4 Januari 2026', image: 'https://i.pravatar.cc/150?img=40' },
-  { id: 10, name: 'Deni Sumargo', email: 'deni@gmail.com', role: 'Tutor', status: 'Aktif', joinDate: '3 Januari 2026', image: 'https://i.pravatar.cc/150?img=50' },
-  { id: 11, name: 'Siska Lestari', email: 'siska@gmail.com', role: 'Pelajar', status: 'Pending', joinDate: '2 Januari 2026', image: 'https://i.pravatar.cc/150?img=55' },
-  { id: 12, name: 'Rafi Ardan', email: 'rafi@mhs.dinus.ac.id', role: 'Tutor', status: 'Aktif', joinDate: '1 Januari 2026', image: 'https://i.pravatar.cc/150?img=33' },
-  { id: 13, name: 'Bambang Pamungkas', email: 'bambang@gmail.com', role: 'Pelajar', status: 'Aktif', joinDate: '30 Desember 2025', image: 'https://i.pravatar.cc/150?img=60' },
-  { id: 14, name: 'Chelsea Islan', email: 'chelsea@gmail.com', role: 'Tutor', status: 'Aktif', joinDate: '28 Desember 2025', image: 'https://i.pravatar.cc/150?img=65' },
-]
-
 export default function ManajemenPengguna() {
-  const [users, setUsers] = useState(initialUsers)
+  const [users, setUsers] = useState([])
+  const [applications, setApplications] = useState([])
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('Semua')
   const [statusFilter, setStatusFilter] = useState('Semua')
   const [currentPage, setCurrentPage] = useState(1)
   const ITEMS_PER_PAGE = 5
+  
+  // Modal & OCR state
+  const [selectedApp, setSelectedApp] = useState(null)
+  const [ocrResult, setOcrResult] = useState('')
+  const [ocrLoading, setOcrLoading] = useState(false)
+
+  // Fetch Data
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem('token') || ''
+      const headers = { Authorization: `Bearer ${token}` }
+      
+      const [usersRes, appsRes] = await Promise.all([
+         axios.get('http://127.0.0.1:8000/api/admin/users', { headers }),
+         axios.get('http://127.0.0.1:8000/api/admin/applications', { headers })
+      ])
+      
+      // Combine data into our table format
+      const appsMap = {}
+      if(appsRes.data && appsRes.data.data) {
+        appsRes.data.data.forEach(app => {
+          appsMap[app.user_id] = app
+        })
+        setApplications(appsRes.data.data)
+      }
+      
+      if(usersRes.data && usersRes.data.data) {
+        const mappedUsers = usersRes.data.data.map(u => {
+          let st = u.status === 'active' ? 'Aktif' : 'Suspend'
+          let rl = u.role === 'tutor' ? 'Tutor' : 'Pelajar'
+          
+          if (appsMap[u.id] && appsMap[u.id].status === 'pending') {
+            st = 'Pending'
+            rl = 'Tutor' // Calon Tutor
+          }
+
+          return {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            role: rl,
+            status: st,
+            joinDate: 'Baru-baru ini',
+            image: `https://i.pravatar.cc/150?u=${u.id}`,
+            appId: appsMap[u.id] ? appsMap[u.id].id : null,
+            cv_url: appsMap[u.id] ? appsMap[u.id].cv_url : null
+          }
+        })
+        setUsers(mappedUsers)
+      }
+    } catch (e) {
+      console.error("Fetch error", e)
+    }
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -69,25 +113,67 @@ export default function ManajemenPengguna() {
   }
 
   // Handlers for Actions
-  const handleView = (name) => {
-    alert(`Fitur profil pengguna untuk ${name} sedang dalam pengembangan.`)
+  const handleView = (user) => {
+    if (user.status === 'Pending' && user.cv_url) {
+      setSelectedApp(user)
+      setOcrResult('')
+      setOcrLoading(false)
+    } else {
+      alert(`Fitur profil pengguna untuk ${user.name} sedang dalam pengembangan.`)
+    }
   }
 
-  const handleApprove = (id) => {
-    setUsers(users.map(u => u.id === id ? { ...u, status: 'Aktif' } : u))
+  const handleRunOcr = async () => {
+    if(!selectedApp || !selectedApp.cv_url) return
+    setOcrLoading(true)
+    setOcrResult('')
+    try {
+      const result = await Tesseract.recognize(
+        selectedApp.cv_url,
+        'eng',
+        { logger: m => console.log(m) }
+      )
+      setOcrResult(result.data.text)
+    } catch (e) {
+      setOcrResult("Gagal mengekstrak teks. Pastikan file gambar valid (PDF tidak bisa langsung di-OCR). " + e.message)
+    }
+    setOcrLoading(false)
   }
 
-  const handleSuspend = (id) => {
-    setUsers(users.map(u => u.id === id ? { ...u, status: 'Suspend' } : u))
+  const handleApprove = async (id) => {
+    try {
+      const token = localStorage.getItem('token') || ''
+      const userObj = users.find(u => u.id === id)
+      if(userObj && userObj.appId) {
+        await axios.patch(`http://127.0.0.1:8000/api/admin/applications/${userObj.appId}/approve`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      }
+      fetchData()
+    } catch (e) {
+      console.error(e)
+    }
   }
 
-  const handleUnsuspend = (id) => {
-    setUsers(users.map(u => u.id === id ? { ...u, status: 'Aktif' } : u))
+  const handleSuspend = async (id) => {
+    alert("Suspend functionality API pending...")
   }
 
-  const handleDelete = (id) => {
+  const handleUnsuspend = async (id) => {
+    alert("Unsuspend functionality API pending...")
+  }
+
+  const handleDelete = async (id) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus pengguna ini?')) {
-      setUsers(users.filter(u => u.id !== id))
+      try {
+        const token = localStorage.getItem('token') || ''
+        await axios.delete(`http://127.0.0.1:8000/api/admin/users/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        fetchData()
+      } catch (e) {
+        console.error(e)
+      }
     }
   }
 
@@ -126,7 +212,7 @@ export default function ManajemenPengguna() {
   const totalPending = users.filter(u => u.status === 'Pending').length
 
   return (
-    <div className="flex flex-col min-h-full">
+    <div className="flex flex-col min-h-full relative">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-[32px] font-bold text-[#000666] mb-2 tracking-tight">
@@ -254,7 +340,7 @@ export default function ManajemenPengguna() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-3 text-slate-400">
-                        <button onClick={() => handleView(user.name)} className="hover:text-slate-600 transition-colors p-1" title="Lihat Profil">
+                        <button onClick={() => handleView(user)} className="hover:text-slate-600 transition-colors p-1" title="Lihat Profil / Dokumen">
                           <Eye className="w-5 h-5" />
                         </button>
                         
@@ -369,6 +455,49 @@ export default function ManajemenPengguna() {
 
       </div>
 
+      {/* MODAL OCR */}
+      {selectedApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 relative">
+            <button 
+              onClick={() => setSelectedApp(null)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h2 className="text-xl font-bold mb-4 text-[#000666]">Verifikasi Dokumen: {selectedApp.name}</h2>
+            
+            <div className="mb-4 bg-slate-50 p-4 rounded-xl flex flex-col items-center justify-center border">
+               <img src={selectedApp.cv_url} alt="Dokumen" className="max-h-64 object-contain mb-2" onError={(e) => e.target.style.display='none'} />
+               <a href={selectedApp.cv_url} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">Lihat / Download File Asli</a>
+            </div>
+
+            <div className="flex gap-4 mb-4">
+               <Button onClick={handleRunOcr} disabled={ocrLoading} className="bg-[#000666] text-white hover:bg-[#000666]/90">
+                 {ocrLoading ? 'Memproses OCR...' : 'Coba Fitur OCR'}
+               </Button>
+               <Button onClick={() => { handleApprove(selectedApp.id); setSelectedApp(null); }} className="bg-emerald-600 text-white hover:bg-emerald-700">
+                 Setujui Aplikasi
+               </Button>
+            </div>
+
+            {ocrLoading && (
+              <div className="text-sm text-slate-500 animate-pulse mt-2">
+                Sedang mengekstrak teks dari dokumen menggunakan Tesseract.js...
+              </div>
+            )}
+
+            {ocrResult && (
+              <div className="mt-4">
+                <h3 className="font-bold text-sm mb-2 text-slate-700">Hasil OCR:</h3>
+                <div className="bg-slate-100 p-4 rounded-xl text-sm whitespace-pre-wrap min-h-[100px] border border-slate-200">
+                  {ocrResult}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
