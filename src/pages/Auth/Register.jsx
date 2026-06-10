@@ -13,7 +13,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [form, setForm] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -35,7 +35,7 @@ export default function Register() {
 
     try {
       const response = await axios.post('/register', {
-        name: form.fullName, // Backend expects "name" based on typical Laravel conventions (often matching the 'user' response)
+        fullName: form.fullName, // Backend memvalidasi field 'fullName'
         email: form.email,
         password: form.password,
         password_confirmation: form.confirmPassword
@@ -134,7 +134,7 @@ export default function Register() {
 
               {/* Logo for mobile only */}
               <div className="flex items-center mb-8 md:hidden">
-                <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
+                <img src="/images/logo_konekdin.png" alt="KonekDin" className="h-8 w-auto" />
               </div>
 
               <div className="text-left mb-8">
@@ -179,8 +179,8 @@ export default function Register() {
                       placeholder="Masukkan nama lengkap"
                     />
                   </div>
-                  {errors.name && (
-                    <p className="text-xs text-red-500 font-medium pt-1">{errors.name[0]}</p>
+                  {errors.fullName && (
+                    <p className="text-xs text-red-500 font-medium pt-1">{errors.fullName[0]}</p>
                   )}
                 </div>
 

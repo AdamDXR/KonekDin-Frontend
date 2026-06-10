@@ -66,7 +66,7 @@ export default function Login() {
           <div className="max-w-md w-full mx-auto">
             {/* Logo for mobile only */}
             <div className="flex items-center mb-8 md:hidden">
-              <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
+              <img src="/images/logo_konekdin.png" alt="KonekDin" className="h-8 w-auto" />
             </div>
 
             <div className="text-left mb-8">
