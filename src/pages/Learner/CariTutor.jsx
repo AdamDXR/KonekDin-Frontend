@@ -56,10 +56,7 @@ export default function CariTutor() {
   const [currentPage, setCurrentPage] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTutor, setSelectedTutor] = useState(null)
-  
-  // Real data state
-  const [tutorsData, setTutorsData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+
 
   // Real data state
   const [tutorsData, setTutorsData] = useState([])
