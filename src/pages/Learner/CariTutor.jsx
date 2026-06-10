@@ -72,7 +72,13 @@ export default function CariTutor() {
     const fetchTutors = async () => {
       try {
         const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        if (!token) {
+           console.warn("Token tidak ditemukan, mengarahkan ke halaman login");
+           window.location.href = '/login';
+           return;
+        }
+
+        const headers = { Authorization: `Bearer ${token}` };
         const response = await axios.get('http://127.0.0.1:8000/api/tutors', { headers });
         console.log("Response dari API:", response.data);
         
@@ -111,6 +117,14 @@ export default function CariTutor() {
         }
       } catch (error) {
         console.error("Gagal mengambil data tutor:", error);
+        
+        // Handle Token Expired / Invalid
+        if (error.response?.status === 401) {
+           localStorage.removeItem('token');
+           window.location.href = '/login';
+           return;
+        }
+
         setErrorMsg(error.response?.data?.message || error.message || "Terjadi kesalahan saat mengambil data");
       } finally {
         setIsLoading(false);
