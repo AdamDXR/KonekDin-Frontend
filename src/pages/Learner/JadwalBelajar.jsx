@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import BookingCard from '@/components/shared/BookingCard'
 
 // Data dummy jadwal — ganti dengan API call nanti
 const jadwalList = [
@@ -28,66 +29,25 @@ const jadwalList = [
 
 function JadwalCard({ jadwal, onHubungi, isHighlighted, cardRef }) {
   return (
-    <div ref={cardRef} className={`rounded-2xl shadow-sm border border-slate-100 overflow-hidden transition-all duration-500 hover:shadow-md ${isHighlighted ? "ring-2 ring-[#0d7c6b] bg-[#f0fbf8] -translate-y-1" : "bg-white"}`}>
-      <div className="flex">
-        {/* Accent bar kiri */}
-        <div className="w-1.5 bg-[#0d7c6b] rounded-l-2xl flex-shrink-0" />
-
-        <div className="flex-1 p-5 sm:p-6">
-          {/* Baris atas: info tutor + tombol hubungi */}
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              {/* Foto tutor + badge rating */}
-              <div className="relative flex-shrink-0">
-                <Avatar className="h-[72px] w-[72px] rounded-xl border border-slate-100">
-                  <AvatarImage src={jadwal.tutorFoto} alt={jadwal.tutorNama} />
-                  <AvatarFallback className="rounded-xl bg-[#0a0f44] text-white text-lg font-bold">
-                    {jadwal.tutorNama.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
-                  <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> {jadwal.tutorRating}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-[17px] font-bold text-[#0a0f44] leading-tight">
-                  {jadwal.tutorNama}
-                </h3>
-                <p className="text-sm font-semibold text-[#0d7c6b] mt-0.5">
-                  Mata Kuliah : {jadwal.mataKuliah}
-                </p>
-              </div>
-            </div>
-
-            {/* Tombol hubungi */}
-            <Button
-              onClick={() => onHubungi(jadwal)}
-              className="flex-shrink-0 bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold px-5 py-2.5 h-auto rounded-xl text-sm gap-2 shadow-sm"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Hubungi Tutor
-            </Button>
-          </div>
-
-          <div className="h-px bg-slate-100 my-4" />
-
-          {/* Baris bawah: tanggal, jam, pengingat */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
-              <Calendar className="h-4 w-4 text-slate-500" />
-              <span className="text-sm font-medium text-slate-700">{jadwal.tanggal}</span>
-            </div>
-
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
-              <Clock className="h-4 w-4 text-slate-500" />
-              <span className="text-sm font-medium text-slate-700">
-                {jadwal.jamMulai} - {jadwal.jamSelesai} {jadwal.timezone}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div ref={cardRef} className={isHighlighted ? "ring-2 ring-[#0d7c6b] rounded-3xl" : ""}>
+      <BookingCard
+        image={jadwal.tutorFoto}
+        rating={jadwal.tutorRating}
+        title={jadwal.tutorNama}
+        subtitle={jadwal.mataKuliah}
+        date={jadwal.tanggal}
+        time={`${jadwal.jamMulai} - ${jadwal.jamSelesai} ${jadwal.timezone}`}
+        accentColor="bg-[#0d7c6b]"
+        actionNode={
+          <Button
+            onClick={() => onHubungi(jadwal)}
+            className="w-full md:w-auto bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold px-5 py-2.5 rounded-xl text-sm gap-2 shadow-sm"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Hubungi Tutor
+          </Button>
+        }
+      />
     </div>
   )
 }
