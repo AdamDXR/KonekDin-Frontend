@@ -72,7 +72,7 @@ export default function DetailPesanan() {
 
   return (
     <div className="flex flex-col min-h-full">
-      
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">Detail Pesanan</h1>
         <p className="text-slate-500">Lihat detail pesanan dan selesaikan pembayaran.</p>

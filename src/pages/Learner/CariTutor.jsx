@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import PesanSesiModal from '@/components/Learner/PesanSesiModal'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import TutorCard from '@/components/shared/TutorCard'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Select,
@@ -30,7 +31,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 
-// Mock Data Tutor
+// Mock Data Tutor - di-export untuk sementara digunakan di Dashboard/ProfilTutor mock
 export const mockTutors = [
   { id: 1, name: 'Irkham Wildan', university: "Informatika '21", courses: ['Basis Data', 'Algoritma dan Struktur Data'], rating: 4.9, isTopTutor: true, schedule: [{ day: 'Senin', times: ['07.00 - 07.50', '12.30 - 13.20'] }, { day: 'Rabu', times: ['15.30 - 16.20'] }, { day: 'Jumat', times: ['17.10 - 18.00'] }], price: 50000, image: 'https://i.pravatar.cc/150?img=11' },
   { id: 2, name: 'Mery Zahra', university: "Informatika '22", courses: ['Pemrograman Berbasis Web', 'Interaksi Manusia dan Komputer'], rating: 4.8, isTopTutor: false, schedule: [{ day: 'Selasa', times: ['09.30 - 10.20'] }, { day: 'Kamis', times: ['14.10 - 15.00'] }], price: 60000, image: 'https://i.pravatar.cc/150?img=5' },
@@ -55,6 +56,7 @@ export default function CariTutor() {
   const [currentPage, setCurrentPage] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTutor, setSelectedTutor] = useState(null)
+
 
   // Real data state
   const [tutorsData, setTutorsData] = useState([])
@@ -148,13 +150,9 @@ export default function CariTutor() {
       return matchSearch && matchCourse && matchDay && matchTime
     })
 
-    // Sort seluruh data sebelum di-paginasi (seperti sistem Makanan Best Seller)
     return filtered.sort((a, b) => {
-      // 1. Kelompokkan Top Tutor (Best Seller) agar tampil paling depan dari seluruh data
       if (a.isTopTutor && !b.isTopTutor) return -1;
       if (!a.isTopTutor && b.isTopTutor) return 1;
-      
-      // 2. Jika sama-sama Top Tutor ATAU sama-sama bukan, urutkan dari rating tertinggi ke terendah
       return b.rating - a.rating;
     });
   }, [tutorsData, searchTerm, filterCourse, filterDay, filterTime])
@@ -166,14 +164,12 @@ export default function CariTutor() {
                             (filterDay !== 'semua' ? 1 : 0) + 
                             (filterTime !== 'semua' ? 1 : 0)
 
-  // Handle page change safely
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage)
     }
   }
 
-  // Reset page when filters change
   useMemo(() => {
     setCurrentPage(1)
   }, [searchTerm, filterCourse, filterDay, filterTime])
@@ -259,18 +255,10 @@ export default function CariTutor() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="semua">Semua Jam</SelectItem>
-                    <SelectItem value="07.00 - 07.50">07.00 - 07.50</SelectItem>
-                    <SelectItem value="07.50 - 08.40">07.50 - 08.40</SelectItem>
-                    <SelectItem value="08.40 - 09.30">08.40 - 09.30</SelectItem>
-                    <SelectItem value="09.30 - 10.20">09.30 - 10.20</SelectItem>
-                    <SelectItem value="10.20 - 11.10">10.20 - 11.10</SelectItem>
-                    <SelectItem value="11.10 - 12.00">11.10 - 12.00</SelectItem>
-                    <SelectItem value="12.30 - 13.20">12.30 - 13.20</SelectItem>
-                    <SelectItem value="13.20 - 14.10">13.20 - 14.10</SelectItem>
-                    <SelectItem value="14.10 - 15.00">14.10 - 15.00</SelectItem>
-                    <SelectItem value="15.30 - 16.20">15.30 - 16.20</SelectItem>
-                    <SelectItem value="16.20 - 17.10">16.20 - 17.10</SelectItem>
-                    <SelectItem value="17.10 - 18.00">17.10 - 18.00</SelectItem>
+                    <SelectItem value="07:00 - 08:00">07:00 - 08:00</SelectItem>
+                    <SelectItem value="08:00 - 09:00">08:00 - 09:00</SelectItem>
+                    <SelectItem value="09:00 - 10:00">09:00 - 10:00</SelectItem>
+                    <SelectItem value="10:00 - 11:00">10:00 - 11:00</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -307,92 +295,26 @@ export default function CariTutor() {
         ) : paginatedTutors.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedTutors.map((tutor) => (
-              <Card key={tutor.id} className="relative p-6 pt-5 border-[#C6C5D4]/30 shadow-sm hover:shadow-md transition-all duration-300 rounded-[20px] group flex flex-col bg-white overflow-hidden">
-                {/* Ribbon - Top Tutor */}
-                {tutor.isTopTutor && (
-                  <div className="absolute top-0 right-4 w-[46px] h-[52px] bg-gradient-to-b from-[#FBBF24] to-[#CA8A04] rounded-b-lg flex flex-col items-center justify-start pt-1.5 shadow-sm z-10">
-                    <Star className="w-3.5 h-3.5 fill-white text-white mb-0.5" />
-                    <span className="text-[8px] font-bold text-white text-center leading-[1.1]">TOP<br/>TUTOR</span>
+              <TutorCard 
+                key={tutor.id} 
+                tutor={tutor} 
+                actionNode={
+                  <div className="flex gap-3 mt-auto">
+                    <Button 
+                      onClick={() => { setSelectedTutor(tutor); setIsModalOpen(true); }}
+                      className="flex-[1.2] rounded-[12px] h-10 bg-[#25D366] hover:bg-[#20b858] text-white font-bold shadow-none text-sm px-0"
+                    >
+                      Pesan Sesi
+                    </Button>
+                    <Button 
+                      onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}
+                      className="flex-[1.4] rounded-[12px] h-10 bg-[#E6F1EF] text-[#006B5F] hover:bg-[#d6e8e5] font-bold shadow-none text-sm px-0"
+                    >
+                      Lihat Profil
+                    </Button>
                   </div>
-                )}
-
-                {/* Top Section: Photo */}
-                <div className="relative w-28 h-28 flex-shrink-0 rounded-[16px] overflow-hidden bg-slate-100 mb-4 shadow-sm border border-slate-100">
-                  <img 
-                    src={tutor.image} 
-                    alt={tutor.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
-                    <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                    {tutor.rating}
-                  </div>
-                </div>
-
-                {/* Name & University */}
-                <div className="mb-4">
-                  <h3 className="font-bold text-[18px] text-[#1E1B4B] leading-tight line-clamp-1 mb-1">{tutor.name}</h3>
-                  <div className="text-[13px] text-[#454652] line-clamp-1">
-                    {tutor.university}
-                  </div>
-                </div>
-
-                {/* Courses Badges */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {tutor.courses.map((course, index) => (
-                    <Badge key={index} className="bg-[#F1F5F9] text-[#312E81] hover:bg-[#e2e8f0] border-none shadow-none font-medium px-3 py-1 rounded-md text-xs">
-                      {course}
-                    </Badge>
-                  ))}
-                </div>
-
-                {/* Jadwal Tersedia */}
-                <div className="mb-6">
-                  <p className="text-[11px] font-semibold text-[#767683] mb-3 tracking-wider">
-                    JADWAL TERSEDIA
-                  </p>
-                  <div className="space-y-2.5">
-                    {tutor.schedule.slice(0, 2).map((slot, index) => (
-                      <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-slate-50 rounded-xl p-2.5 border border-slate-100">
-                        <span className="bg-[#EAF0E4] text-[#4A5D23] font-bold text-[10px] px-2.5 py-1 rounded-lg w-fit shrink-0 uppercase tracking-wide">
-                          {slot.day}
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {slot.times.map((time, tIdx) => (
-                            <span key={tIdx} className="bg-white border border-slate-200 text-slate-600 font-semibold text-[10px] px-2 py-1 rounded-md shadow-sm">
-                              {time}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                    {tutor.schedule.length > 2 && (
-                      <button 
-                        onClick={() => navigate(`/learner/profil-tutor/${tutor.id}#jadwal-ketersediaan`)}
-                        className="w-full mt-2 text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 py-2 rounded-lg transition-colors border border-transparent hover:border-blue-100 text-center"
-                      >
-                        Lihat {tutor.schedule.length - 2} hari lainnya
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3 mt-auto">
-                  <Button 
-                    onClick={() => { setSelectedTutor(tutor); setIsModalOpen(true); }}
-                    className="flex-[1.2] rounded-[12px] h-10 bg-[#25D366] hover:bg-[#20b858] text-white font-bold shadow-none text-sm px-0"
-                  >
-                    Pesan Sesi
-                  </Button>
-                  <Button 
-                    onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}
-                    className="flex-[1.4] rounded-[12px] h-10 bg-[#E6F1EF] text-[#006B5F] hover:bg-[#d6e8e5] font-bold shadow-none text-sm px-0"
-                  >
-                    Lihat Profil
-                  </Button>
-                </div>
-              </Card>
+                }
+              />
             ))}
           </div>
         ) : (
