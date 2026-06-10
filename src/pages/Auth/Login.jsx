@@ -54,9 +54,8 @@ export default function Login() {
         {/* KOLOM KIRI: Visual Branding */}
         <div className="relative w-full md:w-5/12 bg-[#1a1a4b] text-white p-10 flex flex-col justify-between hidden md:flex">
           {/* Logo / Header Branding */}
-          <div className="flex items-center space-x-2 z-10">
-            <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-8 w-8 object-contain" />
-            <span className="text-2xl font-bold tracking-tight">KonekDin</span>
+          <div className="flex items-center z-10">
+            <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-10 w-auto" />
           </div>
 
           {/* Headline Body */}
@@ -94,11 +93,8 @@ export default function Login() {
         <div className="w-full md:w-7/12 p-8 md:p-14 lg:p-16 flex flex-col justify-center bg-white dark:bg-slate-900">
           <div className="max-w-md w-full mx-auto">
             {/* Logo for mobile only */}
-            <div className="flex items-center space-x-2 mb-8 md:hidden">
-              <div className="bg-[#1a1a4b] p-2 rounded-lg">
-                <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-6 w-6 object-contain" />
-              </div>
-              <span className="text-2xl font-bold text-slate-800 dark:text-white">KonekDin</span>
+            <div className="flex items-center mb-8 md:hidden">
+              <img src="/images/logo_konekdin.png" alt="KonekDin" className="h-8 w-auto" />
             </div>
 
             <div className="text-left mb-8">

@@ -25,11 +25,8 @@ export default function DashboardLanding() {
       <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/')}>
-              <div className="bg-[#1a1a4b] p-1.5 rounded-lg group-hover:bg-[#121235] transition-colors">
-                <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-7 w-7 object-contain brightness-0 invert" />
-              </div>
-              <span className="text-2xl font-bold text-[#1a1a4b] tracking-tight">KonekDin</span>
+            <div className="flex items-center cursor-pointer group" onClick={() => navigate('/')}>
+              <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-10 w-auto group-hover:opacity-90 transition-opacity" />
             </div>
             <Button onClick={() => navigate('/login')} className="bg-[#1a1a4b] hover:bg-[#121235] text-white rounded-xl px-6 py-2 h-11 font-semibold transition-all shadow-md hover:shadow-lg">
               Daftar / Masuk <ArrowRight className="ml-2 w-4 h-4" />
@@ -281,11 +278,8 @@ export default function DashboardLanding() {
         <div className="max-w-7xl w-full flex flex-col lg:flex-row justify-between items-center lg:items-start gap-8 lg:gap-0">
           
           <div className="flex flex-col items-center lg:items-start space-y-2 text-center lg:text-left">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="bg-slate-100 p-1.5 rounded-lg">
-                <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-5 w-5 object-contain grayscale opacity-80" />
-              </div>
-              <span className="font-bold text-slate-700 text-base tracking-tight">KonekDin</span>
+            <div className="flex items-center mb-2">
+              <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto grayscale opacity-80" />
             </div>
             <p className="text-slate-400 max-w-xs">Memberdayakan mahasiswa melalui bimbingan teknis antar sebaya dan lingkungan belajar kolaboratif.</p>
             <span className="block mt-2">© 2026 KonekDin. Part of the Academic Commons.</span>

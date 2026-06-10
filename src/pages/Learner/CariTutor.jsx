@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import PesanSesiModal from '@/components/Learner/PesanSesiModal'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import TutorCard from '@/components/shared/TutorCard'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Select,
@@ -269,12 +270,23 @@ export default function CariTutor() {
         ) : paginatedTutors.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedTutors.map((tutor) => (
-              <Card key={tutor.id} className="relative p-6 pt-5 border-[#C6C5D4]/30 shadow-sm hover:shadow-md transition-all duration-300 rounded-[20px] group flex flex-col bg-white overflow-hidden">
-                {/* Ribbon - Top Tutor */}
-                {tutor.isTopTutor && (
-                  <div className="absolute top-0 right-4 w-[46px] h-[52px] bg-gradient-to-b from-[#FBBF24] to-[#CA8A04] rounded-b-lg flex flex-col items-center justify-start pt-1.5 shadow-sm z-10">
-                    <Star className="w-3.5 h-3.5 fill-white text-white mb-0.5" />
-                    <span className="text-[8px] font-bold text-white text-center leading-[1.1]">TOP<br/>TUTOR</span>
+              <TutorCard 
+                key={tutor.id} 
+                tutor={tutor} 
+                actionNode={
+                  <div className="flex gap-3 mt-auto">
+                    <Button 
+                      onClick={() => { setSelectedTutor(tutor); setIsModalOpen(true); }}
+                      className="flex-[1.2] rounded-[12px] h-10 bg-[#25D366] hover:bg-[#20b858] text-white font-bold shadow-none text-sm px-0"
+                    >
+                      Pesan Sesi
+                    </Button>
+                    <Button 
+                      onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}
+                      className="flex-[1.4] rounded-[12px] h-10 bg-[#E6F1EF] text-[#006B5F] hover:bg-[#d6e8e5] font-bold shadow-none text-sm px-0"
+                    >
+                      Lihat Profil
+                    </Button>
                   </div>
                 )}
 
