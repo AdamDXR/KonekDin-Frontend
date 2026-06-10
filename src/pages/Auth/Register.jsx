@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import axios from '@/lib/axios'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -18,12 +19,62 @@ export default function Register() {
     confirmPassword: '',
   })
 
+  const [isLoading, setIsLoading] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [successMsg, setSuccessMsg] = useState('')
+
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Dummy submit, arahkan ke learner
-    navigate('/learner')
+    
+    // Reset state pesan
+    setErrors({})
+    setSuccessMsg('')
+    setIsLoading(true)
+
+    try {
+      const response = await axios.post('/register', {
+        fullName: form.fullName, // Backend memvalidasi field 'fullName'
+        email: form.email,
+        password: form.password,
+        password_confirmation: form.confirmPassword
+      })
+
+      // Jika berhasil, munculkan pesan sukses sebentar lalu arahkan ke login
+      if (response.status === 201 || response.status === 200) {
+        setSuccessMsg(response.data.message || 'Registrasi berhasil!')
+        setTimeout(() => {
+          navigate('/login')
+        }, 1500)
+      }
+    } catch (error) {
+      // Tampilkan struktur error asli dari backend ke console agar bisa kita lihat
+      console.error("Registrasi Error Data:", error.response?.data);
+
+      if (error.response && error.response.status === 422) {
+        // Terkadang backend mengembalikan format error yang berbeda
+        const validationErrors = error.response.data.errors || error.response.data;
+        setErrors(validationErrors);
+
+        // Kumpulkan semua pesan error menjadi satu teks panjang untuk ditampilkan di atas form
+        let allErrors = "Terjadi kesalahan validasi data.";
+        if (typeof validationErrors === 'object') {
+          // Ambil semua pesan error dari berbagai field
+          const messages = Object.values(validationErrors).flat();
+          if (messages.length > 0) {
+            allErrors = messages.join(' | ');
+          }
+        }
+        
+        setErrors(prev => ({ ...prev, general: allErrors }));
+      } else {
+        // Error umum server
+        setErrors({ general: 'Terjadi kesalahan saat menghubungi server atau koneksi terputus.' })
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const isPasswordMatch = form.confirmPassword ? form.password === form.confirmPassword : true
@@ -33,15 +84,15 @@ export default function Register() {
       {/* Container utama (tengah) */}
       <div className="flex-grow flex items-center justify-center p-4">
         <div className="flex w-full max-w-5xl bg-white shadow-2xl rounded-3xl overflow-hidden flex-col md:flex-row">
-        
+
           {/* KOLOM KIRI: Visual Branding */}
           <div className="relative w-full md:w-5/12 bg-[#0a0f44] text-white p-10 flex flex-col justify-between hidden md:flex overflow-hidden">
-            
+
             {/* Background Image with Overlay */}
             <div className="absolute inset-0 z-0">
-              <img 
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Students studying" 
+              <img
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Students studying"
                 className="w-full h-full object-cover opacity-30 mix-blend-luminosity"
               />
               <div className="absolute inset-0 bg-[#0a0f44]/80 mix-blend-multiply"></div>
@@ -49,10 +100,8 @@ export default function Register() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f44] via-transparent to-[#0a0f44]/50"></div>
             </div>
 
-            {/* Logo / Header Branding */}
-            <div className="flex items-center space-x-2 z-10">
-              <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-10 w-10 object-contain brightness-0 invert" />
-              <span className="text-3xl font-bold tracking-tight">KonekDin</span>
+            <div className="flex items-center z-10">
+              <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-12 w-auto" />
             </div>
 
             {/* Headline Body */}
@@ -82,13 +131,10 @@ export default function Register() {
           {/* KOLOM KANAN: Formulir Register */}
           <div className="w-full md:w-7/12 p-8 md:p-14 flex flex-col justify-center bg-white z-10 rounded-l-3xl -ml-4 md:-ml-6 shadow-[-10px_0_30px_rgba(0,0,0,0.05)]">
             <div className="max-w-[400px] w-full mx-auto">
-              
+
               {/* Logo for mobile only */}
-              <div className="flex items-center space-x-2 mb-8 md:hidden">
-                <div className="bg-[#1a1a4b] p-2 rounded-lg">
-                  <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-6 w-6 object-contain brightness-0 invert" />
-                </div>
-                <span className="text-2xl font-bold text-slate-800">KonekDin</span>
+              <div className="flex items-center mb-8 md:hidden">
+                <img src="/images/logo_konekdin.png" alt="KonekDin" className="h-8 w-auto" />
               </div>
 
               <div className="text-left mb-8">
@@ -97,8 +143,22 @@ export default function Register() {
                 <p className="text-slate-500 font-medium">Daftar ke akun KonekDin Anda untuk mulai belajar</p>
               </div>
 
+              {/* Tampilkan pesan sukses jika ada */}
+              {successMsg && (
+                <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-xl text-sm font-semibold text-center">
+                  {successMsg}
+                </div>
+              )}
+
+              {/* Tampilkan error umum jika ada */}
+              {errors.general && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-xl text-sm font-semibold text-center">
+                  {errors.general}
+                </div>
+              )}
+
               <form className="space-y-4" onSubmit={handleSubmit}>
-                
+
                 {/* Input Nama Lengkap */}
                 <div className="space-y-1.5">
                   <Label htmlFor="fullName" className="block text-sm font-bold text-slate-900">
@@ -119,6 +179,9 @@ export default function Register() {
                       placeholder="Masukkan nama lengkap"
                     />
                   </div>
+                  {errors.fullName && (
+                    <p className="text-xs text-red-500 font-medium pt-1">{errors.fullName[0]}</p>
+                  )}
                 </div>
 
                 {/* Input Email */}
@@ -141,6 +204,9 @@ export default function Register() {
                       placeholder="email@mhs.dinus.ac.id"
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-xs text-red-500 font-medium pt-1">{errors.email[0]}</p>
+                  )}
                 </div>
 
                 {/* Input Password */}
@@ -173,6 +239,12 @@ export default function Register() {
                       </button>
                     </div>
                   </div>
+                  {form.password.length > 0 && form.password.length < 8 && (
+                    <p className="text-xs text-orange-500 font-medium pt-1">Kata sandi harus minimal 8 karakter</p>
+                  )}
+                  {errors.password && (
+                    <p className="text-xs text-red-500 font-medium pt-1">{errors.password[0]}</p>
+                  )}
                 </div>
 
                 {/* Input Konfirmasi Password */}
@@ -192,9 +264,8 @@ export default function Register() {
                       onChange={handleChange}
                       required
                       minLength={8}
-                      className={`block w-full h-12 pl-11 pr-10 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:bg-white transition-all font-medium ${
-                        !isPasswordMatch ? 'focus-visible:ring-red-500 border-red-300 bg-red-50' : 'focus-visible:ring-[#1a1a4b] focus-visible:border-slate-200'
-                      }`}
+                      className={`block w-full h-12 pl-11 pr-10 border-transparent rounded-xl text-slate-900 bg-slate-100 placeholder-slate-400 focus-visible:ring-2 focus-visible:bg-white transition-all font-medium ${!isPasswordMatch ? 'focus-visible:ring-red-500 border-red-300 bg-red-50' : 'focus-visible:ring-[#1a1a4b] focus-visible:border-slate-200'
+                        }`}
                       placeholder="Ulangi kata sandi"
                     />
                     <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
@@ -216,10 +287,10 @@ export default function Register() {
                 <div className="pt-3">
                   <Button
                     type="submit"
-                    disabled={!isPasswordMatch || !form.password}
-                    className="w-full flex justify-center h-12 py-3 px-4 rounded-xl shadow-md text-[15px] font-bold text-white bg-[#0a0f44] hover:bg-[#060a2b] focus-visible:ring-[#0a0f44] transition-all disabled:opacity-50"
+                    disabled={!isPasswordMatch || form.password.length < 8 || isLoading}
+                    className="w-full flex justify-center h-12 py-3 px-4 rounded-xl shadow-md text-[15px] font-bold text-white bg-[#0a0f44] hover:bg-[#060a2b] focus-visible:ring-[#0a0f44] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Daftar Sekarang
+                    {isLoading ? 'Memproses...' : 'Daftar Sekarang'}
                   </Button>
                 </div>
               </form>
@@ -287,7 +358,7 @@ export default function Register() {
 
           <div className="flex-grow flex justify-center md:justify-end space-x-6 uppercase tracking-wider md:pr-8">
             <button className="flex items-center space-x-1.5 hover:text-slate-800 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></svg>
               <span>IDN</span>
             </button>
             <a href="#" className="hover:text-slate-800 transition-colors">PUSAT BANTUAN</a>

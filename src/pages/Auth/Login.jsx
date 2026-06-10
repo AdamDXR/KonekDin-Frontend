@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, GraduationCap } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -8,13 +9,40 @@ import { Label } from "@/components/ui/label"
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
   const navigate = useNavigate()
 
-  // Fungsi navigasi dummy, nanti panggil auth beneran
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
-    // Contoh dummy menuju halaman Learner
-    navigate('/learner')
+    setIsLoading(true)
+    setErrorMsg('')
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/login', {
+        email,
+        password
+      })
+
+      if (response.data && response.data.access_token) {
+        localStorage.setItem('token', response.data.access_token)
+        localStorage.setItem('user', JSON.stringify(response.data.user))
+        
+        const role = response.data.user.role
+        if (role === 'admin') {
+          navigate('/admin')
+        } else if (role === 'tutor') {
+          navigate('/tutor')
+        } else {
+          navigate('/learner')
+        }
+      }
+    } catch (error) {
+      setErrorMsg(error.response?.data?.message || 'Terjadi kesalahan saat login.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -26,9 +54,8 @@ export default function Login() {
         {/* KOLOM KIRI: Visual Branding */}
         <div className="relative w-full md:w-5/12 bg-[#1a1a4b] text-white p-10 flex flex-col justify-between hidden md:flex">
           {/* Logo / Header Branding */}
-          <div className="flex items-center space-x-2 z-10">
-            <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-8 w-8 object-contain" />
-            <span className="text-2xl font-bold tracking-tight">KonekDin</span>
+          <div className="flex items-center z-10">
+            <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-10 w-auto" />
           </div>
 
           {/* Headline Body */}
@@ -66,11 +93,8 @@ export default function Login() {
         <div className="w-full md:w-7/12 p-8 md:p-14 lg:p-16 flex flex-col justify-center bg-white dark:bg-slate-900">
           <div className="max-w-md w-full mx-auto">
             {/* Logo for mobile only */}
-            <div className="flex items-center space-x-2 mb-8 md:hidden">
-              <div className="bg-[#1a1a4b] p-2 rounded-lg">
-                <img src="/images/logo_konekdin.png" alt="Logo KonekDin" className="h-6 w-6 object-contain" />
-              </div>
-              <span className="text-2xl font-bold text-slate-800 dark:text-white">KonekDin</span>
+            <div className="flex items-center mb-8 md:hidden">
+              <img src="/images/logo_konekdin.png" alt="KonekDin" className="h-8 w-auto" />
             </div>
 
             <div className="text-left mb-8">
@@ -79,6 +103,11 @@ export default function Login() {
             </div>
 
             <form className="space-y-5" onSubmit={handleLogin}>
+              {errorMsg && (
+                <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm font-medium border border-red-100">
+                  {errorMsg}
+                </div>
+              )}
               {/* Input Email */}
               <div className="space-y-1">
                 <Label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -92,6 +121,8 @@ export default function Login() {
                     id="email"
                     type="email"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="block w-full h-12 pl-10 pr-3 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] dark:focus-visible:ring-blue-500 transition-colors"
                     placeholder="email@mhs.dinus.ac.id"
                   />
@@ -112,6 +143,8 @@ export default function Login() {
                     type={showPassword ? 'text' : 'password'}
                     required
                     minLength={8}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="block w-full h-12 pl-10 pr-10 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-[#1a1a4b] dark:focus-visible:ring-blue-500 transition-colors"
                     placeholder="••••••••"
                   />
@@ -153,9 +186,10 @@ export default function Login() {
               <div className="pt-2">
                 <Button
                   type="submit"
-                  className="w-full flex justify-center h-12 py-3 px-4 rounded-lg shadow-sm text-sm font-semibold text-white bg-[#1a1a4b] hover:bg-[#121235] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1a1a4b] transition-colors"
+                  disabled={isLoading}
+                  className="w-full flex justify-center h-12 py-3 px-4 rounded-lg shadow-sm text-sm font-semibold text-white bg-[#1a1a4b] hover:bg-[#121235] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1a1a4b] transition-colors disabled:opacity-70"
                 >
-                  Masuk
+                  {isLoading ? 'Memproses...' : 'Masuk'}
                 </Button>
               </div>
             </form>

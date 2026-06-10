@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import BookingCard from '@/components/shared/BookingCard';
 import { mockTutors } from '@/pages/Learner/CariTutor';
 import { 
   CheckCircle, 
@@ -38,6 +40,34 @@ const chartData = [
 
 export default function LearnerDashboard() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [stats, setStats] = useState({
+    total_sessions: 0,
+    total_hours: 0,
+    total_subjects: 0
+  });
+
+  useEffect(() => {
+    // 1. Ambil data user dari localStorage
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+
+    // 2. Fetch statistik dari server
+    const fetchStats = async () => {
+      try {
+        const response = await axios.get('/dashboard/stats');
+        if (response.data && response.data.data) {
+          setStats(response.data.data);
+        }
+      } catch (error) {
+        console.error('Gagal mengambil statistik', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-full">
@@ -50,7 +80,7 @@ export default function LearnerDashboard() {
           
           <div className="relative z-10">
             <h1 className="text-3xl md:text-4xl font-extrabold mb-2">
-              Selamat Datang Kembali, Budi Santoso! 👋
+              Selamat Datang Kembali, {user?.name ? user.name.split(' ')[0] : 'Learner'}! 👋
             </h1>
             <p className="text-teal-100 font-medium text-sm md:text-base">
               Siap untuk melanjutkan petualangan belajarmu hari ini?
@@ -79,7 +109,7 @@ export default function LearnerDashboard() {
             <div>
               <div className="text-sm font-bold text-slate-400 mb-1 uppercase tracking-wider">Total Sesi Selesai</div>
               <div className="flex items-end gap-3">
-                <span className="text-3xl font-extrabold text-slate-900">12</span>
+                <span className="text-3xl font-extrabold text-slate-900">{stats.total_sessions}</span>
                 <span className="flex items-center text-emerald-600 text-xs font-bold mb-1 bg-emerald-50 px-2 py-0.5 rounded-md">
                   <TrendingUp className="w-3 h-3 mr-1" /> +12.5%
                 </span>
@@ -95,7 +125,7 @@ export default function LearnerDashboard() {
             <div>
               <div className="text-sm font-bold text-slate-400 mb-1 uppercase tracking-wider">Total Jam Belajar</div>
               <div className="flex items-end gap-3">
-                <span className="text-3xl font-extrabold text-slate-900">18<span className="text-xl text-slate-500 font-bold"> jam</span></span>
+                <span className="text-3xl font-extrabold text-slate-900">{stats.total_hours}<span className="text-xl text-slate-500 font-bold"> jam</span></span>
                 <span className="flex items-center text-emerald-600 text-xs font-bold mb-1 bg-emerald-50 px-2 py-0.5 rounded-md">
                   <TrendingUp className="w-3 h-3 mr-1" /> +18.5%
                 </span>
@@ -111,7 +141,7 @@ export default function LearnerDashboard() {
             <div>
               <div className="text-sm font-bold text-slate-400 mb-1 uppercase tracking-wider">Matkul Dipelajari</div>
               <div className="flex items-end gap-3">
-                <span className="text-3xl font-extrabold text-slate-900">3</span>
+                <span className="text-3xl font-extrabold text-slate-900">{stats.total_subjects}</span>
                 <span className="flex items-center text-emerald-600 text-xs font-bold mb-1 bg-emerald-50 px-2 py-0.5 rounded-md">
                   <TrendingUp className="w-3 h-3 mr-1" /> +7.0%
                 </span>
@@ -135,37 +165,22 @@ export default function LearnerDashboard() {
                 </Button>
               </div>
               
-              <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-teal-200 transition-colors">
-                <div className="flex items-center gap-5">
-                  <div className="relative flex-shrink-0">
-                    <img src="https://i.pravatar.cc/150?img=11" alt="Tutor" className="w-24 h-24 rounded-xl object-cover border border-slate-100" />
-                    <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
-                      <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> 4.9
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-lg mb-1">Irkham Wildan</h3>
-                    <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-md text-xs font-bold">Algoritma & Struktur Data</span>
-                    <div className="flex items-center gap-4 mt-3 text-sm font-medium text-slate-500">
-                      <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                        <Calendar className="w-4 h-4 text-slate-400" />
-                        <span>Senin, 14 Okt</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                        <Clock className="w-4 h-4 text-slate-400" />
-                        <span>12:30 - 13.20 WIB</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <Button 
-                  onClick={() => navigate('/learner/jadwal-belajar?tutor=Irkham Wildan')}
-                  className="w-full sm:w-auto bg-[#000666] hover:bg-blue-900 text-white rounded-xl h-12 px-6 font-bold"
-                >
-                  Rincian Sesi
-                </Button>
-              </div>
+              <BookingCard
+                image="https://i.pravatar.cc/150?img=11"
+                rating={4.9}
+                title="Irkham Wildan"
+                subtitle="Algoritma & Struktur Data"
+                date="Senin, 14 Okt"
+                time="12:30 - 13.20 WIB"
+                actionNode={
+                  <Button 
+                    onClick={() => navigate('/learner/jadwal-belajar?tutor=Irkham Wildan')}
+                    className="w-full sm:w-auto bg-[#000666] hover:bg-blue-900 text-white rounded-xl h-12 px-6 font-bold"
+                  >
+                    Rincian Sesi
+                  </Button>
+                }
+              />
             </div>
 
             {/* Insight Cards */}
