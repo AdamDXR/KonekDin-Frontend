@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Clock, Plus, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StatusBadge from "@/components/shared/StatusBadge";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -128,30 +129,6 @@ const INITIAL_JADWAL = [
     status: "NON AVAILABLE",
   },
 ];
-
-// ─── Badge Status ──────────────────────────────────────────────────────────────
-
-function StatusBadge({ status }) {
-  if (status === "AVAILABLE") {
-    return (
-      <span className="inline-flex items-center justify-center bg-[#fdeed9] text-[#e87714] text-[10px] font-extrabold px-4 py-1.5 rounded-full tracking-wider">
-        AVAILABLE
-      </span>
-    );
-  }
-  if (status === "BOOKED") {
-    return (
-      <span className="inline-flex items-center justify-center bg-[#e5efeb] text-[#0a6d63] text-[10px] font-extrabold px-4 py-1.5 rounded-full tracking-wider">
-        BOOKED
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center justify-center bg-[#e8eaef] text-[#696d76] text-[10px] font-extrabold px-4 py-1.5 rounded-full tracking-wider">
-      NON AVAILABLE
-    </span>
-  );
-}
 
 // ─── Modal Edit Jadwal ─────────────────────────────────────────────────────────
 
