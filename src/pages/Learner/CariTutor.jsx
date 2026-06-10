@@ -61,6 +61,11 @@ export default function CariTutor() {
   const [tutorsData, setTutorsData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Real data state
+  const [tutorsData, setTutorsData] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState(null)
+
   // Filter State
   const [filterCourse, setFilterCourse] = useState('semua')
   const [filterDay, setFilterDay] = useState('semua')
@@ -72,6 +77,7 @@ export default function CariTutor() {
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const response = await axios.get('http://127.0.0.1:8000/api/tutors', { headers });
+        console.log("Response dari API:", response.data);
         
         if (response.data && response.data.data) {
           const formattedTutors = response.data.data.map(tutor => {
@@ -91,22 +97,24 @@ export default function CariTutor() {
 
             return {
               id: tutor.tutor_id,
-              name: tutor.name,
+              name: tutor.name || 'Tutor',
               university: "Universitas Dian Nuswantoro", 
               courses: tutor.taught_courses ? tutor.taught_courses.map(c => c.course_name) : [],
-              rating: tutor.rating_avg || 0,
-              isTopTutor: (tutor.rating_avg || 0) >= 4.8,
+              rating: Number(tutor.rating_avg) || 0,
+              isTopTutor: (Number(tutor.rating_avg) || 0) >= 4.8,
               schedule: scheduleArray,
-              price: tutor.price,
+              price: tutor.price || 0,
               image: tutor.avatar 
                  ? `http://127.0.0.1:8000/storage/${tutor.avatar}` 
-                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name)}&background=random`
+                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`
             };
           });
+          console.log("Formatted Tutors:", formattedTutors);
           setTutorsData(formattedTutors);
         }
       } catch (error) {
         console.error("Gagal mengambil data tutor:", error);
+        setErrorMsg(error.response?.data?.message || error.message || "Terjadi kesalahan saat mengambil data");
       } finally {
         setIsLoading(false);
       }
@@ -117,7 +125,7 @@ export default function CariTutor() {
 
   // Derived State
   const filteredTutors = useMemo(() => {
-    const dataToFilter = tutorsData.length > 0 ? tutorsData : [] // use real data
+    const dataToFilter = tutorsData.length > 0 ? tutorsData : []
     
     const filtered = dataToFilter.filter(tutor => {
       const matchSearch = tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -263,7 +271,13 @@ export default function CariTutor() {
 
       {/* Tutors Grid */}
       <div className="flex-1 pb-10">
-        {isLoading ? (
+
+        {errorMsg ? (
+          <div className="flex flex-col justify-center items-center h-64 text-red-500 bg-red-50 rounded-2xl border border-red-100">
+            <p className="font-bold text-lg mb-2">Gagal Memuat Data</p>
+            <p className="text-sm">{errorMsg}</p>
+          </div>
+        ) : isLoading ? (
            <div className="flex justify-center items-center h-64 text-slate-500 animate-pulse">
              Memuat data tutor...
            </div>
