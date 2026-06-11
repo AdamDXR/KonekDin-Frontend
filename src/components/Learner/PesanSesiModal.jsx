@@ -128,6 +128,7 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
       window.scrollTo(0, 0)
     } catch (err) {
       console.error("Gagal membuat pesanan:", err)
+      console.log("Detail Error dari Backend:", err.response?.data)
       if (err.response?.status === 401) {
         localStorage.removeItem('token')
         window.location.href = '/login'
