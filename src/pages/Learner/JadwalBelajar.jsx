@@ -11,21 +11,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import BookingCard from '@/components/shared/BookingCard'
+import axios from '@/lib/axios'
 
-// Data dummy jadwal — ganti dengan API call nanti
-const jadwalList = [
-  {
-    id: 1,
-    tutorNama: 'Irkham Wildan',
-    tutorFoto: 'https://i.pravatar.cc/150?img=11',
-    tutorRating: 4.9,
-    mataKuliah: 'Algoritma & Struktur Data',
-    tanggal: 'Senin, 14 Oktober 2026',
-    jamMulai: '12.30',
-    jamSelesai: '14.10',
-    timezone: 'WIB',
-  },
-]
+// Hapus dummy jadwalList karena kita akan fetch dari API
 
 function JadwalCard({ jadwal, onHubungi, isHighlighted, cardRef }) {
   return (
@@ -79,9 +67,48 @@ export default function JadwalBelajar() {
   const [searchParams] = useSearchParams()
   const tutorParam = searchParams.get('tutor')
 
-  const [jadwal] = useState(jadwalList)
+  const [jadwal, setJadwal] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState(null)
+  
   const [highlightedId, setHighlightedId] = useState(null)
   const highlightRef = useRef(null)
+
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const response = await axios.get('/schedules')
+        console.log("Response Jadwal:", response.data)
+        
+        if (response.data && response.data.data) {
+           const formatted = response.data.data.map(item => ({
+              id: item.id,
+              tutorNama: item.tutor?.name || item.tutor || 'Tutor',
+              tutorFoto: item.tutor?.avatar ? `http://127.0.0.1:8000/storage/${item.tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.tutor?.name || item.tutor || 'Tutor')}&background=random`,
+              tutorRating: Number(item.tutor?.rating_avg) || 0,
+              mataKuliah: item.course?.name || item.course || 'Materi Belajar',
+              tanggal: item.date,
+              jamMulai: item.time ? item.time.split(' - ')[0] : '00:00',
+              jamSelesai: item.time ? item.time.split(' - ')[1] : '00:00',
+              timezone: 'WIB'
+           }))
+           setJadwal(formatted)
+        }
+      } catch (error) {
+        console.error("Gagal memuat jadwal:", error)
+        if (error.response?.status === 401) {
+           localStorage.removeItem('token')
+           window.location.href = '/login'
+           return
+        }
+        setErrorMsg(error.response?.data?.message || error.message || "Gagal memuat jadwal")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    fetchSchedules()
+  }, [])
 
   useEffect(() => {
     if (!tutorParam) return;
@@ -114,16 +141,28 @@ export default function JadwalBelajar() {
       </div>
 
       <div className="flex flex-col gap-4">
-        {jadwal.map((item) => (
-          <JadwalCard
-            key={item.id}
-            jadwal={item}
-            isHighlighted={item.id === highlightedId}
-            cardRef={item.id === highlightedId ? highlightRef : null}
-            onHubungi={(item) => window.open(`https://wa.me/6281234567890?text=Halo%20Kak%20${encodeURIComponent(item.tutorNama)}`, '_blank')}
-          />
-        ))}
-        <EmptyCard onCariTutor={() => navigate('/learner/cari-tutor')} />
+        {errorMsg ? (
+          <div className="flex flex-col justify-center items-center h-64 text-red-500 bg-red-50 rounded-2xl border border-red-100 p-6 text-center">
+            <p className="font-bold text-lg mb-2">Gagal Memuat Data</p>
+            <p className="text-sm">{errorMsg}</p>
+          </div>
+        ) : isLoading ? (
+          <div className="flex justify-center items-center h-64 text-slate-500 animate-pulse">
+            Memuat jadwal belajar...
+          </div>
+        ) : jadwal.length > 0 ? (
+          jadwal.map((item) => (
+            <JadwalCard
+              key={item.id}
+              jadwal={item}
+              isHighlighted={item.id === highlightedId}
+              cardRef={item.id === highlightedId ? highlightRef : null}
+              onHubungi={(item) => window.open(`https://wa.me/6281234567890?text=Halo%20Kak%20${encodeURIComponent(item.tutorNama)}`, '_blank')}
+            />
+          ))
+        ) : (
+          <EmptyCard onCariTutor={() => navigate('/learner/cari-tutor')} />
+        )}
       </div>
     </div>
   )
