@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays, CheckCircle2, Info, ArrowRight, Timer, Banknote, X, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import axios from '@/lib/axios'
 
 const tipeConfig = {
   pengingat: {
@@ -128,6 +129,28 @@ export default function Notifikasi() {
   const [selectedBank, setSelectedBank] = useState('BCA')
   const [selectedEWallet, setSelectedEWallet] = useState('GOPAY')
 
+  const [rawNotif, setRawNotif] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState(null)
+
+  useEffect(() => {
+    const fetchNotif = async () => {
+      try {
+        const response = await axios.get('/learner/notification')
+        console.log("Response Notifikasi:", response.data)
+        if (response.data && response.data.data) {
+          setRawNotif(response.data.data)
+        }
+      } catch (err) {
+        console.error("Gagal memuat notifikasi:", err)
+        setErrorMsg(err.response?.data?.message || "Gagal memuat notifikasi dari server")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchNotif()
+  }, [])
+
   useEffect(() => {
     const scrollArea = document.getElementById('learner-scroll-area')
     
@@ -164,77 +187,56 @@ export default function Notifikasi() {
     }
   }, [modalType])
 
-  const notifikasiData = [
-    {
-      grup: 'HARI INI',
-      items: [
-        {
-          id: '0',
-          tipe: 'menunggu_pembayaran',
-          judul: 'Menunggu Pembayaran',
-          waktu: 'BARU',
-          isBaru: true,
-          pesan: [
-            'Pesanan sesi ',
-            { bold: 'Algoritma & Struktur Data' },
-            ' bersama ',
-            { bold: 'Irkham Wildan' },
-            ' menunggu pembayaran. Silakan selesaikan pembayaran untuk mengkonfirmasi jadwal Anda.'
-          ],
-          cta: { label: 'Bayar', action: 'BAYAR' },
-          cta2: { label: 'Ubah Metode Pembayaran', action: 'UBAH_METODE' },
-        },
-        {
-          id: '0-paid',
-          tipe: 'pembayaran',
-          judul: 'Pesanan Berhasil!',
-          waktu: '2 menit yang lalu',
-          isBaru: true,
-          pesan: [
-            'Pembayaran untuk sesi ',
-            { bold: 'Kalkulus' },
-            ' bersama ',
-            { bold: 'Kevin Sanjaya' },
-            ' telah dikonfirmasi oleh admin. Selamat belajar!'
-          ],
-          cta: { label: 'Lihat Jadwal Belajar', href: '/learner/jadwal-belajar' },
-        },
-        {
-          id: '1',
-          tipe: 'pengingat',
-          judul: 'Pengingat Sesi Besok',
-          waktu: '2 jam yang lalu',
-          isBaru: false,
-          pesan: [
-            'Persiapkan diri Anda untuk sesi ',
-            { bold: 'Pemrograman Web' },
-            ' bersama ',
-            { bold: 'Budi Santoso' },
-            ' pada pukul ',
-            { bold: '12.30' },
-            '. Siapkan materi yang ingin didiskusikan besok.',
-          ],
-          cta: null,
-        },
-      ],
-    },
-    {
-      grup: 'KEMARIN',
-      items: [
-        {
-          id: '3',
-          tipe: 'pengingat_30m',
-          judul: 'Sesi Mulai dalam 30 Menit!',
-          waktu: '1 hari yang lalu',
-          isBaru: false,
-          pesan: [
-            'Sesi belajarmu akan dimulai dalam 30 menit. Yuk siapkan dirimu dari sekarang, cek kembali materi, dan catat hal-hal yang masih belum kamu pahami untuk ditanyakan ke tutor nanti',
-          ],
-          cta: null,
-        },
-      ],
-    },
-  ]
+  const notifikasiData = React.useMemo(() => {
+    if (rawNotif.length === 0) return []
+
+    const items = rawNotif.map(n => {
+      let tipe = 'info'
+      let judul = 'Pemberitahuan'
+      
+      const typeStr = String(n.type).toLowerCase()
+      if (typeStr.includes('payment') || typeStr.includes('bayar')) {
+         tipe = 'pembayaran'
+         judul = 'Status Pembayaran'
+      } else if (typeStr.includes('reminder') || typeStr.includes('pengingat')) {
+         tipe = 'pengingat'
+         judul = 'Pengingat Sesi'
+      } else if (typeStr.includes('booking') || typeStr.includes('pesanan')) {
+         tipe = 'info'
+         judul = 'Status Pesanan'
+      }
+
+      // Menentukan CTA jika ada action tertentu di data
+      let cta = null
+      let cta2 = null
+
+      if (n.data?.action === 'BAYAR') {
+         tipe = 'menunggu_pembayaran'
+         judul = 'Menunggu Pembayaran'
+         cta = { label: 'Bayar', action: 'BAYAR' }
+         cta2 = { label: 'Ubah Metode Pembayaran', action: 'UBAH_METODE' }
+      }
+
+      return {
+        id: n.id,
+        tipe: tipe,
+        judul: n.data?.title || judul,
+        waktu: n.created_at ? new Date(n.created_at).toLocaleDateString('id-ID') : 'Baru saja',
+        isBaru: !n.read_at,
+        pesan: [n.data?.message || 'Ada pemberitahuan baru untuk Anda.'],
+        cta: cta,
+        cta2: cta2
+      }
+    })
+
+    // Kelompokkan semua ke dalam "TERBARU" untuk sementara
+    return [
+      {
+        grup: 'TERBARU',
+        items: items
+      }
+    ]
+  }, [rawNotif])
 
   const handleActionClick = (action) => {
     if (action === 'BAYAR') {
@@ -262,23 +264,38 @@ export default function Notifikasi() {
 
       {/* Grup per hari */}
       <div className="flex flex-col gap-8">
-        {notifikasiData.map((grup) => (
-          <section key={grup.grup}>
-            <p className="text-[11px] font-semibold tracking-widest text-slate-400 mb-3 px-1">
-              {grup.grup}
-            </p>
-            <div className="flex flex-col gap-3">
-              {grup.items.map((item) => (
-                <NotifikasiCard
-                  key={item.id}
-                  item={item}
-                  onCtaClick={(href) => navigate(href)}
-                  onActionClick={handleActionClick}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+        {isLoading ? (
+          <div className="flex justify-center items-center h-40 text-slate-500 animate-pulse">
+            Memuat notifikasi...
+          </div>
+        ) : errorMsg ? (
+          <div className="flex justify-center items-center h-40 text-red-500 bg-red-50 rounded-2xl border border-red-100 p-4">
+            {errorMsg}
+          </div>
+        ) : notifikasiData.length > 0 ? (
+          notifikasiData.map((grup) => (
+            <section key={grup.grup}>
+              <p className="text-[11px] font-semibold tracking-widest text-slate-400 mb-3 px-1">
+                {grup.grup}
+              </p>
+              <div className="flex flex-col gap-3">
+                {grup.items.map((item) => (
+                  <NotifikasiCard
+                    key={item.id}
+                    item={item}
+                    onCtaClick={(href) => navigate(href)}
+                    onActionClick={handleActionClick}
+                  />
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-slate-500 bg-white rounded-2xl border border-slate-100 border-dashed">
+            <Info className="h-10 w-10 text-slate-200 mb-3" />
+            <p className="font-medium">Belum ada notifikasi</p>
+          </div>
+        )}
       </div>
 
       {/* MODALS */}
