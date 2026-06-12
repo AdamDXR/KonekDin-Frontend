@@ -104,7 +104,7 @@ export default function DetailPesanan() {
               const status = order.payment_status || 'unpaid';
 
               return (
-                <div key={order.booking_id} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-md transition-shadow">
+                <div key={order.id} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-6">
                     <div className="relative">
                       <img 
@@ -122,7 +122,7 @@ export default function DetailPesanan() {
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-bold text-slate-900">{tutor.name || 'Tutor'}</h3>
                         <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-semibold">
-                          {course.course_name || 'Mata Kuliah'}
+                          {course.name || 'Mata Kuliah'}
                         </span>
                       </div>
                       
@@ -146,7 +146,7 @@ export default function DetailPesanan() {
                           Belum Bayar
                         </div>
                         <Button 
-                          onClick={() => handleBayarSekarang(order.booking_id)} 
+                          onClick={() => handleBayarSekarang(order.id)} 
                           className="w-full md:w-auto bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl px-6 h-11 font-bold shadow-sm shadow-emerald-500/20"
                         >
                           Bayar Sekarang
