@@ -58,6 +58,7 @@ export default function ProfilLearner() {
   const [draft, setDraft] = useState(profilData)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploadingFoto, setIsUploadingFoto] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -69,7 +70,7 @@ export default function ProfilLearner() {
             nama: user.name || '',
             email: user.email || '',
             phone: user.phone || '',
-            foto: user.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`,
+            foto: user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`,
             universitas: user.university || 'Universitas Dian Nuswantoro',
             nim: user.nim || '',
             jurusan: user.major || 'Teknik Informatika',
@@ -113,13 +114,44 @@ export default function ProfilLearner() {
   }
 
   const handleSaveCrop = async () => {
+    setIsUploadingFoto(true)
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels)
-      setProfil((prev) => ({ ...prev, foto: croppedImage }))
-      setDraft((prev) => ({ ...prev, foto: croppedImage }))
+      
+      // Langsung kirim foto ke backend
+      let formData = new FormData()
+      formData.append('_method', 'PATCH')
+      const res = await fetch(croppedImage)
+      const blob = await res.blob()
+      formData.append('avatar', blob, 'avatar.png')
+      
+      const response = await axios.post('/me', formData, {
+         headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      
+      if (response.data && response.data.data) {
+          const user = response.data.data
+          const newAvatarUrl = user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : croppedImage
+          
+          setProfil((prev) => ({ ...prev, foto: newAvatarUrl }))
+          setDraft((prev) => ({ ...prev, foto: newAvatarUrl }))
+          
+          // Perbarui localStorage
+          const oldUser = JSON.parse(localStorage.getItem('user')) || {}
+          const newUser = { ...oldUser, avatar: user.avatar }
+          localStorage.setItem('user', JSON.stringify(newUser))
+          window.dispatchEvent(new Event('profileUpdated'))
+      } else {
+          setProfil((prev) => ({ ...prev, foto: croppedImage }))
+          setDraft((prev) => ({ ...prev, foto: croppedImage }))
+      }
+      
       setImageSrc(null)
     } catch (e) {
       console.error(e)
+      alert(e.response?.data?.message || "Gagal menyimpan foto profil")
+    } finally {
+      setIsUploadingFoto(false)
     }
   }
 
@@ -131,31 +163,21 @@ export default function ProfilLearner() {
   const handleSimpan = async () => {
     setIsSubmitting(true)
     try {
-      let formData = new FormData()
-      formData.append('_method', 'PATCH')
-      formData.append('name', draft.nama || '')
-      formData.append('phone', draft.phone || '')
-      formData.append('nim', draft.nim || '')
-      // Jangan timpa email jika tidak diubah atau tidak valid
-      if (draft.email) formData.append('email', draft.email)
-      
-      // Convert base64 foto menjadi Blob file untuk dikirim ke backend
-      if (draft.foto && draft.foto.startsWith('data:image')) {
-         const res = await fetch(draft.foto)
-         const blob = await res.blob()
-         formData.append('avatar', blob, 'avatar.png')
+      const payload = {
+         name: draft.nama || '',
+         phone: draft.phone || '',
+         nim: draft.nim || ''
       }
+      if (draft.email) payload.email = draft.email
       
-      // Kirim sebagai multipart/form-data
-      const response = await axios.post('/me', formData, {
-         headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      // Karena tidak kirim file lagi, cukup pakai PATCH dengan JSON biasa
+      const response = await axios.patch('/me', payload)
       
       if (response.data && response.data.data) {
           const user = response.data.data
           const updatedProfile = {
             ...draft,
-            foto: user.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : draft.foto,
+            foto: profil.foto, // pertahankan foto yang sudah ada
             phone: user.phone || '',
             nim: user.nim || '',
             nama: user.name || ''
@@ -165,7 +187,7 @@ export default function ProfilLearner() {
           
           // Perbarui localStorage user agar sidebar terupdate
           const oldUser = JSON.parse(localStorage.getItem('user')) || {}
-          const newUser = { ...oldUser, name: user.name, avatar: user.avatar, phone: user.phone || '' }
+          const newUser = { ...oldUser, name: user.name, phone: user.phone || '' }
           localStorage.setItem('user', JSON.stringify(newUser))
           window.dispatchEvent(new Event('profileUpdated'))
       } else {
@@ -380,9 +402,10 @@ export default function ProfilLearner() {
                 </Button>
                 <Button
                   onClick={handleSaveCrop}
-                  className="flex-1 font-semibold rounded-xl bg-[#0d7c6b] hover:bg-[#0a5c4e] text-white"
+                  disabled={isUploadingFoto}
+                  className="flex-1 font-semibold rounded-xl bg-[#0d7c6b] hover:bg-[#0a5c4e] text-white disabled:opacity-50"
                 >
-                  Simpan
+                  {isUploadingFoto ? 'Menyimpan...' : 'Simpan'}
                 </Button>
               </div>
             </div>
