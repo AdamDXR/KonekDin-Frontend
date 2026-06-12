@@ -37,7 +37,7 @@ export default function Login() {
         } else if (role === 'tutor') {
           navigate('/tutor')
         } else {
-          navigate('/learner/cari-tutor')
+          navigate('/learner/dashboard')
         }
       }
     } catch (error) {
