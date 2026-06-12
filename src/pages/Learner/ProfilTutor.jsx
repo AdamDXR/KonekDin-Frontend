@@ -1,65 +1,83 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Star, Clock, Zap, BookOpen, UserCircle, CheckCircle2, ChevronRight, MessageSquareMore } from 'lucide-react'
 import PesanSesiModal from '@/components/Learner/PesanSesiModal'
-import { mockTutors } from '@/pages/Learner/CariTutor'
-
-const MOCK_TUTOR_DETAIL = {
-  id: 1,
-  name: 'Irkham Wildan',
-  university: 'Informatika\'21',
-  role: 'Software Engineer',
-  isVerified: true,
-  bio: 'Saya akan membantu Anda menguasai fundamental ngoding hingga pembuatan aplikasi nyata dengan pendekatan terstruktur.',
-  about: 'Halo! Saya Irkham, seorang mahasiswa tingkat akhir yang sangat antusias dengan dunia Software Engineering. Saya memiliki pengalaman memenangkan berbagai kompetisi hackathon dan bekerja di industri sebagai Backend Developer intern. Saya menggunakan pendekatan *practical coding*, artinya kita akan lebih banyak memecahkan masalah nyata ketimbang hanya belajar teori.',
-  rating: 4.9,
-  sessionsCompleted: 128,
-  price: 45000,
-  image: 'https://i.pravatar.cc/150?u=irkham',
-  ipk: 3.85,
-  courses: [
-    { name: 'Pemrograman Web', grade: 'A' },
-    { name: 'Struktur Data', grade: 'A' }
-  ],
-  skills: ['Clean Code', 'BackEnd Development', 'JavaScript Expert', 'Express.js', 'React', 'Node.js', 'REST API'],
-  schedule: [
-    { day: 'Senin', times: ['12.30 - 13.20', '14.10 - 15.00'] },
-    { day: 'Rabu', times: ['09.30 - 10.20', '11.10 - 12.00'] },
-    { day: 'Sabtu', times: ['07.00 - 07.50', '07.50 - 08.40', '08.40 - 09.30'] },
-    { day: 'Minggu', times: ['15.30 - 16.20', '16.20 - 17.10'] }
-  ],
-  reviews: [
-    { name: 'Andi Pratama', role: 'Teknik Informatika\'22', text: 'Sangat jelas! Kak Irkham membantu saya memahami konsep Asynchronous di JS dengan sangat mudah.' },
-    { name: 'Maya Lestari', role: 'Sistem Informasi\'25', text: 'Sabar banget ngajarnya, sangat recommended buat yang baru belajar.' },
-    { name: 'Budi Santoso', role: 'Teknik Informatika\'23', text: 'Penyampaian materi dari Kak Irkham sangat terstruktur, bikin cepat nyambung buat ngerjain tugas akhir.' },
-    { name: 'Citra Maharani', role: 'Sistem Informasi\'24', text: 'Sangat informatif! Baru pertama kali ngerti Express.js tanpa harus pusing baca dokumentasi.' },
-    { name: 'Rizky Fadillah', role: 'Teknik Komputer\'22', text: 'Wah gila sih, sesi codingnya super praktikal. Langsung bisa buat REST API sendiri setelah belajar bareng!' }
-  ]
-}
+import axios from '@/lib/axios'
 
 export default function ProfilTutor() {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
   
-  // Cari data tutor berdasarkan id dari parameter URL
-  const foundTutor = mockTutors.find((t) => t.id === parseInt(id, 10))
-  
-  // Gabungkan data statis (bio, about, reviews) dengan data dinamis (nama, jadwal, matkul, dsb)
-  const tutor = foundTutor 
-    ? { 
-        ...MOCK_TUTOR_DETAIL, 
-        ...foundTutor,
-        // Pastikan courses tetap array of objects jika diperlukan, atau render array of strings
-        courses: foundTutor.courses.map(c => typeof c === 'string' ? { name: c, grade: 'A' } : c)
-      } 
-    : MOCK_TUTOR_DETAIL
-  
+  const [tutor, setTutor] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  React.useEffect(() => {
-    if (location.hash === '#jadwal-ketersediaan') {
+  useEffect(() => {
+    const fetchTutor = async () => {
+      try {
+        const response = await axios.get(`/tutors/${id}`)
+        console.log("Response Tutor:", response.data)
+        if (response.data && response.data.data) {
+          const t = response.data.data;
+          
+          // Kelompokkan jadwal berdasarkan hari
+          const groupedSchedule = {};
+          if (t.schedule && Array.isArray(t.schedule)) {
+             t.schedule.forEach(s => {
+                const d = s.day || s.day_of_week;
+                if (!groupedSchedule[d]) groupedSchedule[d] = [];
+                const timeStr = s.time || `${s.start_time?.substring(0,5)} - ${s.end_time?.substring(0,5)}`;
+                groupedSchedule[d].push({ ...s, timeStr });
+             })
+          }
+          
+          const scheduleArr = Object.keys(groupedSchedule).map(day => ({
+             day,
+             times: groupedSchedule[day].map(s => s.timeStr)
+          }));
+
+          const mapped = {
+            id: t.id,
+            name: t.name,
+            university: t.university || 'Universitas',
+            role: t.major || 'Tutor',
+            isVerified: true,
+            bio: t.bio || 'Tutor KonekDin yang berdedikasi membantu Anda belajar.',
+            about: t.bio || 'Halo! Saya tutor di KonekDin.',
+            rating: Number(t.rating_avg) || 0,
+            sessionsCompleted: t.review_count || 0,
+            price: Number(t.price) || 0,
+            image: t.avatar ? `http://127.0.0.1:8000/storage/${t.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=random`,
+            ipk: 3.85, 
+            courses: t.courses ? t.courses.map(c => ({ name: c.name || c, grade: 'A' })) : [],
+            skills: t.skills || [],
+            schedule: scheduleArr,
+            rawSlots: t.schedule || [],
+            rawCourses: t.courses || [],
+            reviews: t.reviews ? t.reviews.map(r => ({
+              name: r.learner?.name || r.user?.name || 'Anonim',
+              role: 'Learner',
+              text: r.comment || r.review || '',
+              rating: Number(r.rating) || 5
+            })) : []
+          }
+          setTutor(mapped)
+        }
+      } catch (err) {
+        console.error("Gagal memuat tutor:", err)
+        setErrorMsg("Gagal memuat profil tutor.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchTutor()
+  }, [id])
+
+  useEffect(() => {
+    if (location.hash === '#jadwal-ketersediaan' && !isLoading && tutor) {
       setTimeout(() => {
         const element = document.getElementById('jadwal-ketersediaan')
         if (element) {
@@ -71,7 +89,26 @@ export default function ProfilTutor() {
         }
       }, 100)
     }
-  }, [location])
+  }, [location, isLoading, tutor])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#000666]"></div>
+        <p className="mt-4 text-slate-500 font-medium">Memuat profil tutor...</p>
+      </div>
+    )
+  }
+
+  if (errorMsg || !tutor) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] bg-red-50 rounded-3xl border border-red-100">
+        <h2 className="text-xl font-bold text-red-600 mb-2">Tutor Tidak Ditemukan</h2>
+        <p className="text-red-500">{errorMsg || 'Tutor yang Anda cari mungkin tidak ada.'}</p>
+        <Button onClick={() => navigate(-1)} className="mt-6 bg-[#000666]">Kembali</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-full">
@@ -149,10 +186,10 @@ export default function ProfilTutor() {
                   <MessageSquareMore className="w-6 h-6 mr-2 text-green-800" />
                   Ulasan Mahasiswa
                 </h2>
-                <p className="text-sm font-semibold text-slate-500 mt-1 ml-8">Top 5 Review</p>
+                <p className="text-sm font-semibold text-slate-500 mt-1 ml-8">Top Review</p>
               </div>
               <div className="space-y-4">
-                {tutor.reviews.slice(0, 5).map((review, idx) => (
+                {tutor.reviews && tutor.reviews.length > 0 ? tutor.reviews.slice(0, 5).map((review, idx) => (
                   <div key={idx} className="bg-slate-50 p-4 rounded-xl">
                     <div className="flex items-center justify-between mb-2">
                       <div>
@@ -160,14 +197,19 @@ export default function ProfilTutor() {
                         <div className="text-xs text-slate-500">{review.role}</div>
                       </div>
                       <div className="flex">
-                        {[...Array(5)].map((_, i) => (
+                        {[...Array(review.rating)].map((_, i) => (
                           <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                        ))}
+                        {[...Array(5 - review.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 text-slate-200" />
                         ))}
                       </div>
                     </div>
                     <p className="text-slate-700 text-sm italic">"{review.text}"</p>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-slate-500 italic text-sm py-2">Belum ada ulasan untuk tutor ini.</p>
+                )}
               </div>
             </div>
             
@@ -212,7 +254,7 @@ export default function ProfilTutor() {
                 Jadwal Ketersediaan
               </h3>
               <div className="space-y-3">
-                {tutor.schedule.map((slot, idx) => (
+                {tutor.schedule && tutor.schedule.length > 0 ? tutor.schedule.map((slot, idx) => (
                   <div key={idx} className="flex flex-col py-3 border-b border-slate-100 last:border-0 gap-2">
                     <span className="font-bold text-slate-700">{slot.day}</span>
                     <div className="flex flex-wrap gap-2">
@@ -221,7 +263,9 @@ export default function ProfilTutor() {
                       ))}
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-slate-500 text-sm italic">Belum ada jadwal yang tersedia.</p>
+                )}
               </div>
             </div>
           </div>

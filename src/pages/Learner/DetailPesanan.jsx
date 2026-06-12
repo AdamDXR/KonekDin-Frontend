@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Calendar, Clock, Star, Search, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import axios from 'axios'
+import axios from '@/lib/axios'
 
 export default function DetailPesanan() {
   const navigate = useNavigate()
@@ -14,15 +14,7 @@ export default function DetailPesanan() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const token = localStorage.getItem('token')
-        if (!token) {
-           console.warn("Token tidak ditemukan, mengarahkan ke halaman login")
-           window.location.href = '/login'
-           return
-        }
-
-        const headers = { Authorization: `Bearer ${token}` }
-        const response = await axios.get('http://127.0.0.1:8000/api/learner/bookings', { headers })
+        const response = await axios.get('/learner/bookings')
         
         if (response.data && response.data.data) {
            setOrders(response.data.data)

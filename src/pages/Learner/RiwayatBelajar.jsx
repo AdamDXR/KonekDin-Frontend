@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import axios from 'axios'
+import axios from '@/lib/axios'
 
 const PAGE_SIZE = 3
 
@@ -155,13 +155,10 @@ function FormUlasan({ tutor, onBack, onSubmit }) {
     setError(null)
     
     try {
-      const token = localStorage.getItem('token')
-      const headers = { Authorization: `Bearer ${token}` }
-      
-      await axios.post(`http://127.0.0.1:8000/api/learner/bookings/${tutor.id}/reviews`, {
+      await axios.post(`/learner/bookings/${tutor.id}/reviews`, {
         rating,
         comment: ulasan
-      }, { headers })
+      })
       
       setSubmitted(true)
       setTimeout(() => onSubmit(tutor.id, rating, ulasan), 1500)
@@ -294,15 +291,7 @@ export default function RiwayatBelajar() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const token = localStorage.getItem('token')
-        if (!token) {
-           console.warn("Token tidak ditemukan, mengarahkan ke halaman login")
-           window.location.href = '/login'
-           return
-        }
-
-        const headers = { Authorization: `Bearer ${token}` }
-        const response = await axios.get('http://127.0.0.1:8000/api/learner/history', { headers })
+        const response = await axios.get('/learner/history')
         
         if (response.data && response.data.data) {
            // Mapping API data to RiwayatCard format
