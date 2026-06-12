@@ -89,7 +89,7 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handl
             className="flex items-center gap-3 hover:opacity-80 transition-opacity min-w-0"
           >
             <Avatar className="h-11 w-11 border-2 border-slate-100 flex-shrink-0">
-              <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=0a0f44&color=fff`} alt={user?.name || 'User'} />
+              <AvatarImage src={user?.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=0a0f44&color=fff`} alt={user?.name || 'User'} />
               <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">{getInitials(user?.name)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col min-w-0">
@@ -123,10 +123,32 @@ export default function LearnerLayout() {
       return
     }
 
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
+    // Ambil user dari API agar datanya selalu terbaru
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get('/me')
+        if (response.data && response.data.data) {
+          setUser(response.data.data)
+          localStorage.setItem('user', JSON.stringify(response.data.data))
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data user:", err)
+        // Fallback jika API gagal namun token masih ada
+        const savedUser = localStorage.getItem('user')
+        if (savedUser) {
+          setUser(JSON.parse(savedUser))
+        }
+      }
     }
+    fetchUser()
+    
+    // Dengarkan custom event jika profil di-update dari ProfilLearner.jsx
+    const handleProfileUpdate = () => {
+      const savedUser = localStorage.getItem('user')
+      if (savedUser) setUser(JSON.parse(savedUser))
+    }
+    window.addEventListener('profileUpdated', handleProfileUpdate)
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate)
   }, [navigate])
 
   const handleLogout = async () => {
@@ -173,7 +195,7 @@ export default function LearnerLayout() {
           </Sheet>
           <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
           <Avatar className="h-8 w-8">
-            <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=0a0f44&color=fff`} alt={user?.name || 'User'} />
+            <AvatarImage src={user?.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=0a0f44&color=fff`} alt={user?.name || 'User'} />
             <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
           </Avatar>
         </header>

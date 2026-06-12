@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import Cropper from 'react-easy-crop'
 import getCroppedImg from '@/utils/cropImage'
 import { useNavigate } from 'react-router-dom'
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import axios from '@/lib/axios'
 
 // ─── Data dummy ───────────────────────────────────────────────────────────────
 const profilData = {
@@ -55,6 +56,36 @@ export default function ProfilLearner() {
   const [profil, setProfil] = useState(profilData)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(profilData)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get('/me')
+        if (response.data && response.data.data) {
+          const user = response.data.data
+          const mappedProfile = {
+            nama: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            foto: user.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`,
+            universitas: user.university || 'Universitas Dian Nuswantoro',
+            nim: user.nim || '',
+            jurusan: user.major || 'Teknik Informatika',
+            fakultas: user.faculty || 'Ilmu Komputer',
+          }
+          setProfil(mappedProfile)
+          setDraft(mappedProfile)
+        }
+      } catch (err) {
+        console.error("Gagal mengambil profil:", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchProfile()
+  }, [])
 
   // ── State for Cropper ──
   const [imageSrc, setImageSrc] = useState(null)
@@ -97,16 +128,71 @@ export default function ProfilLearner() {
     setEditing(true)
   }
 
-  const handleSimpan = () => {
-    setProfil(draft)
-    setEditing(false)
-    // TODO: kirim ke API
+  const handleSimpan = async () => {
+    setIsSubmitting(true)
+    try {
+      let formData = new FormData()
+      formData.append('_method', 'PATCH')
+      formData.append('name', draft.nama || '')
+      formData.append('phone', draft.phone || '')
+      formData.append('nim', draft.nim || '')
+      // Jangan timpa email jika tidak diubah atau tidak valid
+      if (draft.email) formData.append('email', draft.email)
+      
+      // Convert base64 foto menjadi Blob file untuk dikirim ke backend
+      if (draft.foto && draft.foto.startsWith('data:image')) {
+         const res = await fetch(draft.foto)
+         const blob = await res.blob()
+         formData.append('avatar', blob, 'avatar.png')
+      }
+      
+      // Kirim sebagai multipart/form-data
+      const response = await axios.post('/me', formData, {
+         headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      
+      if (response.data && response.data.data) {
+          const user = response.data.data
+          const updatedProfile = {
+            ...draft,
+            foto: user.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : draft.foto,
+            phone: user.phone || '',
+            nim: user.nim || '',
+            nama: user.name || ''
+          }
+          setProfil(updatedProfile)
+          setDraft(updatedProfile)
+          
+          // Perbarui localStorage user agar sidebar terupdate
+          const oldUser = JSON.parse(localStorage.getItem('user')) || {}
+          const newUser = { ...oldUser, name: user.name, avatar: user.avatar, phone: user.phone || '' }
+          localStorage.setItem('user', JSON.stringify(newUser))
+          window.dispatchEvent(new Event('profileUpdated'))
+      } else {
+          setProfil(draft)
+      }
+      setEditing(false)
+    } catch (err) {
+       console.error("Gagal menyimpan profil", err)
+       alert(err.response?.data?.message || "Gagal menyimpan perubahan")
+    } finally {
+       setIsSubmitting(false)
+    }
   }
 
   const setField = (key) => (e) =>
     setDraft((prev) => ({ ...prev, [key]: e.target.value }))
 
   const current = editing ? draft : profil
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#000666]"></div>
+        <p className="mt-4 text-slate-500 font-medium">Memuat profil...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-full space-y-6 pb-10">
@@ -175,10 +261,11 @@ export default function ProfilLearner() {
             {editing ? (
               <button
                 onClick={handleSimpan}
-                className="flex items-center gap-1.5 text-xs font-semibold text-[#0d7c6b] hover:text-[#0a5c4e] transition"
+                disabled={isSubmitting}
+                className="flex items-center gap-1.5 text-xs font-semibold text-[#0d7c6b] hover:text-[#0a5c4e] transition disabled:opacity-50"
               >
                 <Save className="h-3.5 w-3.5" />
-                Simpan Perubahan
+                {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
               </button>
             ) : (
               <button
