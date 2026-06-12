@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import BookingCard from '@/components/shared/BookingCard';
-import { mockTutors } from '@/pages/Learner/CariTutor';
 import { 
   CheckCircle, 
   Clock, 
@@ -46,6 +45,9 @@ export default function LearnerDashboard() {
     total_hours: 0,
     total_subjects: 0
   });
+  const [upcomingSchedule, setUpcomingSchedule] = useState(null);
+  const [recommendedTutors, setRecommendedTutors] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // 1. Ambil data user dari localStorage
@@ -54,19 +56,25 @@ export default function LearnerDashboard() {
       setUser(JSON.parse(savedUser));
     }
 
-    // 2. Fetch statistik dari server
-    const fetchStats = async () => {
+    // 2. Fetch dashboard data dari server
+    const fetchDashboard = async () => {
       try {
-        const response = await axios.get('/dashboard/stats');
+        const response = await axios.get('/learner/dashboard');
+        console.log("Dashboard Response:", response.data);
         if (response.data && response.data.data) {
-          setStats(response.data.data);
+          const { stats, upcoming_schedule, recommended_tutors } = response.data.data;
+          if (stats) setStats(stats);
+          if (upcoming_schedule) setUpcomingSchedule(upcoming_schedule);
+          if (recommended_tutors) setRecommendedTutors(recommended_tutors);
         }
       } catch (error) {
-        console.error('Gagal mengambil statistik', error);
+        console.error('Gagal mengambil data dashboard', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchStats();
+    fetchDashboard();
   }, []);
 
   return (
@@ -165,22 +173,32 @@ export default function LearnerDashboard() {
                 </Button>
               </div>
               
-              <BookingCard
-                image="https://i.pravatar.cc/150?img=11"
-                rating={4.9}
-                title="Irkham Wildan"
-                subtitle="Algoritma & Struktur Data"
-                date="Senin, 14 Okt"
-                time="12:30 - 13.20 WIB"
-                actionNode={
-                  <Button 
-                    onClick={() => navigate('/learner/jadwal-belajar?tutor=Irkham Wildan')}
-                    className="w-full sm:w-auto bg-[#000666] hover:bg-blue-900 text-white rounded-xl h-12 px-6 font-bold"
-                  >
-                    Rincian Sesi
-                  </Button>
-                }
-              />
+              {isLoading ? (
+                <div className="animate-pulse bg-slate-100 rounded-2xl h-40 w-full"></div>
+              ) : upcomingSchedule ? (
+                <BookingCard
+                  image={upcomingSchedule.tutor?.avatar ? `http://127.0.0.1:8000/storage/${upcomingSchedule.tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(upcomingSchedule.tutor?.name || upcomingSchedule.tutor || 'Tutor')}&background=random`}
+                  rating={Number(upcomingSchedule.tutor?.rating_avg || 0)}
+                  title={upcomingSchedule.tutor?.name || upcomingSchedule.tutor || 'Nama Tutor'}
+                  subtitle={upcomingSchedule.course?.name || upcomingSchedule.course || 'Sesi Belajar'}
+                  date={upcomingSchedule.date}
+                  time={upcomingSchedule.time}
+                  actionNode={
+                    <Button 
+                      onClick={() => navigate(`/learner/jadwal-belajar?tutor=${upcomingSchedule.tutor?.name || upcomingSchedule.tutor}`)}
+                      className="w-full sm:w-auto bg-[#000666] hover:bg-blue-900 text-white rounded-xl h-12 px-6 font-bold"
+                    >
+                      Rincian Sesi
+                    </Button>
+                  }
+                />
+              ) : (
+                <div className="bg-slate-50 border border-slate-100 rounded-[24px] p-8 text-center text-slate-500 flex flex-col items-center">
+                  <Calendar className="w-10 h-10 text-slate-300 mb-3" />
+                  <p className="font-medium">Tidak ada jadwal terdekat.</p>
+                  <p className="text-sm mt-1">Yuk pesan sesi baru dan mulai belajar!</p>
+                </div>
+              )}
             </div>
 
             {/* Insight Cards */}
@@ -238,30 +256,40 @@ export default function LearnerDashboard() {
 
             <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-6 space-y-5">
               
-              {mockTutors.filter(t => t.isTopTutor).slice(0, 3).map((tutor, index, arr) => (
-                <div key={tutor.id}>
-                  <div className="flex items-center justify-between group cursor-pointer" onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}>
-                    <div className="flex items-center gap-4">
-                      <div className="relative flex-shrink-0">
-                        <img src={tutor.image} alt={tutor.name} className="w-24 h-24 rounded-xl object-cover border border-slate-100 group-hover:ring-2 ring-teal-500 ring-offset-2 transition-all" />
-                        <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
-                          <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> {tutor.rating}
+              {isLoading ? (
+                <div className="animate-pulse space-y-6">
+                   <div className="h-20 bg-slate-100 rounded-xl"></div>
+                   <div className="h-20 bg-slate-100 rounded-xl"></div>
+                   <div className="h-20 bg-slate-100 rounded-xl"></div>
+                </div>
+              ) : recommendedTutors && recommendedTutors.length > 0 ? (
+                recommendedTutors.slice(0, 3).map((tutor, index, arr) => (
+                  <div key={tutor.id || index}>
+                    <div className="flex items-center justify-between group cursor-pointer" onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}>
+                      <div className="flex items-center gap-4">
+                        <div className="relative flex-shrink-0">
+                          <img src={tutor.avatar ? `http://127.0.0.1:8000/storage/${tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name)}&background=random`} alt={tutor.name} className="w-24 h-24 rounded-xl object-cover border border-slate-100 group-hover:ring-2 ring-teal-500 ring-offset-2 transition-all" />
+                          <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
+                            <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> {Number(tutor.rating_avg || tutor.rating || 0).toFixed(1)}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-lg mb-0.5 group-hover:text-teal-600 transition-colors">{tutor.name}</h3>
+                          <div className="text-md text-slate-500 font-medium">{tutor.courses ? (tutor.courses[0]?.name || tutor.courses[0]) : 'Tutor'}</div>
+                          <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">({tutor.review_count || 120 - index * 15} Ulasan)</div>
                         </div>
                       </div>
-                      
-                      <div>
-                        <h3 className="font-bold text-slate-900 text-lg mb-0.5 group-hover:text-teal-600 transition-colors">{tutor.name}</h3>
-                        <div className="text-md text-slate-500 font-medium">{tutor.courses[0]}</div>
-                        <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">({120 - index * 15} Ulasan)</div>
-                      </div>
                     </div>
-                  </div>
 
-                  {index < arr.length - 1 && (
-                    <div className="h-px bg-slate-100 w-full mt-5"></div>
-                  )}
-                </div>
-              ))}
+                    {index < arr.length - 1 && (
+                      <div className="h-px bg-slate-100 w-full mt-5"></div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-slate-500 py-6 font-medium">Belum ada tutor rekomendasi</div>
+              )}
 
             </div>
 

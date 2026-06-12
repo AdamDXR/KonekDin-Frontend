@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Calendar, Clock, CreditCard, ChevronLeft, Receipt, Copy, X, Landmark, Wallet, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import axios from '@/lib/axios'
 
 export default function Pembayaran() {
   const navigate = useNavigate()
@@ -12,6 +13,32 @@ export default function Pembayaran() {
   const [selectedBank, setSelectedBank] = useState('BCA')
   const [selectedEWallet, setSelectedEWallet] = useState('GOPAY')
   const [modalType, setModalType] = useState(null) // 'VA', 'EWALLET', null
+
+  const orderId = location.state?.orderId
+  const [orderDetail, setOrderDetail] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  useEffect(() => {
+    if (!orderId) {
+      navigate('/learner/detail-pesanan')
+      return
+    }
+
+    const fetchDetail = async () => {
+      try {
+        const response = await axios.get(`/learner/bookings/${orderId}`)
+        if (response.data && response.data.data) {
+          setOrderDetail(response.data.data)
+        }
+      } catch (err) {
+        console.error("Gagal memuat detail pesanan", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchDetail()
+  }, [orderId, navigate])
 
   useEffect(() => {
     const scrollArea = document.getElementById('learner-scroll-area')
@@ -54,15 +81,60 @@ export default function Pembayaran() {
     else if (selectedMethod === 'EWallet') setModalType('EWALLET')
   }
 
-  const handleSelesai = () => {
-    setModalType(null)
-    if (location.state && location.state.returnTo) {
-      navigate(location.state.returnTo)
-    } else {
-      navigate(-1)
+  const handleSelesai = async () => {
+    if (!orderId || isSubmitting) return;
+    setIsSubmitting(true)
+    
+    try {
+      const payment_method = selectedMethod === 'Transfer' ? `${selectedBank} VA` : selectedEWallet;
+      
+      // Mengirim konfirmasi pembayaran (dummy bukti jika diperlukan backend)
+      await axios.post(`/learner/bookings/${orderId}/pay`, {
+        payment_method: payment_method,
+        // Backend minta proof_of_payment, kita beri base64 kosong atau url sementara
+        proof_of_payment: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+      });
+      
+      setModalType(null)
+      if (location.state && location.state.returnTo) {
+        navigate(location.state.returnTo)
+      } else {
+        navigate('/learner/detail-pesanan')
+      }
+      window.scrollTo(0, 0)
+    } catch (err) {
+      console.error("Gagal memproses pembayaran:", err)
+      alert("Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.")
+    } finally {
+      setIsSubmitting(false)
     }
-    window.scrollTo(0, 0)
   }
+
+  // Helper fungsi untuk render
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-full items-center justify-center pt-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#000666]"></div>
+        <p className="mt-4 text-slate-500 font-medium">Memuat data pembayaran...</p>
+      </div>
+    )
+  }
+
+  if (!orderDetail) return null;
+
+  const tutor = orderDetail.tutor || {};
+  const course = orderDetail.course || {};
+  const slots = orderDetail.slots || orderDetail.slot;
+  const timeStr = Array.isArray(slots) && slots[0] 
+    ? `${slots[0].start_time?.substring(0, 5)} - ${slots[0].end_time?.substring(0, 5)}`
+    : (slots?.start_time ? `${slots.start_time?.substring(0, 5)} - ${slots.end_time?.substring(0, 5)}` : '-');
+  const sessionCount = Array.isArray(slots) ? slots.length : (slots ? 1 : 0);
+  
+  // Asumsi harga per sesi di backend
+  const basePrice = tutor.price || 45000;
+  const totalPrice = basePrice * (sessionCount || 1);
+  const serviceFee = 15000;
+  const grandTotal = totalPrice + serviceFee;
 
   return (
     <div className="flex flex-col min-h-full">
@@ -96,26 +168,32 @@ export default function Pembayaran() {
               <div className="grid grid-cols-2 gap-y-8 gap-x-4">
                 <div>
                   <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Learner</div>
-                  <div className="font-bold text-slate-900 text-lg">Budi Santoso</div>
+                  <div className="font-bold text-slate-900 text-lg">{orderDetail.learner?.name || 'Learner'}</div>
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Tutor</div>
                   <div className="flex items-center gap-3">
-                    <img src="https://i.pravatar.cc/150?img=11" alt="Tutor" className="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-100" />
-                    <div className="font-bold text-slate-900 text-lg">Irkham Wildan</div>
+                    <img src={tutor.avatar ? `http://127.0.0.1:8000/storage/${tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`} alt="Tutor" className="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-100" />
+                    <div className="font-bold text-slate-900 text-lg">{tutor.name}</div>
                   </div>
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Mata Pelajaran</div>
-                  <span className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-xs font-bold">Algoritma & Struktur Data</span>
+                  <span className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-xs font-bold">
+                    {course.course_name || course.name || 'Mata Kuliah'}
+                  </span>
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Jadwal Sesi</div>
                   <div className="flex items-start gap-2 text-slate-800 font-medium text-sm">
                     <Calendar className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                     <div>
-                      <div>Senin, 14 Okt 2026</div>
-                      <div>12:30 - 14:10</div>
+                      <div>
+                        {orderDetail.booking_date 
+                          ? new Date(orderDetail.booking_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }) 
+                          : '-'}
+                      </div>
+                      <div>{timeStr} WIB</div>
                     </div>
                   </div>
                 </div>
@@ -224,19 +302,19 @@ export default function Pembayaran() {
 
                <div className="space-y-4 text-sm text-white/80 font-medium">
                  <div className="flex justify-between items-center">
-                   <span>Biaya Sesi (2 Sesi)</span>
-                   <span>Rp 90.000</span>
+                   <span>Biaya Sesi ({sessionCount || 1} Sesi)</span>
+                   <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
                  </div>
                  <div className="flex justify-between items-center">
                    <span>Biaya Layanan</span>
-                   <span>Rp 15.000</span>
+                   <span>Rp {serviceFee.toLocaleString('id-ID')}</span>
                  </div>
                </div>
 
                <div className="h-px bg-white/10 my-8"></div>
 
                <div className="mb-2 text-xs font-bold text-white/50 uppercase tracking-widest">Total Pembayaran</div>
-               <div className="text-5xl font-bold mb-10 tracking-tight">Rp 105.000</div>
+               <div className="text-5xl font-bold mb-10 tracking-tight">Rp {grandTotal.toLocaleString('id-ID')}</div>
 
                <div className="bg-white/5 rounded-2xl p-5 flex items-start gap-4 border border-white/10">
                  <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
@@ -327,12 +405,12 @@ export default function Pembayaran() {
                   <div className="text-slate-500 text-[10px] font-bold mb-1 uppercase tracking-wider">Total Pembayaran</div>
                   <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-indigo-700">
-                      Rp 105.000
+                      Rp {grandTotal.toLocaleString('id-ID')}
                     </span>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      onClick={() => navigator.clipboard.writeText('105000')}
+                      onClick={() => navigator.clipboard.writeText(grandTotal.toString())}
                       className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-2"
                     >
                       <Copy className="w-4 h-4 mr-1.5" />
@@ -345,9 +423,10 @@ export default function Pembayaran() {
 
               <Button 
                 onClick={handleSelesai}
-                className="w-full h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20"
+                disabled={isSubmitting}
+                className="w-full h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 disabled:opacity-70"
               >
-                Oke
+                {isSubmitting ? 'Memproses...' : 'Oke'}
               </Button>
 
               <p className="text-center text-[10px] text-slate-400 mt-2">
@@ -432,9 +511,10 @@ export default function Pembayaran() {
 
               <Button 
                 onClick={handleSelesai}
-                className="w-full h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 shrink-0 mt-2"
+                disabled={isSubmitting}
+                className="w-full h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 shrink-0 mt-2 disabled:opacity-70"
               >
-                Oke
+                {isSubmitting ? 'Memproses...' : 'Oke'}
               </Button>
             </div>
           </div>
