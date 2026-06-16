@@ -5,7 +5,9 @@ import {
   BarChart2,
   AlertTriangle,
   LogOut,
-  Menu
+  Menu,
+  Wallet,
+  Database
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -117,8 +119,7 @@ export default function AdminLayout() {
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Home },
-    { name: 'Manajemen Pengguna', href: '/admin/manajemen-pengguna', icon: Users },
-    { name: 'Laporan & Analisis', href: '/admin/laporan-analisis', icon: BarChart2 },
+    { name: 'Manajemen', href: '/admin/manajemen', icon: Database },
     { name: 'Komplain & Moderasi', href: '/admin/komplain', icon: AlertTriangle },
   ]
 
