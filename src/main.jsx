@@ -19,10 +19,8 @@ import RegisterTutorTinjauan from "@/pages/Auth/RegisterTutorTinjauan";
 // Landing Page
 import Landing from "@/pages/Landing/Landing";
 
-// Admin Pages
 import AdminDashboard from '@/pages/Admin/Dashboard'
-import ManajemenPengguna from '@/pages/Admin/ManajemenPengguna'
-import LaporanAnalisis from '@/pages/Admin/LaporanAnalisis'
+import Manajemen from '@/pages/Admin/Manajemen'
 import KomplainModerasi from '@/pages/Admin/KomplainModerasi'
 // import KelolaMatakuliah from '@/pages/Admin/KelolaMatakuliah'
 // import ValidasiBadge from '@/pages/Admin/ValidasiBadge'
@@ -63,8 +61,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route path="manajemen-pengguna" element={<ManajemenPengguna />} />
-          <Route path="laporan-analisis" element={<LaporanAnalisis />} />
+          <Route path="manajemen" element={<Manajemen />} />
           <Route path="komplain" element={<KomplainModerasi />} />
           <Route index element={<AdminDashboard />} />
           {/* 
