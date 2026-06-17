@@ -1,7 +1,6 @@
 import React from "react";
 import { Wallet, Clock, Star, Banknote } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { SESSIONS } from "./JadwalMengajar";
 import { ULASAN } from "./Ulasan";
 
 // Dynamically get the latest 3 reviews from ULASAN
@@ -13,16 +12,8 @@ const REVIEWS = ULASAN.slice(0, 3).map((u) => ({
   text: u.review,
 }));
 
-// Dynamically filter SESSIONS for today's date (Senin, 14 Okt 2026)
-const TODAY_SESSIONS = SESSIONS.filter(
-  (session) => session.schedule === "Senin, 14 Okt 2026"
-).map((session) => ({
-  id: session.id,
-  learnerName: session.learnerName,
-  avatar: session.avatarUrl,
-  subject: session.subject,
-  time: session.time.replace(" WIB", ""),
-}));
+// Placeholder — akan di-fetch dari API nanti
+const TODAY_SESSIONS = [];
 
 export default function TutorDashboard() {
   const navigate = useNavigate();
