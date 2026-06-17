@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from '@/lib/axios'
@@ -145,6 +145,7 @@ export default function TutorLayout() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-[250px] border-r-0">
+              <SheetTitle className="sr-only">Navigasi Utama Tutor</SheetTitle>
               <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} />
             </SheetContent>
           </Sheet>
