@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { CheckCircle2, ShieldCheck, FileText, Pencil, Upload, Info } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from '@/lib/axios';
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 function KonekDinLogo() {
@@ -71,6 +72,11 @@ function UploadZone({ onFile, accept = ".pdf", formatText = "Format PDF (Maks. 5
       return;
     }
     
+    if (f.size > 5 * 1024 * 1024) {
+      if (onError) onError("Ukuran file melebihi 5MB.");
+      return;
+    }
+    
     onFile(f);
   };
 
@@ -107,7 +113,32 @@ function UploadZone({ onFile, accept = ".pdf", formatText = "Format PDF (Maks. 5
 }
 
 // ─── Uploaded File Card ───────────────────────────────────────────────────────
-function UploadedCard({ fileName, onRemove }) {
+function UploadedCard({ fileName, onFile, accept, formatText, onError }) {
+  const inputRef = useRef(null);
+
+  const validateFile = (f) => {
+    if (!f) return;
+    
+    if (onError) onError("");
+
+    if (accept.includes(".pdf") && f.type !== "application/pdf" && !f.name.toLowerCase().endsWith(".pdf")) {
+      if (onError) onError("File harus berformat PDF.");
+      return;
+    }
+    
+    if (accept.includes(".jpg") && !f.type.startsWith("image/")) {
+      if (onError) onError("File harus berformat gambar (JPG/PNG).");
+      return;
+    }
+    
+    if (f.size > 5 * 1024 * 1024) {
+      if (onError) onError("Ukuran file melebihi 5MB.");
+      return;
+    }
+    
+    onFile(f);
+  };
+
   return (
     <div className="flex items-center gap-4 bg-[#f0fdf8] border border-[#0d7c6b] rounded-xl px-5 py-4">
       {/* Check icon */}
@@ -121,12 +152,19 @@ function UploadedCard({ fileName, onRemove }) {
       </div>
       {/* Ubah button */}
       <button
-        onClick={onRemove}
+        onClick={() => inputRef.current.click()}
         className="flex items-center gap-1.5 text-sm font-semibold text-[#0F1D8C] hover:text-[#0d7c6b] transition-colors flex-shrink-0"
       >
         <Pencil className="w-3.5 h-3.5" />
         Ubah
       </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => validateFile(e.target.files[0])}
+      />
     </div>
   );
 }
@@ -155,10 +193,10 @@ function DocSection({ title, description, badge, accept, formatText, file, setFi
       {file ? (
         <UploadedCard 
           fileName={file.name || file.fileName || file} 
-          onRemove={() => {
-            setFile(null);
-            if (onError) onError("");
-          }} 
+          onFile={setFile}
+          accept={accept}
+          formatText={formatText}
+          onError={onError}
         />
       ) : (
         <UploadZone onFile={setFile} accept={accept} formatText={formatText} onError={onError} />
@@ -173,18 +211,26 @@ function DocSection({ title, description, badge, accept, formatText, file, setFi
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function RegisterTutorDokumen() {
   const navigate = useNavigate();
-  const [semester, setSemester] = useState("");
+  const location = useLocation();
+  
+  const [semester, setSemester] = useState(location.state?.semester?.toString() || "");
   const [semesterError, setSemesterError] = useState("");
 
-  const [transkripFile, setTranskripFile] = useState(null);
-  const [transkripError, setTranskripError] = useState("");
+  const [transkripFiles, setTranskripFiles] = useState(location.state?.transkripFiles || []);
+  const [transkripErrors, setTranskripErrors] = useState([]);
 
-  const [portofolio, setPortofolio] = useState("");
+  const [portofolio, setPortofolio] = useState(location.state?.portofolio || "");
 
-  const [sertifikatFile, setSertifikatFile] = useState(null);
+  const [sertifikatFile, setSertifikatFile] = useState(location.state?.sertifikatFile || null);
   const [sertifikatError, setSertifikatError] = useState("");
 
-  const isTranskripValid = transkripFile !== null && transkripError === "";
+  const parsedSemester = parseInt(semester, 10);
+  const isValidSemesterValue = !isNaN(parsedSemester) && parsedSemester >= 3 && parsedSemester <= 14;
+  const numTranscripts = isValidSemesterValue ? parsedSemester - 1 : 1;
+
+  const isTranskripValid = Array.from({ length: numTranscripts }).every(
+    (_, i) => transkripFiles[i] !== null && transkripFiles[i] !== undefined && !transkripErrors[i]
+  );
   const isPortofolioValid = portofolio.trim() !== "";
   const isSemesterValid = semester.trim() !== "" && semesterError === "";
   const isSertifikatValid = sertifikatError === "";
@@ -282,17 +328,30 @@ export default function RegisterTutorDokumen() {
 
             <div className="h-px bg-slate-100" />
 
-            <DocSection
-              title="Transkrip Nilai"
-              description="Kumpulkan dokumen akademik resmi."
-              badge="WAJIB"
-              accept=".pdf"
-              formatText="Format PDF (Maks. 5MB)"
-              file={transkripFile}
-              setFile={setTranskripFile}
-              error={transkripError}
-              onError={setTranskripError}
-            />
+            <div className="flex flex-col gap-8">
+              {Array.from({ length: numTranscripts }).map((_, i) => (
+                <DocSection
+                  key={i}
+                  title={isValidSemesterValue ? `Transkrip Nilai Semester ${i + 1}` : "Transkrip Nilai"}
+                  description="Kumpulkan dokumen akademik resmi."
+                  badge="WAJIB"
+                  accept=".pdf"
+                  formatText="Format PDF (Maks. 5MB)"
+                  file={transkripFiles[i]}
+                  setFile={(file) => {
+                    const newFiles = [...transkripFiles];
+                    newFiles[i] = file;
+                    setTranskripFiles(newFiles);
+                  }}
+                  error={transkripErrors[i]}
+                  onError={(err) => {
+                    const newErrs = [...transkripErrors];
+                    newErrs[i] = err;
+                    setTranskripErrors(newErrs);
+                  }}
+                />
+              ))}
+            </div>
             <div className="h-px bg-slate-100" />
             
             {/* Portofolio Input Link */}
@@ -339,7 +398,14 @@ export default function RegisterTutorDokumen() {
               Kembali ke Informasi Awal
             </button>
             <button 
-              onClick={() => navigate('/register/tutor/mata-kuliah', { state: { semester: parseInt(semester, 10) } })}
+              onClick={() => navigate('/register/tutor/mata-kuliah', { 
+                state: { 
+                  semester: parseInt(semester, 10),
+                  transkripFiles: transkripFiles.slice(0, numTranscripts),
+                  portofolio,
+                  sertifikatFile
+                } 
+              })}
               disabled={!isFormValid}
               className={`text-white font-bold px-8 py-3 rounded-full text-sm shadow-md transition-all duration-150 ${
                 isFormValid 

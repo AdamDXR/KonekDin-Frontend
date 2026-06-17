@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CheckCircle2, X, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from '@/lib/axios';
 
 function KonekDinLogo() {
   return (
@@ -48,7 +49,8 @@ const SUGGESTED = ["Java", "Python", "SQL", "Machine Learning", "Data Analysis",
 
 export default function RegisterTutorKeahlian() {
   const navigate = useNavigate();
-  const [skills, setSkills] = useState(["Java", "Python", "SQL", "Machine Learning", "Data Analysis", "Public Speaking", "Web Development", "Artificial Intelligence", "UI/UX Design"]);
+  const location = useLocation();
+  const [skills, setSkills] = useState(location.state?.skills || []);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
 
@@ -69,7 +71,12 @@ export default function RegisterTutorKeahlian() {
 
   const handleNext = () => {
     if (skills.length === 0) { setError("Harap tambahkan minimal satu keahlian."); return; }
-    navigate("/register/tutor/tinjauan");
+    navigate("/register/tutor/tinjauan", {
+      state: {
+        ...location.state,
+        skills
+      }
+    });
   };
 
   return (
@@ -143,7 +150,7 @@ export default function RegisterTutorKeahlian() {
           </div>
 
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
-            <button onClick={() => navigate("/register/tutor/mata-kuliah")}
+            <button onClick={() => navigate("/register/tutor/mata-kuliah", { state: location.state })}
               className="flex items-center gap-1.5 text-sm font-semibold text-[#0d7c6b] hover:text-[#0a5a4e] transition-colors">
               ← Kembali
             </button>
