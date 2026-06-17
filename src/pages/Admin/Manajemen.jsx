@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   Search,
   Eye,
@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import axios from '@/lib/axios'
 
 // ─── Toast Component ──────────────────────────────────────────────────────────
 function ToastNotification({ toast, onClose }) {
@@ -72,38 +73,7 @@ const generateDummyUsers = () => {
 }
 const initialUsersData = generateDummyUsers()
 
-// ─── Dummy Data Verifikasi Tutor (Pending) ───────────────────────────────────
-const initialVerifikasiData = [
-  {
-    id: 101,
-    name: 'Budi Santoso',
-    email: 'budi.santoso@example.com',
-    joinDate: '18 Okt 2026',
-    image: 'https://i.pravatar.cc/150?u=201',
-    status: 'Pending',
-    documents: [
-      { type: "file", name: "TRANSKRIP_NILAI.pdf", label: "Transkrip Nilai" },
-      { type: "link", value: "https://github.com/budisantoso", label: "Portofolio" },
-      { type: "image", name: "Sertifikat_WebDev.jpg", label: "Sertifikat" },
-    ],
-    matkul: ["Pemrograman Web", "Algoritma dan Struktur Data"],
-    keahlian: ["React", "Tailwind CSS", "JavaScript"]
-  },
-  {
-    id: 102,
-    name: 'Siti Aminah',
-    email: 'siti.aminah@example.com',
-    joinDate: '17 Okt 2026',
-    image: 'https://i.pravatar.cc/150?u=202',
-    status: 'Pending',
-    documents: [
-      { type: "file", name: "KHS_Semester_4.pdf", label: "Transkrip Nilai" },
-      { type: "image", name: "Sertifikat_UIUX.jpg", label: "Sertifikat" },
-    ],
-    matkul: ["Interaksi Manusia & Komputer"],
-    keahlian: ["Figma", "UI/UX Design", "Wireframing"]
-  }
-]
+// ─── Dummy Data Verifikasi Tutor (Dihapus karena sudah API) ─────────────────
 
 // ─── Dummy Data Keuangan ──────────────────────────────────────────────────────
 const initialTransaksiMasuk = [
@@ -115,7 +85,9 @@ const initialTransaksiMasuk = [
 
 // ─── Komponen Tab Pengguna ────────────────────────────────────────────────────
 function TabPengguna() {
-  const [users, setUsers] = useState(initialUsersData)
+  const [users, setUsers] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('Semua')
   const [statusFilter, setStatusFilter] = useState('Semua')
@@ -133,21 +105,68 @@ function TabPengguna() {
   const [suspendModal, setSuspendModal] = useState({ isOpen: false, item: null, duration: '1 Minggu' })
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null })
 
-  const handleSuspend = () => {
-    setUsers(prev => prev.map(u => u.id === suspendModal.item.id ? { ...u, status: 'Suspend', suspendUntil: 'Diatur Admin' } : u))
-    showToast(`Akun ${suspendModal.item.name} berhasil di-suspend selama ${suspendModal.duration}.`)
-    setSuspendModal({ isOpen: false, item: null, duration: '1 Minggu' })
+  const fetchUsers = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await axios.get('/admin/users')
+      const formattedUsers = response.data.data.map(user => {
+        const isSuspended = user.suspended_until && new Date(user.suspended_until) > new Date()
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role === 'learner' ? 'Pelajar' : 'Tutor',
+          status: isSuspended ? 'Suspend' : 'Aktif',
+          joinDate: user.created_at,
+          image: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`,
+          suspendUntil: isSuspended ? new Date(user.suspended_until).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : null,
+          suspendReason: isSuspended ? 'Pelanggaran ketentuan (Diatur via durasi)' : null
+        }
+      })
+      setUsers(formattedUsers)
+    } catch (err) {
+      setError('Gagal memuat data pengguna.')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleDelete = () => {
-    setUsers(prev => prev.filter(u => u.id !== deleteModal.item.id))
-    showToast(`Akun ${deleteModal.item.name} berhasil dihapus permanen dari sistem.`)
-    setDeleteModal({ isOpen: false, item: null })
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+
+  const handleSuspend = async () => {
+    try {
+      await axios.patch(`/admin/users/${suspendModal.item.id}/suspend`, { duration: suspendModal.duration })
+      showToast(`Akun ${suspendModal.item.name} berhasil di-suspend selama ${suspendModal.duration}.`)
+      setSuspendModal({ isOpen: false, item: null, duration: '1 Minggu' })
+      fetchUsers()
+    } catch (error) {
+      showToast('Gagal melakukan suspend pengguna.', 'error')
+    }
   }
 
-  const handleUnsuspend = (id, name) => {
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, status: 'Aktif', suspendUntil: null } : u))
-    showToast(`Status Suspend pada akun ${name} berhasil dicabut.`)
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`/admin/users/${deleteModal.item.id}`)
+      showToast(`Akun ${deleteModal.item.name} berhasil dihapus permanen dari sistem.`)
+      setDeleteModal({ isOpen: false, item: null })
+      fetchUsers()
+    } catch (error) {
+      showToast('Gagal menghapus pengguna.', 'error')
+    }
+  }
+
+  const handleUnsuspend = async (id, name) => {
+    try {
+      await axios.patch(`/admin/users/${id}/unsuspend`)
+      showToast(`Status Suspend pada akun ${name} berhasil dicabut.`)
+      fetchUsers()
+    } catch (error) {
+      showToast('Gagal mencabut suspend pengguna.', 'error')
+    }
   }
 
   const filteredUsers = useMemo(() => {
@@ -315,7 +334,15 @@ function TabPengguna() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {paginatedUsers.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">Memuat data pengguna...</td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-red-500">{error}</td>
+                </tr>
+              ) : paginatedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-slate-500">Tidak ada pengguna yang sesuai dengan filter.</td>
                 </tr>
@@ -379,19 +406,55 @@ function TabPengguna() {
 
 // ─── Komponen Tab Verifikasi Tutor ────────────────────────────────────────────
 function TabVerifikasiTutor() {
-  const [pendingUsers, setPendingUsers] = useState(initialVerifikasiData)
-  const [toast, setToast] = useState({ show: false, message: '' })
+  const [pendingUsers, setPendingUsers] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
   const [viewModal, setViewModal] = useState({ isOpen: false, item: null })
 
-  const showToast = (message) => {
-    setToast({ show: true, message })
-    setTimeout(() => setToast({ show: false, message: '' }), 4000)
+  const fetchApplications = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await axios.get('/admin/applications')
+      const formattedApps = response.data.data.map(app => ({
+        id: app.id,
+        name: app.name,
+        email: app.email,
+        joinDate: app.created_at,
+        image: app.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.name)}&background=random`,
+        status: app.status,
+        documents: app.documents || [],
+        matkul: app.matkul || [],
+        keahlian: app.keahlian || []
+      }))
+      setPendingUsers(formattedApps)
+    } catch (err) {
+      setError('Gagal memuat data pengajuan tutor.')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleAcc = (user) => {
-    setPendingUsers(prev => prev.filter(u => u.id !== user.id))
-    showToast(`Pendaftaran Tutor untuk ${user.name} disetujui. Notifikasi otomatis dikirimkan ke Learner.`)
-    setViewModal({ isOpen: false, item: null })
+  useEffect(() => {
+    fetchApplications()
+  }, [])
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type })
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000)
+  }
+
+  const handleAcc = async (user) => {
+    try {
+      await axios.patch(`/admin/applications/${user.id}/approve`)
+      showToast(`Pendaftaran Tutor untuk ${user.name} disetujui. Notifikasi otomatis dikirimkan ke Learner.`)
+      setViewModal({ isOpen: false, item: null })
+      fetchApplications()
+    } catch (err) {
+      showToast('Gagal menyetujui pendaftaran tutor.', 'error')
+    }
   }
 
   return (
@@ -499,7 +562,11 @@ function TabVerifikasiTutor() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {pendingUsers.length === 0 ? (
+              {isLoading ? (
+                <tr><td colSpan={4} className="py-12 px-6 text-center text-slate-500">Memuat data pengajuan tutor...</td></tr>
+              ) : error ? (
+                <tr><td colSpan={4} className="py-12 px-6 text-center text-red-500">{error}</td></tr>
+              ) : pendingUsers.length === 0 ? (
                 <tr><td colSpan={4} className="py-12 px-6 text-center text-slate-500">Tidak ada pengajuan pendaftaran tutor baru.</td></tr>
               ) : pendingUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
