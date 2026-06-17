@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { CheckCircle2, Lightbulb, X, Plus } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from '@/lib/axios';
 
 // ─── Shared Logo ──────────────────────────────────────────────────────────────
 function KonekDinLogo() {
@@ -66,7 +67,7 @@ const MATKUL_PER_SEMESTER = {
 export default function RegisterTutorMataKuliah() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState(location.state?.selectedMataKuliah || []);
   const [search, setSearch] = useState("");
 
   const maxSemester = location.state?.semester || 14;
@@ -167,17 +168,21 @@ export default function RegisterTutorMataKuliah() {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
             <button
-              onClick={() => navigate("/register/tutor/dokumen")}
+              onClick={() => navigate("/register/tutor/dokumen", { state: location.state })}
               className="flex items-center gap-1.5 text-sm font-semibold text-[#0d7c6b] hover:text-[#0a5a4e] transition-colors"
             >
               ← Kembali
             </button>
             {selected.length > 0 && (
               <button
-                onClick={() => navigate("/register/tutor/keahlian")}
+                onClick={() => navigate("/register/tutor/keahlian", {
+                  state: {
+                    ...location.state,
+                    selectedMataKuliah: selected
+                  }
+                })}
                 className="bg-[#0F1D8C] hover:bg-[#0b166e] text-white font-bold px-8 py-3 rounded-full text-sm shadow-md hover:shadow-lg transition-all duration-150"
               >
                 Langkah Selanjutnya
