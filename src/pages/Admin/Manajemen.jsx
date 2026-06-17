@@ -75,13 +75,7 @@ const initialUsersData = generateDummyUsers()
 
 // ─── Dummy Data Verifikasi Tutor (Dihapus karena sudah API) ─────────────────
 
-// ─── Dummy Data Keuangan ──────────────────────────────────────────────────────
-const initialTransaksiMasuk = [
-  { id: 'TRX-1092', tanggal: '13 Okt 2026, 14:30', learner: 'Budi Santoso', tutor: 'Dukun Samin', nominal: 60000, metode: 'BCA VA', status: 'Selesai' },
-  { id: 'TRX-1091', tanggal: '12 Okt 2026, 09:15', learner: 'Andi Wijaya', tutor: 'Siti Aminah', nominal: 45000, metode: 'Mandiri VA', status: 'Selesai' },
-  { id: 'TRX-1090', tanggal: '11 Okt 2026, 16:45', learner: 'Rina Melati', tutor: 'Bambang Pamungkas', nominal: 120000, metode: 'GOPAY', status: 'Menunggu' },
-  { id: 'TRX-1088', tanggal: '09 Okt 2026, 10:10', learner: 'Ahmad Faisal', tutor: 'Siti Aminah', nominal: 45000, metode: 'OVO', status: 'Menunggu' },
-]
+// ─── Dummy Data Keuangan (Dihapus karena sudah API) ───────────────────────────
 
 // ─── Komponen Tab Pengguna ────────────────────────────────────────────────────
 function TabPengguna() {
@@ -411,6 +405,7 @@ function TabVerifikasiTutor() {
   const [error, setError] = useState(null)
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
   const [viewModal, setViewModal] = useState({ isOpen: false, item: null })
+  const [rejectModal, setRejectModal] = useState({ isOpen: false, item: null, reason: 'Dokumen tidak valid' })
 
   const fetchApplications = async () => {
     setIsLoading(true)
@@ -454,6 +449,19 @@ function TabVerifikasiTutor() {
       fetchApplications()
     } catch (err) {
       showToast('Gagal menyetujui pendaftaran tutor.', 'error')
+    }
+  }
+
+  const handleReject = async () => {
+    try {
+      await axios.patch(`/admin/applications/${rejectModal.item.id}/reject`, {
+        admin_note: rejectModal.reason
+      })
+      showToast(`Pendaftaran Tutor untuk ${rejectModal.item.name} telah ditolak.`)
+      setRejectModal({ isOpen: false, item: null, reason: 'Dokumen tidak valid' })
+      fetchApplications()
+    } catch (err) {
+      showToast('Gagal menolak pendaftaran tutor.', 'error')
     }
   }
 
@@ -546,6 +554,42 @@ function TabVerifikasiTutor() {
         </div>
       )}
 
+      {/* Modal Penolakan */}
+      {rejectModal.isOpen && rejectModal.item && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] p-8 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-200">
+            <button onClick={() => setRejectModal({ isOpen: false, item: null, reason: 'Dokumen tidak valid' })} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6 bg-red-100 text-red-600">
+              <Ban className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-[#0a0f44] mb-2">Tolak Pendaftaran</h3>
+            <p className="text-slate-500 text-[15px] mb-6">Pilih alasan penolakan untuk calon tutor <strong>{rejectModal.item.name}</strong>. Alasan ini akan dikirimkan kepada yang bersangkutan.</p>
+            
+            <div className="space-y-3 mb-8">
+              {['Dokumen tidak valid', 'Nilai kurang memenuhi syarat', 'Informasi tidak lengkap'].map(rsn => (
+                <button 
+                  key={rsn}
+                  onClick={() => setRejectModal(prev => ({ ...prev, reason: rsn }))}
+                  className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${rejectModal.reason === rsn ? 'border-red-500 bg-red-50' : 'border-slate-100 bg-white hover:border-red-200'}`}
+                >
+                  <span className={`font-bold text-left ${rejectModal.reason === rsn ? 'text-red-700' : 'text-slate-600'}`}>{rsn}</span>
+                  <div className={`w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center ${rejectModal.reason === rsn ? 'border-red-500' : 'border-slate-300'}`}>
+                    {rejectModal.reason === rsn && <div className="w-2.5 h-2.5 bg-red-500 rounded-full" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button onClick={() => setRejectModal({ isOpen: false, item: null, reason: 'Dokumen tidak valid' })} className="flex-1 py-3 px-4 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Batal</button>
+              <button onClick={handleReject} className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm">Konfirmasi Tolak</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Table Section */}
       <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
         <div className="border-b border-slate-100 p-4 sm:px-6 flex items-center justify-between">
@@ -592,6 +636,9 @@ function TabVerifikasiTutor() {
                       <button onClick={() => setViewModal({ isOpen: true, item: user })} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" /> Lihat Berkas
                       </button>
+                      <button onClick={() => setRejectModal({ isOpen: true, item: user, reason: 'Dokumen tidak valid' })} className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-red-200 shadow-sm flex items-center gap-1.5">
+                        <X className="w-3.5 h-3.5" /> Tolak
+                      </button>
                       <button onClick={() => handleAcc(user)} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-emerald-200 shadow-sm flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5" /> ACC
                       </button>
@@ -609,25 +656,50 @@ function TabVerifikasiTutor() {
 
 // ─── Komponen Tab Keuangan ────────────────────────────────────────────────────
 function TabKeuangan() {
-  const [transaksi, setTransaksi] = useState(initialTransaksiMasuk)
+  const [transaksi, setTransaksi] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [modalConfig, setModalConfig] = useState({ isOpen: false, item: null })
-  const [toast, setToast] = useState({ show: false, message: '' })
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
 
-  const showToast = (message) => {
-    setToast({ show: true, message })
-    setTimeout(() => setToast({ show: false, message: '' }), 4000)
+  const fetchPayments = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await axios.get('/admin/payments')
+      setTransaksi(response.data.data)
+    } catch (err) {
+      setError('Gagal memuat data keuangan.')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleConfirmAcc = () => {
+  useEffect(() => {
+    fetchPayments()
+  }, [])
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type })
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000)
+  }
+
+  const handleConfirmAcc = async () => {
     if (!modalConfig.item) return
-    setTransaksi(prev => prev.map(t => t.id === modalConfig.item.id ? { ...t, status: 'Selesai' } : t))
-    showToast(`Pembayaran Rp ${modalConfig.item.nominal.toLocaleString('id-ID')} dari ${modalConfig.item.learner} berhasil di-ACC.`)
-    setModalConfig({ isOpen: false, item: null })
+    try {
+      await axios.patch(`/admin/payments/${modalConfig.item.id}/approve`)
+      showToast(`Pembayaran dari ${modalConfig.item.learner} berhasil di-ACC. Jadwal telah diaktifkan.`)
+      setModalConfig({ isOpen: false, item: null })
+      fetchPayments()
+    } catch (err) {
+      showToast('Gagal menyetujui pembayaran.', 'error')
+    }
   }
 
   return (
     <div className="animate-in fade-in duration-300 relative">
-      <ToastNotification toast={toast} onClose={() => setToast({ show: false, message: '' })} />
+      <ToastNotification toast={toast} onClose={() => setToast({ show: false, message: '', type: 'success' })} />
 
       {modalConfig.isOpen && modalConfig.item && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -635,7 +707,7 @@ function TabKeuangan() {
             <button onClick={() => setModalConfig({ isOpen: false, item: null })} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5" /></button>
             <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6 bg-emerald-100 text-emerald-600"><CheckCircle className="w-8 h-8" /></div>
             <h3 className="text-xl font-bold text-[#0a0f44] mb-2">Setujui Pembayaran?</h3>
-            <p className="text-slate-500 text-[15px] mb-8 leading-relaxed">Apakah Anda yakin ingin melakukan ACC untuk pembayaran sebesar <strong>Rp {modalConfig.item.nominal.toLocaleString('id-ID')}</strong> dari Learner <strong>"{modalConfig.item.learner}"</strong>?</p>
+            <p className="text-slate-500 text-[15px] mb-8 leading-relaxed">Apakah Anda yakin ingin melakukan ACC untuk pembayaran sebesar <strong>Rp {modalConfig.item.nominal?.toLocaleString('id-ID')}</strong> dari Learner <strong>"{modalConfig.item.learner}"</strong>?</p>
             <div className="flex items-center gap-3">
               <button onClick={() => setModalConfig({ isOpen: false, item: null })} className="flex-1 py-3 px-4 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Batal</button>
               <button onClick={handleConfirmAcc} className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-sm">Ya, Setujui</button>
@@ -662,23 +734,33 @@ function TabKeuangan() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {transaksi.map((trx) => (
+              {isLoading ? (
+                <tr><td colSpan={7} className="py-12 px-6 text-center text-slate-500">Memuat data pembayaran...</td></tr>
+              ) : error ? (
+                <tr><td colSpan={7} className="py-12 px-6 text-center text-red-500">{error}</td></tr>
+              ) : transaksi.length === 0 ? (
+                <tr><td colSpan={7} className="py-12 px-6 text-center text-slate-500">Tidak ada data pembayaran.</td></tr>
+              ) : transaksi.map((trx) => (
                 <tr key={trx.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-4 px-6 font-bold text-[#000666]">{trx.id}</td>
+                  <td className="py-4 px-6 font-bold text-[#000666]">TRX-{trx.id}</td>
                   <td className="py-4 px-6 text-slate-500">{trx.tanggal}</td>
                   <td className="py-4 px-6 text-slate-700 font-semibold">{trx.learner}</td>
                   <td className="py-4 px-6 text-slate-700">{trx.tutor}</td>
                   <td className="py-4 px-6">
-                    <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold">{trx.metode}</span>
+                    <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold uppercase">{trx.metode}</span>
                   </td>
-                  <td className="py-4 px-6 font-bold text-emerald-600">Rp {trx.nominal.toLocaleString('id-ID')}</td>
+                  <td className="py-4 px-6 font-bold text-emerald-600">Rp {trx.nominal?.toLocaleString('id-ID')}</td>
                   <td className="py-4 px-6">
-                    {trx.status === 'Menunggu' ? (
+                    {trx.status === 'pending' || trx.status === 'Menunggu' ? (
                       <button onClick={() => setModalConfig({ isOpen: true, item: trx })} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-emerald-200 shadow-sm flex items-center gap-1.5 w-full justify-center">
                         <CheckCircle className="w-3.5 h-3.5" /> ACC
                       </button>
                     ) : (
-                      <div className="flex justify-center"><span className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-600">{trx.status}</span></div>
+                      <div className="flex justify-center">
+                        <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${trx.status === 'accepted' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
+                          {trx.status === 'accepted' ? 'Selesai' : trx.status}
+                        </span>
+                      </div>
                     )}
                   </td>
                 </tr>
