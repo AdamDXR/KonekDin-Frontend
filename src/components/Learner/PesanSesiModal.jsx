@@ -2,41 +2,20 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, Book, Calendar, X, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import { format, addDays } from 'date-fns'
+import idLocale from 'date-fns/locale/id'
 import axios from 'axios'
 
-// Helper function to get next occurrence of a day
-const getNextDateForDay = (dayName) => {
-  const days = {
-    'minggu': 0, 'senin': 1, 'selasa': 2, 'rabu': 3,
-    'kamis': 4, 'jumat': 5, 'sabtu': 6
-  }
-  
-  const targetDay = days[dayName.toLowerCase()]
-  if (targetDay === undefined) return new Date().toISOString().split('T')[0] // Fallback today
-  
-  const date = new Date()
-  const today = date.getDay()
-  let daysUntil = targetDay - today
-  
-  // Jika hari target sudah lewat atau sama dengan hari ini, ambil minggu depan
-  if (daysUntil <= 0) {
-    daysUntil += 7
-  }
-  
-  date.setDate(date.getDate() + daysUntil)
-  
-  // Kembalikan dalam format YYYY-MM-DD (menyesuaikan timezone lokal)
-  const offset = date.getTimezoneOffset()
-  date.setMinutes(date.getMinutes() - offset)
-  return date.toISOString().split('T')[0]
+// Helper to map indonesian day names to JS getDay() indices
+const dayNameToIndex = {
+  'minggu': 0, 'senin': 1, 'selasa': 2, 'rabu': 3,
+  'kamis': 4, 'jumat': 5, 'sabtu': 6
 }
+
+
 
 export default function PesanSesiModal({ isOpen, onClose, tutor }) {
   const navigate = useNavigate()
@@ -46,16 +25,38 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
 
-  const scheduleOptions = useMemo(() => {
+  const [selectedDate, setSelectedDate] = useState(null)
+  
+  // Hitung index hari apa saja tutor ini memiliki jadwal
+  const availableDayIndices = useMemo(() => {
     if (!tutor || !tutor.rawSlots) return []
-    // Combine slot info into a JSON string to keep slot_id, day, start_time, end_time
-    return tutor.rawSlots.map(slot => ({
-      id: slot.slot_id || slot.availability_id || slot.id,
-      day_of_week: slot.day_of_week,
-      label: `${slot.day_of_week} (${slot.start_time?.substring(0,5) || ''} - ${slot.end_time?.substring(0,5) || ''})`,
-      value: JSON.stringify({ id: slot.slot_id || slot.availability_id || slot.id, day: slot.day_of_week })
-    }))
+    const indices = new Set()
+    tutor.rawSlots.forEach(slot => {
+      const idx = dayNameToIndex[slot.day_of_week?.toLowerCase()]
+      if (idx !== undefined) indices.add(idx)
+    })
+    return Array.from(indices)
   }, [tutor])
+
+  const scheduleOptions = useMemo(() => {
+    if (!tutor || !tutor.rawSlots || !selectedDate) return []
+    
+    const selectedDayIdx = selectedDate.getDay()
+    
+    return tutor.rawSlots
+      .filter(slot => dayNameToIndex[slot.day_of_week?.toLowerCase()] === selectedDayIdx)
+      .map(slot => ({
+        id: slot.slot_id || slot.availability_id || slot.id,
+        day_of_week: slot.day_of_week,
+        label: `${slot.start_time?.substring(0,5) || ''} - ${slot.end_time?.substring(0,5) || ''} WIB`,
+        value: JSON.stringify({ id: slot.slot_id || slot.availability_id || slot.id, day: slot.day_of_week })
+      }))
+  }, [tutor, selectedDate])
+
+  // Reset slot jika tanggal berubah
+  useEffect(() => {
+    setSelectedSlotStr("")
+  }, [selectedDate])
 
   const courseOptions = useMemo(() => {
     if (!tutor || !tutor.rawCourses) return []
@@ -71,6 +72,7 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
     if (isOpen) {
       setErrorMsg(null)
       setSelectedCourseId("")
+      setSelectedDate(null)
       setSelectedSlotStr("")
       if (scrollArea) {
         const scrollbarWidth = scrollArea.offsetWidth - scrollArea.clientWidth
@@ -111,7 +113,10 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
       }
 
       const slotData = JSON.parse(selectedSlotStr)
-      const bookingDate = getNextDateForDay(slotData.day)
+      const year = selectedDate.getFullYear()
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+      const day = String(selectedDate.getDate()).padStart(2, '0')
+      const bookingDate = `${year}-${month}-${day}`
 
       const payload = {
         tutor_id: tutor.id,
@@ -195,6 +200,40 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
             </div>
           </div>
 
+          {/* Date Info */}
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center">
+            <div className="w-8 h-8 bg-pink-100 text-pink-600 rounded-lg flex items-center justify-center shrink-0 mr-3">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-bold text-slate-400 mb-0.5">TANGGAL SESI</div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={`w-full h-auto bg-transparent border-none p-0 text-sm font-semibold text-slate-800 focus:ring-0 focus:ring-offset-0 shadow-none text-left justify-start hover:bg-transparent ${!selectedDate ? "text-slate-500" : ""}`}
+                  >
+                    {selectedDate ? format(selectedDate, "EEEE, d MMMM yyyy", { locale: idLocale }) : "Pilih Tanggal Sesi"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    disabled={(date) => {
+                      const today = new Date()
+                      today.setHours(0, 0, 0, 0)
+                      const maxDate = addDays(today, 30)
+                      return date < today || date > maxDate || !availableDayIndices.includes(date.getDay())
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
           {/* Time Info */}
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center">
             <div className="w-8 h-8 bg-teal-100 text-teal-600 rounded-lg flex items-center justify-center shrink-0 mr-3">
@@ -202,9 +241,9 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[10px] font-bold text-slate-400 mb-0.5">WAKTU SESI</div>
-              <Select value={selectedSlotStr} onValueChange={setSelectedSlotStr} disabled={isLoading}>
+              <Select value={selectedSlotStr} onValueChange={setSelectedSlotStr} disabled={isLoading || !selectedDate || scheduleOptions.length === 0}>
                 <SelectTrigger className="w-full h-auto bg-transparent border-none p-0 text-sm font-semibold text-slate-800 focus:ring-0 focus:ring-offset-0 shadow-none text-left">
-                  <SelectValue placeholder="Pilih Waktu Sesi" />
+                  <SelectValue placeholder={!selectedDate ? "Pilih tanggal terlebih dahulu" : scheduleOptions.length === 0 ? "Tidak ada jadwal" : "Pilih Waktu Sesi"} />
                 </SelectTrigger>
                 <SelectContent>
                   {scheduleOptions.map((opt, idx) => (
