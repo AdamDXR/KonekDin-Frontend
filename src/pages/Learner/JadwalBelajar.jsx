@@ -62,6 +62,12 @@ function EmptyCard({ onCariTutor }) {
   )
 }
 
+const formatDate = (dateString) => {
+  if (!dateString) return '-'
+  const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }
+  return new Date(dateString).toLocaleDateString('id-ID', options)
+}
+
 export default function JadwalBelajar() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -87,9 +93,9 @@ export default function JadwalBelajar() {
               tutorFoto: item.tutor?.avatar ? `http://127.0.0.1:8000/storage/${item.tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.tutor?.name || item.tutor || 'Tutor')}&background=random`,
               tutorRating: Number(item.tutor?.rating_avg) || 0,
               mataKuliah: item.course?.name || item.course || 'Materi Belajar',
-              tanggal: item.date,
-              jamMulai: item.time ? item.time.split(' - ')[0] : '00:00',
-              jamSelesai: item.time ? item.time.split(' - ')[1] : '00:00',
+              tanggal: formatDate(item.booking_date),
+              jamMulai: item.slots && item.slots.length > 0 ? item.slots[0].start_time : '00:00',
+              jamSelesai: item.slots && item.slots.length > 0 ? item.slots[0].end_time : '00:00',
               timezone: 'WIB'
            }))
            setJadwal(formatted)
