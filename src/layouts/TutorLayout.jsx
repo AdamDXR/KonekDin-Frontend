@@ -21,7 +21,9 @@ const getInitials = (name) => {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 }
 
-const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handleLogout }) => (
+import { Repeat } from 'lucide-react'
+
+const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handleLogout, unreadNotifCount }) => (
   <div className="flex flex-col h-full bg-white">
     {/* Logo KonekDin */}
     <div className="px-5 pt-5 pb-4">
@@ -52,7 +54,15 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handl
         >
           {({ isActive }) => (
             <>
-              <item.icon className="h-[18px] w-[18px] flex-shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
+              <div className="relative flex-shrink-0">
+                <item.icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
+                {item.name === 'Notifikasi' && unreadNotifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
+                  </span>
+                )}
+              </div>
               {item.name}
             </>
           )}
@@ -60,8 +70,17 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handl
       ))}
     </nav>
 
-    <div className="px-5 pb-5">
-      <div className="flex items-center justify-between">
+    <div className="px-5 pb-5 space-y-4">
+      {/* Tombol Ganti Role (Selalu muncul di layout tutor) */}
+      <button
+        onClick={() => navigate('/learner/dashboard')}
+        className="w-full flex items-center justify-center gap-2 bg-[#F2F4F6] hover:bg-[#EEF2FF] text-[#000666] font-semibold px-6 py-2.5 h-auto rounded-xl text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+      >
+        <Repeat className="w-4 h-4" strokeWidth={2.5} />
+        Beralih ke Learner
+      </button>
+
+      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
         <NavLink
           to="/tutor/profil"
           onClick={() => setIsMobileMenuOpen(false)}
@@ -92,6 +111,7 @@ export default function TutorLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -103,6 +123,27 @@ export default function TutorLayout() {
     const savedUser = localStorage.getItem('user')
     if (savedUser) {
       setUser(JSON.parse(savedUser))
+    }
+
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get('/tutor/notifications')
+        if (response.data && response.data.data) {
+          const unreadCount = response.data.data.filter(n => !n.read_at).length
+          setUnreadNotifCount(unreadCount)
+        }
+      } catch (err) {
+        console.error("Gagal mengambil notifikasi tutor:", err)
+      }
+    }
+    fetchNotifications()
+
+    const handleNotificationsUpdate = () => {
+      fetchNotifications()
+    }
+    window.addEventListener('notificationsUpdated', handleNotificationsUpdate)
+    return () => {
+      window.removeEventListener('notificationsUpdated', handleNotificationsUpdate)
     }
   }, [navigate])
 
@@ -131,7 +172,7 @@ export default function TutorLayout() {
     <div className="flex h-screen bg-[#f7f9fb] overflow-hidden">
       {/* Sidebar Desktop */}
       <aside className="w-[250px] border-r border-slate-100 hidden lg:flex flex-col flex-shrink-0 bg-white">
-        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} />
+        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} unreadNotifCount={unreadNotifCount} />
       </aside>
 
       {/* Main Area: header + content + footer */}
@@ -147,7 +188,7 @@ export default function TutorLayout() {
             <SheetContent side="left" className="p-0 w-[250px] border-r-0">
               <SheetTitle className="sr-only">Navigasi Utama Tutor</SheetTitle>
               <SheetDescription className="sr-only">Menu navigasi aplikasi untuk tutor</SheetDescription>
-              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} />
+              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} unreadNotifCount={unreadNotifCount} />
             </SheetContent>
           </Sheet>
           <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />

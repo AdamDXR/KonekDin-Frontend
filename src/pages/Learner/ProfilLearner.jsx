@@ -350,6 +350,7 @@ export default function ProfilLearner() {
           </p>
         </div>
         <Button
+          onClick={() => navigate('/register/tutor/dokumen')}
           className="flex-shrink-0 bg-white text-[#0a0f44] hover:bg-slate-100 font-bold px-6 py-2.5 h-auto rounded-xl text-sm transition-colors shadow-sm"
         >
           Daftar Tutor
