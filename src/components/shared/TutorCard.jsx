@@ -58,9 +58,14 @@ export default function TutorCard({ tutor, actionNode }) {
                 <span className="bg-[#EAF0E4] text-[#4A5D23] font-bold text-[10px] px-2.5 py-1 rounded-lg w-fit shrink-0 uppercase tracking-wide">
                   {slot.day}
                 </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {slot.times?.map((time, tIdx) => (
-                    <span key={tIdx} className="bg-white border border-slate-200 text-slate-600 font-semibold text-[10px] px-2 py-1 rounded-md shadow-sm">
+                <div className="flex flex-col gap-1.5 w-full">
+                  {slot.slots ? slot.slots.map((s, tIdx) => (
+                    <div key={tIdx} className="flex justify-between items-center bg-white border border-slate-200 px-2 py-1.5 rounded-md shadow-sm w-full gap-2">
+                      <span className="text-slate-700 font-bold text-[10px] whitespace-nowrap">{s.time}</span>
+                      <span className="text-teal-600 font-semibold text-[10px] truncate text-right">{s.matkul}</span>
+                    </div>
+                  )) : slot.times?.map((time, tIdx) => (
+                    <span key={tIdx} className="bg-white border border-slate-200 text-slate-600 font-semibold text-[10px] px-2 py-1 rounded-md shadow-sm w-fit">
                       {time}
                     </span>
                   ))}
