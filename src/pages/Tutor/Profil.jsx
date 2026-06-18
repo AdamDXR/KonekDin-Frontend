@@ -770,19 +770,23 @@ const ALL_KEAHLIAN = [
 
 function EditKeahlianModal({ initialSelected, onClose, onSave }) {
   const [selected, setSelected] = useState(initialSelected || []);
-  const [search, setSearch] = useState("");
+  const [input, setInput] = useState("");
+  const [error, setError] = useState("");
 
-  const toggle = (k) => {
-    setSelected((prev) =>
-      prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]
-    );
+  const addSkill = () => {
+    const val = input.trim();
+    if (!val) return;
+    if (selected.includes(val)) { setError("Keahlian sudah ditambahkan."); return; }
+    setSelected((prev) => [...prev, val]);
+    setInput("");
+    setError("");
   };
 
-  const available = ALL_KEAHLIAN.filter(
-    (k) =>
-      !selected.includes(k) &&
-      k.toLowerCase().includes(search.toLowerCase())
-  );
+  const removeSkill = (s) => setSelected((prev) => prev.filter((x) => x !== s));
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") { e.preventDefault(); addSkill(); }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -792,41 +796,52 @@ function EditKeahlianModal({ initialSelected, onClose, onSave }) {
         </button>
         <div className="p-8">
           <h2 className="text-2xl font-extrabold text-[#0a0f44] mb-2">Edit Keahlian</h2>
-          <p className="text-sm text-slate-400 mb-6">Pilih keahlian atau alat yang dikuasai.</p>
+          <p className="text-sm text-slate-400 mb-6">Pilih keahlian atau ketik sendiri keahlian yang Anda kuasai.</p>
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-5">
-            <p className="text-sm font-bold text-[#0F1D8C]">Pilih Keahlian</p>
-            <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 flex flex-wrap gap-2 min-h-[52px] items-center">
+            <p className="text-sm font-bold text-[#0F1D8C]">Keahlian</p>
+            
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => { setInput(e.target.value); setError(""); }}
+                onKeyDown={handleKeyDown}
+                placeholder="Ketik keahlian, lalu tekan Enter..."
+                className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#0F1D8C]/20 focus:border-[#0F1D8C] transition"
+              />
+              <button
+                onClick={addSkill}
+                className="w-11 h-11 flex items-center justify-center bg-[#0F1D8C] hover:bg-[#0b166e] text-white rounded-xl transition-colors shadow-sm"
+              >
+                <Plus className="w-5 h-5" strokeWidth={2.5} />
+              </button>
+            </div>
+            {error && <p className="text-xs text-red-500 font-medium -mt-2">{error}</p>}
+
+            <div className="flex flex-wrap gap-2 min-h-[52px]">
               {selected.map((k) => (
-                <span key={k} className="inline-flex items-center gap-1.5 bg-[#0F1D8C] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                <span key={k} className="inline-flex items-center gap-1.5 bg-[#0d7c6b] text-white text-xs font-semibold px-3.5 py-2 rounded-full">
                   {k}
-                  <button onClick={() => toggle(k)} className="hover:text-slate-300 transition-colors">
+                  <button onClick={() => removeSkill(k)} className="hover:text-[#b3e8d8] transition-colors">
                     <X className="w-3 h-3" strokeWidth={2.5} />
                   </button>
                 </span>
               ))}
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={selected.length === 0 ? "Ketik untuk mencari..." : ""}
-                className="flex-1 min-w-[140px] text-sm text-slate-500 placeholder-slate-400 outline-none bg-transparent"
-              />
             </div>
-            <div className="flex flex-wrap gap-2 max-h-[150px] overflow-y-auto">
-              {available.map((k) => (
-                <button
-                  key={k}
-                  onClick={() => toggle(k)}
-                  className="inline-flex items-center gap-1.5 bg-[#e0faf3] text-[#0d7c6b] border border-[#b3e8d8] text-xs font-semibold px-3.5 py-2 rounded-full hover:bg-[#0d7c6b] hover:text-white hover:border-[#0d7c6b] transition-all duration-150"
-                >
-                  {k}
-                  <Plus className="w-3 h-3" strokeWidth={2.5} />
-                </button>
-              ))}
-              {available.length === 0 && search && (
-                <p className="text-xs text-slate-400">Tidak ada hasil untuk "{search}".</p>
-              )}
-            </div>
+
+            {selected.length === 0 && (
+              <div>
+                <p className="text-xs text-slate-400 mb-2">Saran keahlian:</p>
+                <div className="flex flex-wrap gap-2">
+                  {ALL_KEAHLIAN.slice(0, 8).map((s) => (
+                    <button key={s} onClick={() => setSelected((prev) => [...prev, s])}
+                      className="inline-flex items-center gap-1 bg-[#e0faf3] text-[#0d7c6b] border border-[#b3e8d8] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-[#0d7c6b] hover:text-white transition-all">
+                      {s} <Plus className="w-3 h-3" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="mt-8 flex justify-end gap-3">
             <Button onClick={onClose} variant="outline" className="font-semibold rounded-xl text-slate-600 border-slate-300 hover:bg-slate-50 px-6">Batal</Button>
@@ -915,12 +930,21 @@ export default function ProfilTutor() {
             setMatkulList([]);
           }
           
-          if (tutor.portfolio_url) {
+          if (tutor.portfolio_urls && tutor.portfolio_urls.length > 0) {
+            setPortofolioList(tutor.portfolio_urls.map((url, idx) => ({
+              id: idx + 1,
+              icon: "📎",
+              title: url,
+              issuer: "Portofolio",
+              linkUrl: url
+            })));
+          } else if (tutor.portfolio_url) {
+            // Fallback just in case backend returns old format
             setPortofolioList([{
               id: 1,
               icon: "📎",
-              title: "Portofolio Utama",
-              issuer: "Dari Pendaftaran",
+              title: tutor.portfolio_url,
+              issuer: "Portofolio",
               linkUrl: tutor.portfolio_url.startsWith('http') ? tutor.portfolio_url : `https://${tutor.portfolio_url}`
             }]);
           } else {
@@ -932,13 +956,23 @@ export default function ProfilTutor() {
               id: 1,
               semester: `Semester ${tutor.current_semester || '?'}`,
               fileName: tutor.transcript_file.split('/').pop(),
-              pdfUrl: `http://127.0.0.1:8000/storage/${tutor.transcript_file}`
+              pdfUrl: tutor.transcript_file.startsWith('http') ? tutor.transcript_file : `http://127.0.0.1:8000/storage/${tutor.transcript_file}`
             }]);
           } else {
             setTranskripList([]);
           }
           
-          setSertifikasiList([]);
+          if (tutor.certificate_files && tutor.certificate_files.length > 0) {
+            setSertifikasiList(tutor.certificate_files.map((url, idx) => ({
+              id: idx + 1,
+              title: "Sertifikat",
+              desc: "Sertifikat Tersimpan",
+              imageUrl: url,
+              image: url
+            })));
+          } else {
+            setSertifikasiList([]);
+          }
         }
       } catch (err) {
         console.error("Gagal mengambil profil tutor:", err);
@@ -1034,25 +1068,57 @@ export default function ProfilTutor() {
     }
   };
 
-  const handleAddSertifikat = (newItem) => {
-    setSertifikasiList([...sertifikasiList, { id: Date.now(), ...newItem }]);
-  };
-
-  const handleDeleteSertifikat = () => {
-    if (sertifikatToDelete !== null) {
-      setSertifikasiList(sertifikasiList.filter((s) => s.id !== sertifikatToDelete));
-      setSertifikatToDelete(null);
+  const handleAddSertifikat = async (newItem) => {
+    const newSertifikat = { id: Date.now(), ...newItem };
+    const updatedList = [...sertifikasiList, newSertifikat];
+    setSertifikasiList(updatedList);
+    
+    if (newItem.file) {
+      try {
+        const fd = new FormData();
+        fd.append('certificate_files[]', newItem.file);
+        
+        await axios.post('/tutor/profile?_method=PATCH', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } catch (err) {
+        console.error("Gagal menyimpan sertifikat:", err);
+      }
     }
   };
 
-  const handleAddPortofolio = (newItem) => {
-    setPortofolioList([...portofolioList, { id: Date.now(), icon: "📎", ...newItem }]);
+  const handleDeleteSertifikat = async () => {
+    if (sertifikatToDelete !== null) {
+      const updatedList = sertifikasiList.filter((s) => s.id !== sertifikatToDelete);
+      setSertifikasiList(updatedList);
+      setSertifikatToDelete(null);
+      // Backend does not support deleting a single certificate without re-uploading the others easily via UI, 
+      // so we just update the local state. The user would need to re-upload to truly replace in DB.
+    }
   };
 
-  const handleDeletePortofolio = () => {
+  const handleAddPortofolio = async (newItem) => {
+    const updatedList = [...portofolioList, { id: Date.now(), icon: "📎", ...newItem }];
+    setPortofolioList(updatedList);
+    try {
+      const urls = updatedList.map(p => p.linkUrl);
+      await axios.patch('/tutor/profile', { portfolio_urls: urls });
+    } catch (err) {
+      console.error("Gagal menyimpan portofolio:", err);
+    }
+  };
+
+  const handleDeletePortofolio = async () => {
     if (portofolioToDelete !== null) {
-      setPortofolioList(portofolioList.filter((p) => p.id !== portofolioToDelete));
+      const updatedList = portofolioList.filter((p) => p.id !== portofolioToDelete);
+      setPortofolioList(updatedList);
       setPortofolioToDelete(null);
+      try {
+        const urls = updatedList.map(p => p.linkUrl);
+        await axios.patch('/tutor/profile', { portfolio_urls: urls });
+      } catch (err) {
+        console.error("Gagal menghapus portofolio:", err);
+      }
     }
   };
 
@@ -1598,7 +1664,16 @@ export default function ProfilTutor() {
         <EditMataKuliahModal 
           initialSelected={matkulList}
           onClose={() => setShowModalMatkul(false)}
-          onSave={(selected) => setMatkulList(selected)}
+          onSave={async (selected) => {
+            setMatkulList(selected);
+            try {
+              // Note: The backend may not support taught_courses in PATCH /tutor/profile yet,
+              // but we send it so it works if the backend is updated.
+              await axios.patch('/tutor/profile', { taught_courses: selected });
+            } catch (err) {
+              console.error("Gagal menyimpan mata kuliah:", err);
+            }
+          }}
         />
       )}
 
