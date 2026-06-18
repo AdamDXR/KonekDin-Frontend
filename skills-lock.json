@@ -8,10 +8,10 @@
       "computedHash": "0c877c8521ec97a5d55fa682d33122b811aebddd4788b92ac008efe85cd305cd"
     },
     "frontend-design": {
-      "source": "bytedance/deer-flow",
+      "source": "anthropics/skills",
       "sourceType": "github",
-      "skillPath": "skills/public/frontend-design/SKILL.md",
-      "computedHash": "8925cd22a5b6dba32095df9dee7b69fe2797bd0e0ba89d3fd8bdaee5543deffc"
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "93f53fd1c0352d3d7ec17b8f73d7351bf76f4821e55d123c9d2abc2c53ba48e4"
     },
     "react-vite-best-practices": {
       "source": "asyrafhussin/agent-skills",

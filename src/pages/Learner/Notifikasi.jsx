@@ -139,7 +139,27 @@ export default function Notifikasi() {
         const response = await axios.get('/learner/notification')
         console.log("Response Notifikasi:", response.data)
         if (response.data && response.data.data) {
-          setRawNotif(response.data.data)
+          const notifications = response.data.data
+          setRawNotif(notifications)
+
+          // THE TRICK: Cek apakah ada notifikasi persetujuan tutor
+          const hasApproval = notifications.some(n => {
+            const title = (n.data?.title || '').toLowerCase()
+            const msg = (n.data?.message || '').toLowerCase()
+            return title.includes('disetujui') || msg.includes('disetujui') || title.includes('diterima') || msg.includes('diterima')
+          })
+
+          if (hasApproval) {
+            axios.get('/me').then(res => {
+              if (res.data && res.data.data) {
+                localStorage.setItem('user', JSON.stringify(res.data.data))
+                window.dispatchEvent(new Event('profileUpdated'))
+              }
+            }).catch(e => console.error("Gagal sinkronisasi role:", e))
+          }
+
+          // Sinkronisasi indikator red-dot di sidebar
+          window.dispatchEvent(new Event('notificationsUpdated'))
         }
       } catch (err) {
         console.error("Gagal memuat notifikasi:", err)

@@ -175,20 +175,41 @@ export default function RegisterTutorTinjauan() {
     setLoading(true);
 
     try {
-      let courseId = 1;
+      let courseIds = [];
       
       try {
-        const { data: courses } = await axios.get("/courses");
-        const match = courses.find(c => c.name.toLowerCase() === formData.selectedMataKuliah[0]?.toLowerCase());
-        if (match) courseId = match.id;
-      } catch(e) { console.error("Gagal mengambil course_id", e); }
+        const response = await axios.get("/courses");
+        const coursesList = response.data?.data || response.data || [];
+        
+        if (formData.selectedMataKuliah && formData.selectedMataKuliah.length > 0) {
+          formData.selectedMataKuliah.forEach(name => {
+            const match = coursesList.find(c => c.name.toLowerCase() === name.toLowerCase());
+            if (match) courseIds.push(match.id);
+          });
+        }
+        if (courseIds.length === 0) courseIds = [1]; // Fallback
+      } catch(e) { 
+        console.error("Gagal mengambil course_ids", e); 
+        courseIds = [1];
+      }
 
       const fd = new FormData();
       if (formData.transkripFiles[0]) {
-        fd.append("transcript_file", formData.transkripFiles[0]);
+        fd.append("transcript_files[]", formData.transkripFiles[0]);
       }
-      fd.append("course_id", courseId);
+      courseIds.forEach(id => {
+        fd.append("course_ids[]", id);
+      });
+      fd.append("current_semester", formData.semester);
       fd.append("grade", "A");
+      if (formData.portofolio) {
+        let link = formData.portofolio;
+        if (!/^https?:\/\//i.test(link)) link = "https://" + link;
+        fd.append("portfolio_urls[]", link);
+      }
+      if (formData.skills && formData.skills.length > 0) {
+        fd.append("skills", JSON.stringify(formData.skills));
+      }
 
       await axios.post("/register/tutor/upload-document", fd, {
         headers: {
