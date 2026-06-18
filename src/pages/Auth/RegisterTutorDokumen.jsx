@@ -71,9 +71,8 @@ function UploadZone({ onFile, accept = ".pdf", formatText = "Format PDF (Maks. 5
       if (onError) onError("File harus berformat gambar (JPG/PNG).");
       return;
     }
-    
-    if (f.size > 5 * 1024 * 1024) {
-      if (onError) onError("Ukuran file melebihi 5MB.");
+    if (f.size > 2 * 1024 * 1024) {
+      if (onError) onError("Ukuran file melebihi 2MB.");
       return;
     }
     
@@ -131,8 +130,8 @@ function UploadedCard({ fileName, onFile, accept, formatText, onError }) {
       return;
     }
     
-    if (f.size > 5 * 1024 * 1024) {
-      if (onError) onError("Ukuran file melebihi 5MB.");
+    if (f.size > 2 * 1024 * 1024) {
+      if (onError) onError("Ukuran file melebihi 2MB.");
       return;
     }
     

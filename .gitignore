@@ -25,5 +25,8 @@ dist-ssr
 
 design-pdf/
 
+.agents/*
+skills-lock.json
+
 endpoint.md
 backend.md 
