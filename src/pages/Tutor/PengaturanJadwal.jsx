@@ -341,7 +341,7 @@ export default function PengaturanJadwal() {
     fetchTutorProfile();
   }, []);
 
-  const handleSaveJadwal = ({ hari, jam, matkul, status }) => {
+  const handleSaveJadwal = async ({ hari, jam, matkul, status }) => {
     const statusUpper = status === "Available" ? "AVAILABLE" : "NON AVAILABLE";
     const matkulValue = status === "Non Available" ? null : matkul;
 
@@ -350,27 +350,34 @@ export default function PengaturanJadwal() {
       (item) => item.hari === hari && item.waktu === jam,
     );
 
+    const updatedEntry = {
+      id: exists?.id || nextId,
+      hari,
+      waktu: jam,
+      matkul: matkulValue,
+      status: statusUpper,
+    };
+
     if (exists) {
+      // Update local state
       setJadwal((prev) =>
         prev.map((item) =>
-          item.hari === hari && item.waktu === jam
-            ? { ...item, matkul: matkulValue, status: statusUpper }
-            : item,
+          item.hari === hari && item.waktu === jam ? updatedEntry : item,
         ),
       );
     } else {
-      // Belum ada → tambah baris baru
-      setJadwal((prev) => [
-        ...prev,
-        {
-          id: nextId,
-          hari,
-          waktu: jam,
-          matkul: matkulValue,
-          status: statusUpper,
-        },
-      ]);
+      // Tambah baris baru
+      setJadwal((prev) => [...prev, updatedEntry]);
       setNextId((n) => n + 1);
+    }
+
+    // Kirim ke backend (POST atau PUT tergantung implementasi backend)
+    try {
+      await axios.post('/api/tutor/availability', updatedEntry);
+      // Refetch data untuk memastikan sinkronisasi
+      fetchJadwal();
+    } catch (error) {
+      console.error('Gagal menyimpan jadwal ke backend:', error);
     }
   };
 
