@@ -241,6 +241,10 @@ export default function JadwalMengajar() {
           window.location.href = "/login";
           return;
         }
+        if (error.response?.status === 403) {
+          setErrorMsg("Akses ditolak: Akun Anda belum terdaftar atau disetujui sebagai tutor.");
+          return;
+        }
         setErrorMsg(
           error.response?.data?.message ||
             error.message ||
