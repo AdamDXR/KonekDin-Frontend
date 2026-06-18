@@ -59,6 +59,7 @@ export default function ProfilLearner() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUploadingFoto, setIsUploadingFoto] = useState(false)
+  const [tutorStatus, setTutorStatus] = useState(null)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -79,6 +80,17 @@ export default function ProfilLearner() {
           setProfil(mappedProfile)
           setDraft(mappedProfile)
         }
+
+        // Ambil status pendaftaran tutor
+        try {
+          const statusRes = await axios.get('/me/tutor-application-status')
+          if (statusRes.data && statusRes.data.data) {
+            setTutorStatus(statusRes.data.data.status)
+          }
+        } catch (e) {
+          console.error("Gagal mengambil status tutor:", e)
+        }
+
       } catch (err) {
         console.error("Gagal mengambil profil:", err)
       } finally {
@@ -206,6 +218,14 @@ export default function ProfilLearner() {
     setDraft((prev) => ({ ...prev, [key]: e.target.value }))
 
   const current = editing ? draft : profil
+
+  const handleDaftarTutorClick = () => {
+    if (tutorStatus === 'pending') {
+      alert("Pendaftaran tutor Anda sedang dalam proses peninjauan oleh tim KonekDin.");
+    } else {
+      navigate('/register/tutor/dokumen');
+    }
+  }
 
   if (isLoading) {
     return (
@@ -342,19 +362,30 @@ export default function ProfilLearner() {
       </div>
 
       {/* ── Banner CTA ── */}
-      <div className="bg-[#0a0f44] rounded-2xl px-8 py-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-        <div>
-          <h3 className="text-xl font-extrabold text-white">Yuk daftar jadi tutor!</h3>
-          <p className="text-sm text-slate-300 mt-1 max-w-sm leading-relaxed">
-            "Bagikan keahlianmu dan bantu mahasiswa lain berkembang bersama."
-          </p>
+      {tutorStatus !== 'approved' && (
+        <div className="bg-[#0a0f44] rounded-2xl px-8 py-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+          <div>
+            <h3 className="text-xl font-extrabold text-white">
+              {tutorStatus === 'pending' ? 'Pendaftaran Sedang Diproses' : 'Yuk daftar jadi tutor!'}
+            </h3>
+            <p className="text-sm text-slate-300 mt-1 max-w-sm leading-relaxed">
+              {tutorStatus === 'pending' 
+                ? "Tim kami sedang meninjau dokumen dan kualifikasi Anda. Harap tunggu informasi selanjutnya."
+                : '"Bagikan keahlianmu dan bantu mahasiswa lain berkembang bersama."'}
+            </p>
+          </div>
+          <Button
+            onClick={handleDaftarTutorClick}
+            className={`flex-shrink-0 font-bold px-6 py-2.5 h-auto rounded-xl text-sm transition-colors shadow-sm ${
+              tutorStatus === 'pending'
+                ? 'bg-slate-700 text-slate-300 cursor-not-allowed hover:bg-slate-700'
+                : 'bg-white text-[#0a0f44] hover:bg-slate-100'
+            }`}
+          >
+            {tutorStatus === 'pending' ? 'Menunggu Review' : 'Daftar Tutor'}
+          </Button>
         </div>
-        <Button
-          className="flex-shrink-0 bg-white text-[#0a0f44] hover:bg-slate-100 font-bold px-6 py-2.5 h-auto rounded-xl text-sm transition-colors shadow-sm"
-        >
-          Daftar Tutor
-        </Button>
-      </div>
+      )}
 
       {/* ── Modal Crop Foto ── */}
       {imageSrc && (

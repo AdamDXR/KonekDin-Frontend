@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, Clock, X } from "lucide-react";
+import { Calendar, Clock, X, CalendarDays } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,147 +12,44 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { ULASAN } from "./Ulasan";
+import axios from "@/lib/axios";
 
-// ─── Data mock riwayat mengajar ──────────────────────────────────────────────
-const RIWAYAT = [
-  // Page 1
-  {
-    id: 1,
-    learnerName: "Siti Aminah",
-    avatar: "https://i.pravatar.cc/150?img=34",
-    avatarFallback: "SA",
-    subject: "Basis Data",
-    date: "9 Okt 2026",
-    time: "14:10 - 15:00",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
-  {
-    id: 2,
-    learnerName: "Ahmad Raja",
-    avatar: "https://i.pravatar.cc/150?img=68",
-    avatarFallback: "AR",
-    subject: "Algoritma dan Struktur Data",
-    date: "5 Okt 2026",
-    time: "14:10 - 15:00",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
-  {
-    id: 3,
-    learnerName: "Rani Ranti",
-    avatar: "https://i.pravatar.cc/150?img=5",
-    avatarFallback: "RR",
-    subject: "Algoritma dan Struktur Data",
-    date: "2 Okt 2026",
-    time: "09:30 - 10:20",
-    durasi: "100 Menit",
-    pendapatan: "Rp 90.000",
-  },
-  {
-    id: 4,
-    learnerName: "Andi Wijaya",
-    avatar: "https://i.pravatar.cc/150?img=53",
-    avatarFallback: "AW",
-    subject: "Pemrograman Berbasis Web",
-    date: "1 Okt 2026",
-    time: "14:10 - 15:00",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
-  {
-    id: 5,
-    learnerName: "Alfiana Anan",
-    avatar: "https://i.pravatar.cc/150?img=26",
-    avatarFallback: "AA",
-    subject: "Pemrograman Berbasis Web",
-    date: "1 Okt 2026",
-    time: "09:30 - 10:20",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
+// ─── Helper ──────────────────────────────────────────────────────────────────
+const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
-  // Page 2
-  {
-    id: 6,
-    learnerName: "Budi Santoso",
-    avatar: "https://i.pravatar.cc/150?img=15",
-    avatarFallback: "BS",
-    subject: "Algoritma dan Struktur Data",
-    date: "30 Sep 2026",
-    time: "14:10 - 15:00",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
-  {
-    id: 7,
-    learnerName: "Citra Lestari",
-    avatar: "https://i.pravatar.cc/150?img=49",
-    avatarFallback: "CL",
-    subject: "Basis Data",
-    date: "29 Sep 2026",
-    time: "09:30 - 10:20",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
-  {
-    id: 8,
-    learnerName: "Dedi Kurniawan",
-    avatar: "https://i.pravatar.cc/150?img=51",
-    avatarFallback: "DK",
-    subject: "Pemrograman Berbasis Web",
-    date: "28 Sep 2026",
-    time: "14:10 - 15:50",
-    durasi: "100 Menit",
-    pendapatan: "Rp 90.000",
-  },
-  {
-    id: 9,
-    learnerName: "Eka Putri",
-    avatar: "https://i.pravatar.cc/150?img=33",
-    avatarFallback: "EP",
-    subject: "Algoritma dan Struktur Data",
-    date: "27 Sep 2026",
-    time: "09:30 - 10:20",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
-  {
-    id: 10,
-    learnerName: "Farhan Maulana",
-    avatar: "https://i.pravatar.cc/150?img=15",
-    avatarFallback: "FM",
-    subject: "Basis Data",
-    date: "26 Sep 2026",
-    time: "14:10 - 15:00",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
+function formatTanggal(dateStr) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+}
 
-  // Page 3
-  {
-    id: 11,
-    learnerName: "Gita Rahayu",
-    avatar: "https://i.pravatar.cc/150?img=28",
-    avatarFallback: "GR",
-    subject: "Pemrograman Berbasis Web",
-    date: "25 Sep 2026",
-    time: "09:30 - 10:20",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
-  {
-    id: 12,
-    learnerName: "Rina Sari",
-    avatar: "https://i.pravatar.cc/150?img=45",
-    avatarFallback: "RS",
-    subject: "Pemrograman Berbasis Web",
-    date: "24 Sep 2026",
-    time: "14:10 - 15:00",
-    durasi: "50 Menit",
-    pendapatan: "Rp 45.000",
-  },
-];
+function getInitials(name) {
+  if (!name) return "LR";
+  return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
+}
+
+function hitungDurasi(slots) {
+  if (!slots || slots.length === 0) return "50 Menit";
+  let totalMenit = 0;
+  slots.forEach((s) => {
+    const start = s.start_time?.substring(0, 5)?.split(":") || [];
+    const end = s.end_time?.substring(0, 5)?.split(":") || [];
+    if (start.length === 2 && end.length === 2) {
+      const startMin = parseInt(start[0]) * 60 + parseInt(start[1]);
+      const endMin = parseInt(end[0]) * 60 + parseInt(end[1]);
+      totalMenit += endMin - startMin;
+    }
+  });
+  return totalMenit > 0 ? `${totalMenit} Menit` : "50 Menit";
+}
+
+function formatWaktu(slots) {
+  if (!slots || slots.length === 0) return "-";
+  return slots
+    .map((s) => `${s.start_time?.substring(0, 5) || ""} - ${s.end_time?.substring(0, 5) || ""}`)
+    .join(", ");
+}
 
 // ─── RiwayatCard ─────────────────────────────────────────────────────────────
 function RiwayatCard({ item, navigate, onShowNoReview }) {
@@ -254,10 +151,48 @@ function NoReviewModal({ learnerName, onClose }) {
 // ─── Halaman Utama ────────────────────────────────────────────────────────────
 export default function RiwayatMengajar() {
   const navigate = useNavigate()
-  const [riwayat] = useState(RIWAYAT)
+  const [riwayat, setRiwayat] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [noReviewLearner, setNoReviewLearner] = useState(null)
   const itemsPerPage = 5
+
+  useEffect(() => {
+    const fetchRiwayat = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get('/api/tutor/history');
+        const data = response.data?.data || [];
+
+        const formatted = data.map((item) => {
+          const slots = item.booking_slots || [];
+          return {
+            id: item.id,
+            learnerName: item.learner?.name || item.learner || "Learner",
+            avatar: item.learner?.avatar
+              ? `http://127.0.0.1:8000/storage/${item.learner.avatar}`
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.learner?.name || item.learner || "Learner")}&background=0a0f44&color=fff`,
+            avatarFallback: getInitials(item.learner?.name || item.learner),
+            subject: item.course?.name || item.subject || "Mata Kuliah",
+            date: formatTanggal(item.booking_date || item.date),
+            time: formatWaktu(slots) || item.time || "-",
+            durasi: hitungDurasi(slots),
+            pendapatan: item.total_price
+              ? `Rp ${Number(item.total_price).toLocaleString('id-ID')}`
+              : "Rp 0",
+          };
+        });
+
+        setRiwayat(formatted);
+      } catch (error) {
+        console.error("Gagal mengambil riwayat mengajar:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRiwayat();
+  }, []);
 
   const totalPages = Math.ceil(riwayat.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
@@ -281,17 +216,35 @@ export default function RiwayatMengajar() {
         </p>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-400 animate-pulse">
+          <CalendarDays className="h-12 w-12" strokeWidth={1.2} />
+          <p className="text-sm font-medium">Memuat riwayat mengajar...</p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && riwayat.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-300">
+          <CalendarDays className="h-12 w-12" strokeWidth={1.2} />
+          <p className="text-sm text-slate-400">Belum ada riwayat mengajar.</p>
+        </div>
+      )}
+
       {/* List */}
-      <div className="space-y-4">
-        {currentRiwayat.map((item) => (
-          <RiwayatCard 
-            key={item.id} 
-            item={item} 
-            navigate={navigate} 
-            onShowNoReview={setNoReviewLearner} 
-          />
-        ))}
-      </div>
+      {!isLoading && currentRiwayat.length > 0 && (
+        <div className="space-y-4">
+          {currentRiwayat.map((item) => (
+            <RiwayatCard 
+              key={item.id} 
+              item={item} 
+              navigate={navigate} 
+              onShowNoReview={setNoReviewLearner} 
+            />
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

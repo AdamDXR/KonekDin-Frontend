@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import axios from "@/lib/axios";
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/utils/cropImage';
 import {
@@ -18,59 +19,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import axios from '@/lib/axios';
+import { useEffect } from "react";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const TRANSKRIP = [
-  {
-    id: 1,
-    semester: "Semester 3",
-    fileName: "transkrip-semester-3.pdf",
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-  },
-  {
-    id: 2,
-    semester: "Semester 4",
-    fileName: "transkrip-semester-4.pdf",
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-  },
-];
-
-const PORTOFOLIO = [
-  {
-    id: 1,
-    icon: "💻",
-    title: "Omni-Micro Framework",
-    issuer: "Proyek Open Source • 2023",
-    linkUrl: "https://github.com/omni-micro",
-  },
-  {
-    id: 2,
-    icon: "📱",
-    title: "SecurePay Mobile SDK",
-    issuer: "Proyek Klien • 2024",
-    linkUrl: "https://github.com/securepay",
-  },
-];
-
-const SERTIFIKASI = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=400&h=220&fit=crop",
-    title: "Certified Mathematics Educator (CME)",
-    desc: "Sertifikasi resmi dari Global Education Board untuk pengajar matematika tingkat lanjut.",
-    imageUrl: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=800&h=600&fit=crop",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=220&fit=crop",
-    title: "Advanced Quantitative Analysis",
-    desc: "Pelatihan analisis kuantitatif tingkat lanjut yang diselenggarakan oleh Universitas Dian Nuswantoro.",
-    imageUrl: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=600&fit=crop",
-  },
-];
+// ─── Data (Moved to state) ───────────────────────────────────────────────────
 
 // ─── Modal Tambah Transkrip ───────────────────────────────────────────────────
 
@@ -819,19 +771,23 @@ const ALL_KEAHLIAN = [
 
 function EditKeahlianModal({ initialSelected, onClose, onSave }) {
   const [selected, setSelected] = useState(initialSelected || []);
-  const [search, setSearch] = useState("");
+  const [input, setInput] = useState("");
+  const [error, setError] = useState("");
 
-  const toggle = (k) => {
-    setSelected((prev) =>
-      prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]
-    );
+  const addSkill = () => {
+    const val = input.trim();
+    if (!val) return;
+    if (selected.includes(val)) { setError("Keahlian sudah ditambahkan."); return; }
+    setSelected((prev) => [...prev, val]);
+    setInput("");
+    setError("");
   };
 
-  const available = ALL_KEAHLIAN.filter(
-    (k) =>
-      !selected.includes(k) &&
-      k.toLowerCase().includes(search.toLowerCase())
-  );
+  const removeSkill = (s) => setSelected((prev) => prev.filter((x) => x !== s));
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") { e.preventDefault(); addSkill(); }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -841,41 +797,52 @@ function EditKeahlianModal({ initialSelected, onClose, onSave }) {
         </button>
         <div className="p-8">
           <h2 className="text-2xl font-extrabold text-[#0a0f44] mb-2">Edit Keahlian</h2>
-          <p className="text-sm text-slate-400 mb-6">Pilih keahlian atau alat yang dikuasai.</p>
+          <p className="text-sm text-slate-400 mb-6">Pilih keahlian atau ketik sendiri keahlian yang Anda kuasai.</p>
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-5">
-            <p className="text-sm font-bold text-[#0F1D8C]">Pilih Keahlian</p>
-            <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 flex flex-wrap gap-2 min-h-[52px] items-center">
+            <p className="text-sm font-bold text-[#0F1D8C]">Keahlian</p>
+            
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => { setInput(e.target.value); setError(""); }}
+                onKeyDown={handleKeyDown}
+                placeholder="Ketik keahlian, lalu tekan Enter..."
+                className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#0F1D8C]/20 focus:border-[#0F1D8C] transition"
+              />
+              <button
+                onClick={addSkill}
+                className="w-11 h-11 flex items-center justify-center bg-[#0F1D8C] hover:bg-[#0b166e] text-white rounded-xl transition-colors shadow-sm"
+              >
+                <Plus className="w-5 h-5" strokeWidth={2.5} />
+              </button>
+            </div>
+            {error && <p className="text-xs text-red-500 font-medium -mt-2">{error}</p>}
+
+            <div className="flex flex-wrap gap-2 min-h-[52px]">
               {selected.map((k) => (
-                <span key={k} className="inline-flex items-center gap-1.5 bg-[#0F1D8C] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                <span key={k} className="inline-flex items-center gap-1.5 bg-[#0d7c6b] text-white text-xs font-semibold px-3.5 py-2 rounded-full">
                   {k}
-                  <button onClick={() => toggle(k)} className="hover:text-slate-300 transition-colors">
+                  <button onClick={() => removeSkill(k)} className="hover:text-[#b3e8d8] transition-colors">
                     <X className="w-3 h-3" strokeWidth={2.5} />
                   </button>
                 </span>
               ))}
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={selected.length === 0 ? "Ketik untuk mencari..." : ""}
-                className="flex-1 min-w-[140px] text-sm text-slate-500 placeholder-slate-400 outline-none bg-transparent"
-              />
             </div>
-            <div className="flex flex-wrap gap-2 max-h-[150px] overflow-y-auto">
-              {available.map((k) => (
-                <button
-                  key={k}
-                  onClick={() => toggle(k)}
-                  className="inline-flex items-center gap-1.5 bg-[#e0faf3] text-[#0d7c6b] border border-[#b3e8d8] text-xs font-semibold px-3.5 py-2 rounded-full hover:bg-[#0d7c6b] hover:text-white hover:border-[#0d7c6b] transition-all duration-150"
-                >
-                  {k}
-                  <Plus className="w-3 h-3" strokeWidth={2.5} />
-                </button>
-              ))}
-              {available.length === 0 && search && (
-                <p className="text-xs text-slate-400">Tidak ada hasil untuk "{search}".</p>
-              )}
-            </div>
+
+            {selected.length === 0 && (
+              <div>
+                <p className="text-xs text-slate-400 mb-2">Saran keahlian:</p>
+                <div className="flex flex-wrap gap-2">
+                  {ALL_KEAHLIAN.slice(0, 8).map((s) => (
+                    <button key={s} onClick={() => setSelected((prev) => [...prev, s])}
+                      className="inline-flex items-center gap-1 bg-[#e0faf3] text-[#0d7c6b] border border-[#b3e8d8] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-[#0d7c6b] hover:text-white transition-all">
+                      {s} <Plus className="w-3 h-3" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="mt-8 flex justify-end gap-3">
             <Button onClick={onClose} variant="outline" className="font-semibold rounded-xl text-slate-600 border-slate-300 hover:bg-slate-50 px-6">Batal</Button>
@@ -892,16 +859,16 @@ function EditKeahlianModal({ initialSelected, onClose, onSave }) {
 export default function ProfilTutor() {
   const fileInputRef = useRef(null);
 
-  const [sertifikasiList, setSertifikasiList] = useState(SERTIFIKASI);
+  const [sertifikasiList, setSertifikasiList] = useState([]);
   const [sertifikatToDelete, setSertifikatToDelete] = useState(null);
 
-  const [portofolioList, setPortofolioList] = useState(PORTOFOLIO);
+  const [portofolioList, setPortofolioList] = useState([]);
   const [portofolioToDelete, setPortofolioToDelete] = useState(null);
 
-  const [transkripList, setTranskripList] = useState(TRANSKRIP);
+  const [transkripList, setTranskripList] = useState([]);
   const [transkripToDelete, setTranskripToDelete] = useState(null);
 
-  const [tarif, setTarif] = useState("Rp 45.000");
+  const [tarif, setTarif] = useState("Rp 0");
   const [showModalTarif, setShowModalTarif] = useState(false);
   const [showModalTranskrip, setShowModalTranskrip] = useState(false);
   const [showModalSertifikasi, setShowModalSertifikasi] = useState(false);
@@ -909,20 +876,168 @@ export default function ProfilTutor() {
   const [showModalMatkul, setShowModalMatkul] = useState(false);
   const [showModalKeahlian, setShowModalKeahlian] = useState(false);
 
-  const [matkulList, setMatkulList] = useState(["Pemrograman Web", "Algoritma & Struktur Data"]);
-  const [keahlianList, setKeahlianList] = useState(["React", "JavaScript", "UI/UX Design"]);
+  const [matkulList, setMatkulList] = useState([]);
+  const [keahlianList, setKeahlianList] = useState([]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
   const [profil, setProfil] = useState({
-    foto: "https://i.pravatar.cc/150?img=15",
-    nama: "Irkham Wildan",
-    nim: "A11.2024.12345",
-    jurusan: "Teknik Informatika",
-    fakultas: "Ilmu Komputer",
-    email: "irkham@mhs.dinus.ac.id",
-    telepon: "+62 812 3456 7890",
+    foto: "https://ui-avatars.com/api/?name=Loading&background=random",
+    nama: "Loading...",
+    nim: "Loading...",
+    jurusan: "Loading...",
+    fakultas: "Loading...",
+    email: "Loading...",
+    telepon: "Loading...",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [userRes, tutorRes] = await Promise.all([
+          axios.get('/user'),
+          axios.get('/tutor/profile').catch(() => ({ data: { data: {} } })) // Fallback if not tutor
+        ]);
+        
+        if (userRes.data && userRes.data.user) {
+          const user = userRes.data.user;
+          const mappedProfile = {
+            nama: user.name || '',
+            email: user.email || '',
+            telepon: user.phone || '',
+            foto: user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`,
+            universitas: user.university || 'Universitas Dian Nuswantoro',
+            nim: user.nim || '',
+            jurusan: user.major || 'Teknik Informatika',
+            fakultas: user.faculty || 'Ilmu Komputer',
+          };
+          setProfil(mappedProfile);
+        }
+        
+        if (tutorRes.data && tutorRes.data.data) {
+          const tutor = tutorRes.data.data;
+          if (tutor.price !== undefined) {
+            setTarif(`Rp ${new Intl.NumberFormat("id-ID").format(tutor.price)}`);
+          }
+          if (tutor.skills && Array.isArray(tutor.skills)) {
+            setKeahlianList(tutor.skills);
+          } else {
+            setKeahlianList([]);
+          }
+          if (tutor.taught_courses && Array.isArray(tutor.taught_courses)) {
+            setMatkulList(tutor.taught_courses.map(tc => tc.course_name));
+          } else {
+            setMatkulList([]);
+          }
+          
+          if (tutor.portfolio_urls && tutor.portfolio_urls.length > 0) {
+            setPortofolioList(tutor.portfolio_urls.map((url, idx) => ({
+              id: idx + 1,
+              icon: "📎",
+              title: url,
+              issuer: "Portofolio",
+              linkUrl: url
+            })));
+          } else if (tutor.portfolio_url) {
+            // Fallback just in case backend returns old format
+            setPortofolioList([{
+              id: 1,
+              icon: "📎",
+              title: tutor.portfolio_url,
+              issuer: "Portofolio",
+              linkUrl: tutor.portfolio_url.startsWith('http') ? tutor.portfolio_url : `https://${tutor.portfolio_url}`
+            }]);
+          } else {
+            setPortofolioList([]);
+          }
+
+          if (tutor.transcript_file) {
+            setTranskripList([{
+              id: 1,
+              semester: `Semester ${tutor.current_semester || '?'}`,
+              fileName: tutor.transcript_file.split('/').pop(),
+              pdfUrl: tutor.transcript_file.startsWith('http') ? tutor.transcript_file : `http://127.0.0.1:8000/storage/${tutor.transcript_file}`
+            }]);
+          } else {
+            setTranskripList([]);
+          }
+          
+          if (tutor.certificate_files && tutor.certificate_files.length > 0) {
+            setSertifikasiList(tutor.certificate_files.map((url, idx) => ({
+              id: idx + 1,
+              title: "Sertifikat",
+              desc: "Sertifikat Tersimpan",
+              imageUrl: url,
+              image: url
+            })));
+          } else {
+            setSertifikasiList([]);
+          }
+        }
+      } catch (err) {
+        console.error("Gagal mengambil profil tutor:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSimpan = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+         name: profil.nama || '',
+         phone: profil.telepon || '',
+         nim: profil.nim || ''
+      };
+      if (profil.email) payload.email = profil.email;
+      
+      const response = await axios.patch('/me', payload);
+      
+      if (response.data && response.data.data) {
+          const user = response.data.data;
+          const oldUser = JSON.parse(localStorage.getItem('user')) || {};
+          const newUser = { ...oldUser, name: user.name, phone: user.phone || '' };
+          localStorage.setItem('user', JSON.stringify(newUser));
+          window.dispatchEvent(new Event('profileUpdated'));
+      }
+      setIsEditing(false);
+    } catch (err) {
+       console.error("Gagal menyimpan profil", err);
+       alert(err.response?.data?.message || "Gagal menyimpan perubahan");
+    } finally {
+       setIsSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchTutorProfile = async () => {
+      try {
+        const response = await axios.get('/api/me');
+        const user = response.data?.data || response.data;
+        
+        setProfil(prev => ({
+          ...prev,
+          nama: user?.name || prev.nama,
+          email: user?.email || prev.email,
+          foto: user?.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : prev.foto
+        }));
+
+        const courses = user?.tutor_profile?.taught_courses?.map(c => c.course_name) 
+                     || user?.taught_courses?.map(c => c.course_name) 
+                     || user?.courses
+                     || [];
+        if (courses.length > 0) {
+          setMatkulList(courses);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil profil tutor:", error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+    fetchTutorProfile();
+  }, []);
 
   // ── State for Cropper ──
   const [imageSrc, setImageSrc] = useState(null);
@@ -952,32 +1067,88 @@ export default function ProfilTutor() {
   const handleSaveCrop = async () => {
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-      setProfil((prev) => ({ ...prev, foto: croppedImage }));
+      
+      let formData = new FormData();
+      formData.append('_method', 'PATCH');
+      const res = await fetch(croppedImage);
+      const blob = await res.blob();
+      formData.append('avatar', blob, 'avatar.png');
+      
+      const response = await axios.post('/me', formData, {
+         headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      if (response.data && response.data.data) {
+          const user = response.data.data;
+          const newAvatarUrl = user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : croppedImage;
+          setProfil((prev) => ({ ...prev, foto: newAvatarUrl }));
+          
+          const oldUser = JSON.parse(localStorage.getItem('user')) || {};
+          const newUser = { ...oldUser, avatar: user.avatar };
+          localStorage.setItem('user', JSON.stringify(newUser));
+          window.dispatchEvent(new Event('profileUpdated'));
+      } else {
+          setProfil((prev) => ({ ...prev, foto: croppedImage }));
+      }
+      
       setImageSrc(null);
     } catch (e) {
       console.error(e);
+      alert(e.response?.data?.message || "Gagal menyimpan foto profil");
     }
   };
 
-  const handleAddSertifikat = (newItem) => {
-    setSertifikasiList([...sertifikasiList, { id: Date.now(), ...newItem }]);
+  const handleAddSertifikat = async (newItem) => {
+    const newSertifikat = { id: Date.now(), ...newItem };
+    const updatedList = [...sertifikasiList, newSertifikat];
+    setSertifikasiList(updatedList);
+    
+    if (newItem.file) {
+      try {
+        const fd = new FormData();
+        fd.append('certificate_files[]', newItem.file);
+        
+        await axios.post('/tutor/profile?_method=PATCH', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } catch (err) {
+        console.error("Gagal menyimpan sertifikat:", err);
+      }
+    }
   };
 
-  const handleDeleteSertifikat = () => {
+  const handleDeleteSertifikat = async () => {
     if (sertifikatToDelete !== null) {
-      setSertifikasiList(sertifikasiList.filter((s) => s.id !== sertifikatToDelete));
+      const updatedList = sertifikasiList.filter((s) => s.id !== sertifikatToDelete);
+      setSertifikasiList(updatedList);
       setSertifikatToDelete(null);
+      // Backend does not support deleting a single certificate without re-uploading the others easily via UI, 
+      // so we just update the local state. The user would need to re-upload to truly replace in DB.
     }
   };
 
-  const handleAddPortofolio = (newItem) => {
-    setPortofolioList([...portofolioList, { id: Date.now(), icon: "📎", ...newItem }]);
+  const handleAddPortofolio = async (newItem) => {
+    const updatedList = [...portofolioList, { id: Date.now(), icon: "📎", ...newItem }];
+    setPortofolioList(updatedList);
+    try {
+      const urls = updatedList.map(p => p.linkUrl);
+      await axios.patch('/tutor/profile', { portfolio_urls: urls });
+    } catch (err) {
+      console.error("Gagal menyimpan portofolio:", err);
+    }
   };
 
-  const handleDeletePortofolio = () => {
+  const handleDeletePortofolio = async () => {
     if (portofolioToDelete !== null) {
-      setPortofolioList(portofolioList.filter((p) => p.id !== portofolioToDelete));
+      const updatedList = portofolioList.filter((p) => p.id !== portofolioToDelete);
+      setPortofolioList(updatedList);
       setPortofolioToDelete(null);
+      try {
+        const urls = updatedList.map(p => p.linkUrl);
+        await axios.patch('/tutor/profile', { portfolio_urls: urls });
+      } catch (err) {
+        console.error("Gagal menghapus portofolio:", err);
+      }
     }
   };
 
@@ -1135,11 +1306,12 @@ export default function ProfilTutor() {
           </h2>
           {isEditing ? (
             <button
-              onClick={() => setIsEditing(false)}
-              className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline"
+              onClick={handleSimpan}
+              disabled={isSubmitting}
+              className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" />
-              Simpan Perubahan
+              {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
           ) : (
             <button
@@ -1481,7 +1653,15 @@ export default function ProfilTutor() {
         <EditTarifModal
           tarif={tarif}
           onClose={() => setShowModalTarif(false)}
-          onSave={(val) => setTarif(val)}
+          onSave={async (val) => {
+            const rawVal = parseInt(val.replace(/\D/g, ""), 10);
+            setTarif(val);
+            try {
+              await axios.patch('/tutor/profile', { price: rawVal });
+            } catch (err) {
+              console.error("Gagal menyimpan tarif:", err);
+            }
+          }}
         />
       )}
 
@@ -1514,7 +1694,16 @@ export default function ProfilTutor() {
         <EditMataKuliahModal 
           initialSelected={matkulList}
           onClose={() => setShowModalMatkul(false)}
-          onSave={(selected) => setMatkulList(selected)}
+          onSave={async (selected) => {
+            setMatkulList(selected);
+            try {
+              // Note: The backend may not support taught_courses in PATCH /tutor/profile yet,
+              // but we send it so it works if the backend is updated.
+              await axios.patch('/tutor/profile', { taught_courses: selected });
+            } catch (err) {
+              console.error("Gagal menyimpan mata kuliah:", err);
+            }
+          }}
         />
       )}
 
@@ -1523,9 +1712,18 @@ export default function ProfilTutor() {
         <EditKeahlianModal 
           initialSelected={keahlianList}
           onClose={() => setShowModalKeahlian(false)}
-          onSave={(selected) => setKeahlianList(selected)}
+          onSave={async (selected) => {
+            setKeahlianList(selected);
+            try {
+              await axios.patch('/tutor/profile', { skills: selected });
+            } catch (err) {
+              console.error("Gagal menyimpan keahlian:", err);
+            }
+          }}
         />
       )}
+
+
 
       {/* ── Modal Konfirmasi Hapus Sertifikat ── */}
       {sertifikatToDelete !== null && (

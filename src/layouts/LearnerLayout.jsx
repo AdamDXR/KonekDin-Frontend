@@ -24,9 +24,9 @@ const getInitials = (name) => {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 }
 
-const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handleLogout }) => {
-  // Simulasi jika user sudah di-ACC sebagai tutor (IsTutor = true)
-  const isTutor = true;
+const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handleLogout, unreadNotifCount, hasUnreadApproval }) => {
+  // Hanya muncul jika user benar-benar punya role tutor DAN tidak ada notif persetujuan yang belum dibaca
+  const isTutor = user?.role === 'tutor' && !hasUnreadApproval;
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -61,7 +61,15 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handl
           >
             {({ isActive }) => (
               <>
-                <item.icon className="h-[18px] w-[18px] flex-shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
+                <div className="relative flex-shrink-0">
+                  <item.icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
+                  {item.name === 'Notifikasi' && unreadNotifCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
+                    </span>
+                  )}
+                </div>
                 {item.name}
               </>
             )}
@@ -115,6 +123,8 @@ export default function LearnerLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0)
+  const [hasUnreadApproval, setHasUnreadApproval] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -123,13 +133,13 @@ export default function LearnerLayout() {
       return
     }
 
-    // Ambil user dari API agar datanya selalu terbaru
+    // Ambil user dari API /user yang bisa diakses role apapun
     const fetchUser = async () => {
       try {
-        const response = await axios.get('/me')
-        if (response.data && response.data.data) {
-          setUser(response.data.data)
-          localStorage.setItem('user', JSON.stringify(response.data.data))
+        const response = await axios.get('/user')
+        if (response.data && response.data.user) {
+          setUser(response.data.user)
+          localStorage.setItem('user', JSON.stringify(response.data.user))
         }
       } catch (err) {
         console.error("Gagal mengambil data user:", err)
@@ -140,15 +150,45 @@ export default function LearnerLayout() {
         }
       }
     }
+
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get('/learner/notification')
+        if (response.data && response.data.data) {
+          const notifications = response.data.data
+          const unreadCount = notifications.filter(n => !n.read_at).length
+          setUnreadNotifCount(unreadCount)
+
+          const approvalUnread = notifications.some(n => {
+            if (n.read_at) return false;
+            const t = (n.data?.title || '').toLowerCase()
+            const m = (n.data?.message || '').toLowerCase()
+            return t.includes('disetujui') || m.includes('disetujui') || t.includes('diterima') || m.includes('diterima') || t.includes('tutor') || m.includes('tutor')
+          })
+          setHasUnreadApproval(approvalUnread)
+        }
+      } catch (err) {
+        console.error("Gagal mengambil notifikasi:", err)
+      }
+    }
+
     fetchUser()
+    fetchNotifications()
     
-    // Dengarkan custom event jika profil di-update dari ProfilLearner.jsx
+    // Dengarkan custom event jika profil di-update dari ProfilLearner.jsx atau Notifikasi.jsx
     const handleProfileUpdate = () => {
       const savedUser = localStorage.getItem('user')
       if (savedUser) setUser(JSON.parse(savedUser))
     }
+    const handleNotificationsUpdate = () => {
+      fetchNotifications()
+    }
     window.addEventListener('profileUpdated', handleProfileUpdate)
-    return () => window.removeEventListener('profileUpdated', handleProfileUpdate)
+    window.addEventListener('notificationsUpdated', handleNotificationsUpdate)
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate)
+      window.removeEventListener('notificationsUpdated', handleNotificationsUpdate)
+    }
   }, [navigate])
 
   const handleLogout = async () => {
@@ -176,7 +216,7 @@ export default function LearnerLayout() {
     <div className="flex h-screen bg-[#f7f9fb] overflow-hidden">
       {/* Sidebar Desktop */}
       <aside className="w-[250px] border-r border-slate-100 hidden lg:flex flex-col flex-shrink-0 bg-white">
-        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} />
+        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} unreadNotifCount={unreadNotifCount} hasUnreadApproval={hasUnreadApproval} />
       </aside>
 
       {/* Main Area: header + content + footer */}
@@ -192,7 +232,7 @@ export default function LearnerLayout() {
             <SheetContent side="left" className="p-0 w-[250px] border-r-0">
               <SheetTitle className="sr-only">Navigasi Utama</SheetTitle>
               <SheetDescription className="sr-only">Menu navigasi aplikasi untuk learner</SheetDescription>
-              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} />
+              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} unreadNotifCount={unreadNotifCount} hasUnreadApproval={hasUnreadApproval} />
             </SheetContent>
           </Sheet>
           <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
