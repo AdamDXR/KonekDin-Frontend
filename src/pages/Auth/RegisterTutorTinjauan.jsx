@@ -178,8 +178,9 @@ export default function RegisterTutorTinjauan() {
       let courseId = 1;
       
       try {
-        const { data: courses } = await axios.get("/courses");
-        const match = courses.find(c => c.name.toLowerCase() === formData.selectedMataKuliah[0]?.toLowerCase());
+        const response = await axios.get("/courses");
+        const coursesList = response.data?.data || response.data || [];
+        const match = coursesList.find(c => c.name.toLowerCase() === formData.selectedMataKuliah[0]?.toLowerCase());
         if (match) courseId = match.id;
       } catch(e) { console.error("Gagal mengambil course_id", e); }
 
@@ -188,6 +189,7 @@ export default function RegisterTutorTinjauan() {
         fd.append("transcript_file", formData.transkripFiles[0]);
       }
       fd.append("course_id", courseId);
+      fd.append("current_semester", formData.semester);
       fd.append("grade", "A");
 
       await axios.post("/register/tutor/upload-document", fd, {

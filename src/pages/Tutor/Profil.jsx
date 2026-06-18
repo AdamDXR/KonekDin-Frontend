@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import axios from '@/lib/axios';
+import { useEffect } from "react";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -915,14 +917,68 @@ export default function ProfilTutor() {
   const [isEditing, setIsEditing] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
   const [profil, setProfil] = useState({
-    foto: "https://i.pravatar.cc/150?img=15",
-    nama: "Irkham Wildan",
-    nim: "A11.2024.12345",
-    jurusan: "Teknik Informatika",
-    fakultas: "Ilmu Komputer",
-    email: "irkham@mhs.dinus.ac.id",
-    telepon: "+62 812 3456 7890",
+    foto: "https://ui-avatars.com/api/?name=Loading&background=random",
+    nama: "Loading...",
+    nim: "Loading...",
+    jurusan: "Loading...",
+    fakultas: "Loading...",
+    email: "Loading...",
+    telepon: "Loading...",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get('/me')
+        if (response.data && response.data.data) {
+          const user = response.data.data
+          const mappedProfile = {
+            nama: user.name || '',
+            email: user.email || '',
+            telepon: user.phone || '',
+            foto: user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`,
+            universitas: user.university || 'Universitas Dian Nuswantoro',
+            nim: user.nim || '',
+            jurusan: user.major || 'Teknik Informatika',
+            fakultas: user.faculty || 'Ilmu Komputer',
+          }
+          setProfil(mappedProfile)
+        }
+      } catch (err) {
+        console.error("Gagal mengambil profil:", err)
+      }
+    }
+    fetchProfile()
+  }, [])
+
+  const handleSimpan = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+         name: profil.nama || '',
+         phone: profil.telepon || '',
+         nim: profil.nim || ''
+      };
+      if (profil.email) payload.email = profil.email;
+      
+      const response = await axios.patch('/me', payload);
+      
+      if (response.data && response.data.data) {
+          const user = response.data.data;
+          const oldUser = JSON.parse(localStorage.getItem('user')) || {};
+          const newUser = { ...oldUser, name: user.name, phone: user.phone || '' };
+          localStorage.setItem('user', JSON.stringify(newUser));
+          window.dispatchEvent(new Event('profileUpdated'));
+      }
+      setIsEditing(false);
+    } catch (err) {
+       console.error("Gagal menyimpan profil", err);
+       alert(err.response?.data?.message || "Gagal menyimpan perubahan");
+    } finally {
+       setIsSubmitting(false);
+    }
+  };
 
   // ── State for Cropper ──
   const [imageSrc, setImageSrc] = useState(null);
@@ -952,10 +1008,34 @@ export default function ProfilTutor() {
   const handleSaveCrop = async () => {
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-      setProfil((prev) => ({ ...prev, foto: croppedImage }));
+      
+      let formData = new FormData();
+      formData.append('_method', 'PATCH');
+      const res = await fetch(croppedImage);
+      const blob = await res.blob();
+      formData.append('avatar', blob, 'avatar.png');
+      
+      const response = await axios.post('/me', formData, {
+         headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      if (response.data && response.data.data) {
+          const user = response.data.data;
+          const newAvatarUrl = user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : croppedImage;
+          setProfil((prev) => ({ ...prev, foto: newAvatarUrl }));
+          
+          const oldUser = JSON.parse(localStorage.getItem('user')) || {};
+          const newUser = { ...oldUser, avatar: user.avatar };
+          localStorage.setItem('user', JSON.stringify(newUser));
+          window.dispatchEvent(new Event('profileUpdated'));
+      } else {
+          setProfil((prev) => ({ ...prev, foto: croppedImage }));
+      }
+      
       setImageSrc(null);
     } catch (e) {
       console.error(e);
+      alert(e.response?.data?.message || "Gagal menyimpan foto profil");
     }
   };
 
@@ -1135,11 +1215,12 @@ export default function ProfilTutor() {
           </h2>
           {isEditing ? (
             <button
-              onClick={() => setIsEditing(false)}
-              className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline"
+              onClick={handleSimpan}
+              disabled={isSubmitting}
+              className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" />
-              Simpan Perubahan
+              {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
           ) : (
             <button

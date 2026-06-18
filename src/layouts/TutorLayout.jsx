@@ -87,7 +87,7 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handl
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
         >
           <Avatar className="h-11 w-11 border-2 border-slate-100 flex-shrink-0">
-            <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Tutor')}&background=0a0f44&color=fff`} alt={user?.name || 'Tutor'} />
+            <AvatarImage key={user?.avatar || 'fallback'} src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Tutor')}&background=0a0f44&color=fff`} alt={user?.name || 'Tutor'} />
             <AvatarFallback className="bg-[#0a0f44] text-white text-sm font-semibold">{getInitials(user?.name)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
@@ -141,9 +141,15 @@ export default function TutorLayout() {
     const handleNotificationsUpdate = () => {
       fetchNotifications()
     }
+    const handleProfileUpdate = () => {
+      const savedUser = localStorage.getItem('user')
+      if (savedUser) setUser(JSON.parse(savedUser))
+    }
     window.addEventListener('notificationsUpdated', handleNotificationsUpdate)
+    window.addEventListener('profileUpdated', handleProfileUpdate)
     return () => {
       window.removeEventListener('notificationsUpdated', handleNotificationsUpdate)
+      window.removeEventListener('profileUpdated', handleProfileUpdate)
     }
   }, [navigate])
 
@@ -193,7 +199,7 @@ export default function TutorLayout() {
           </Sheet>
           <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
           <Avatar className="h-8 w-8">
-            <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Tutor')}&background=0a0f44&color=fff`} alt={user?.name || 'Tutor'} />
+            <AvatarImage key={user?.avatar || 'fallback'} src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Tutor')}&background=0a0f44&color=fff`} alt={user?.name || 'Tutor'} />
             <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
           </Avatar>
         </header>

@@ -24,9 +24,9 @@ const getInitials = (name) => {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 }
 
-const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handleLogout, unreadNotifCount }) => {
-  // Hanya muncul jika user benar-benar punya role tutor
-  const isTutor = user?.role === 'tutor';
+const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handleLogout, unreadNotifCount, hasUnreadApproval }) => {
+  // Hanya muncul jika user benar-benar punya role tutor DAN tidak ada notif persetujuan yang belum dibaca
+  const isTutor = user?.role === 'tutor' && !hasUnreadApproval;
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -124,6 +124,7 @@ export default function LearnerLayout() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [unreadNotifCount, setUnreadNotifCount] = useState(0)
+  const [hasUnreadApproval, setHasUnreadApproval] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -132,13 +133,13 @@ export default function LearnerLayout() {
       return
     }
 
-    // Ambil user dari API agar datanya selalu terbaru
+    // Ambil user dari API /user yang bisa diakses role apapun
     const fetchUser = async () => {
       try {
-        const response = await axios.get('/me')
-        if (response.data && response.data.data) {
-          setUser(response.data.data)
-          localStorage.setItem('user', JSON.stringify(response.data.data))
+        const response = await axios.get('/user')
+        if (response.data && response.data.user) {
+          setUser(response.data.user)
+          localStorage.setItem('user', JSON.stringify(response.data.user))
         }
       } catch (err) {
         console.error("Gagal mengambil data user:", err)
@@ -154,8 +155,17 @@ export default function LearnerLayout() {
       try {
         const response = await axios.get('/learner/notification')
         if (response.data && response.data.data) {
-          const unreadCount = response.data.data.filter(n => !n.read_at).length
+          const notifications = response.data.data
+          const unreadCount = notifications.filter(n => !n.read_at).length
           setUnreadNotifCount(unreadCount)
+
+          const approvalUnread = notifications.some(n => {
+            if (n.read_at) return false;
+            const t = (n.data?.title || '').toLowerCase()
+            const m = (n.data?.message || '').toLowerCase()
+            return t.includes('disetujui') || m.includes('disetujui') || t.includes('diterima') || m.includes('diterima') || t.includes('tutor') || m.includes('tutor')
+          })
+          setHasUnreadApproval(approvalUnread)
         }
       } catch (err) {
         console.error("Gagal mengambil notifikasi:", err)
@@ -206,7 +216,7 @@ export default function LearnerLayout() {
     <div className="flex h-screen bg-[#f7f9fb] overflow-hidden">
       {/* Sidebar Desktop */}
       <aside className="w-[250px] border-r border-slate-100 hidden lg:flex flex-col flex-shrink-0 bg-white">
-        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} unreadNotifCount={unreadNotifCount} />
+        <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} unreadNotifCount={unreadNotifCount} hasUnreadApproval={hasUnreadApproval} />
       </aside>
 
       {/* Main Area: header + content + footer */}
@@ -222,7 +232,7 @@ export default function LearnerLayout() {
             <SheetContent side="left" className="p-0 w-[250px] border-r-0">
               <SheetTitle className="sr-only">Navigasi Utama</SheetTitle>
               <SheetDescription className="sr-only">Menu navigasi aplikasi untuk learner</SheetDescription>
-              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} unreadNotifCount={unreadNotifCount} />
+              <SidebarContent navigation={navigation} setIsMobileMenuOpen={setIsMobileMenuOpen} navigate={navigate} user={user} handleLogout={handleLogout} unreadNotifCount={unreadNotifCount} hasUnreadApproval={hasUnreadApproval} />
             </SheetContent>
           </Sheet>
           <img src="/images/logo_konekdin(background_putih).png" alt="KonekDin" className="h-8 w-auto" />
