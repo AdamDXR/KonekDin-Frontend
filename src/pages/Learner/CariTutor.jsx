@@ -87,15 +87,20 @@ export default function CariTutor() {
             const scheduleMap = {};
             if (tutor.available_slots) {
               tutor.available_slots.forEach(slot => {
-                if (!scheduleMap[slot.day_of_week]) {
-                  scheduleMap[slot.day_of_week] = [];
+                if (slot.status === 'AVAILABLE' || slot.status === 'Available') {
+                  if (!scheduleMap[slot.day_of_week]) {
+                    scheduleMap[slot.day_of_week] = [];
+                  }
+                  const timeStr = `${slot.start_time} - ${slot.end_time}`;
+                  const matkul = slot.course || slot.course_name || 'Tanpa Mata Kuliah';
+                  scheduleMap[slot.day_of_week].push({ time: timeStr, matkul: matkul });
                 }
-                scheduleMap[slot.day_of_week].push(`${slot.start_time} - ${slot.end_time}`);
               });
             }
             const scheduleArray = Object.keys(scheduleMap).map(day => ({
               day: day,
-              times: scheduleMap[day]
+              slots: scheduleMap[day],
+              times: scheduleMap[day].map(s => s.time) // Fallback for backward compatibility
             }));
 
             return {
@@ -147,7 +152,7 @@ export default function CariTutor() {
       const matchCourse = filterCourse === 'semua' || tutor.courses.includes(filterCourse)
       
       const matchDay = filterDay === 'semua' || tutor.schedule.some(s => s.day === filterDay)
-      const matchTime = filterTime === 'semua' || tutor.schedule.some(s => s.times.includes(filterTime))
+      const matchTime = filterTime === 'semua' || tutor.schedule.some(s => (s.slots && s.slots.some(slot => slot.time.includes(filterTime))) || (s.times && s.times.includes(filterTime)))
 
       return matchSearch && matchCourse && matchDay && matchTime
     })

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Clock, Plus, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/shared/StatusBadge";
+import axios from "@/lib/axios";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -30,16 +31,7 @@ const JAM_OPTIONS = [
   "17.10 - 18.00",
 ];
 
-const MATKUL_OPTIONS = [
-  "Basis Data",
-  "Pemrograman Web",
-  "Algoritma & Struktur Data",
-  "Logika Informatika",
-  "Jaringan Komputer",
-  "Sistem Operasi",
-  "Kalkulus",
-  "Fisika Dasar",
-];
+
 
 const STATUS_OPTIONS = ["Available", "Non Available"];
 
@@ -132,10 +124,10 @@ const INITIAL_JADWAL = [
 
 // ─── Modal Edit Jadwal ─────────────────────────────────────────────────────────
 
-function EditJadwalModal({ onClose, onSave }) {
+function EditJadwalModal({ onClose, onSave, matkulOptions }) {
   const [formHari, setFormHari] = useState("Senin");
   const [formJam, setFormJam] = useState("07.00 - 07.50");
-  const [formMatkul, setFormMatkul] = useState("Basis Data");
+  const [formMatkul, setFormMatkul] = useState(matkulOptions[0] || "");
   const [formStatus, setFormStatus] = useState("Available");
   const [error, setError] = useState("");
 
@@ -232,11 +224,15 @@ function EditJadwalModal({ onClose, onSave }) {
                 onChange={(e) => setFormMatkul(e.target.value)}
                 className={selectClass}
               >
-                {MATKUL_OPTIONS.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
+                {matkulOptions && matkulOptions.length > 0 ? (
+                  matkulOptions.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>Belum ada mata kuliah</option>
+                )}
               </select>
               <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
                 ▾
@@ -305,11 +301,45 @@ function EditJadwalModal({ onClose, onSave }) {
 // ─── Halaman Utama ─────────────────────────────────────────────────────────────
 
 export default function PengaturanJadwal() {
-  const [jadwal, setJadwal] = useState(INITIAL_JADWAL);
+  const [jadwal, setJadwal] = useState([]); // Diubah menjadi array kosong
+  const [isLoading, setIsLoading] = useState(false);
   const [filterHari, setFilterHari] = useState("Senin");
   const [filterStatus, setFilterStatus] = useState("Semua Status");
   const [showModal, setShowModal] = useState(false);
   const [nextId, setNextId] = useState(100);
+  const [matkulOptions, setMatkulOptions] = useState([]);
+
+  const fetchJadwal = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get('/api/tutor/availability');
+      const data = response.data.data || response.data; // Sesuaikan dengan struktur response
+      setJadwal(data || []);
+    } catch (error) {
+      console.error("Terjadi kesalahan saat mengambil data jadwal:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchTutorProfile = async () => {
+    try {
+      const response = await axios.get('/api/me');
+      const user = response.data?.data || response.data;
+      const courses = user?.tutor_profile?.taught_courses?.map(c => c.course_name) 
+                   || user?.taught_courses?.map(c => c.course_name) 
+                   || user?.courses
+                   || [];
+      setMatkulOptions(courses);
+    } catch (error) {
+      console.error("Gagal mengambil profil tutor:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchJadwal();
+    fetchTutorProfile();
+  }, []);
 
   const handleSaveJadwal = ({ hari, jam, matkul, status }) => {
     const statusUpper = status === "Available" ? "AVAILABLE" : "NON AVAILABLE";
@@ -452,7 +482,11 @@ export default function PengaturanJadwal() {
           </span>
         </div>
 
-        {sorted.length === 0 ? (
+        {isLoading ? (
+          <div className="py-16 text-center text-sm text-slate-500 font-medium">
+            Memuat data jadwal...
+          </div>
+        ) : sorted.length === 0 ? (
           <div className="py-16 text-center text-sm text-slate-400">
             Tidak ada jadwal untuk filter ini.
           </div>
@@ -490,6 +524,7 @@ export default function PengaturanJadwal() {
         <EditJadwalModal
           onClose={() => setShowModal(false)}
           onSave={handleSaveJadwal}
+          matkulOptions={matkulOptions}
         />
       )}
     </div>
