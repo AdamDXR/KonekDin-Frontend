@@ -84,7 +84,7 @@ const SidebarContent = ({ navigation, setIsMobileMenuOpen, navigate, user, handl
         <NavLink
           to="/tutor/profil"
           onClick={() => setIsMobileMenuOpen(false)}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity min-w-0"
         >
           <Avatar className="h-11 w-11 border-2 border-slate-100 flex-shrink-0">
             <AvatarImage key={user?.avatar || 'fallback'} src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Tutor')}&background=0a0f44&color=fff`} alt={user?.name || 'Tutor'} />

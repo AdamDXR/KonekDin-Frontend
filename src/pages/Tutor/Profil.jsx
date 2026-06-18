@@ -21,58 +21,7 @@ import { Link } from "react-router-dom";
 import axios from '@/lib/axios';
 import { useEffect } from "react";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const TRANSKRIP = [
-  {
-    id: 1,
-    semester: "Semester 3",
-    fileName: "transkrip-semester-3.pdf",
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-  },
-  {
-    id: 2,
-    semester: "Semester 4",
-    fileName: "transkrip-semester-4.pdf",
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-  },
-];
-
-const PORTOFOLIO = [
-  {
-    id: 1,
-    icon: "💻",
-    title: "Omni-Micro Framework",
-    issuer: "Proyek Open Source • 2023",
-    linkUrl: "https://github.com/omni-micro",
-  },
-  {
-    id: 2,
-    icon: "📱",
-    title: "SecurePay Mobile SDK",
-    issuer: "Proyek Klien • 2024",
-    linkUrl: "https://github.com/securepay",
-  },
-];
-
-const SERTIFIKASI = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=400&h=220&fit=crop",
-    title: "Certified Mathematics Educator (CME)",
-    desc: "Sertifikasi resmi dari Global Education Board untuk pengajar matematika tingkat lanjut.",
-    imageUrl: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=800&h=600&fit=crop",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=220&fit=crop",
-    title: "Advanced Quantitative Analysis",
-    desc: "Pelatihan analisis kuantitatif tingkat lanjut yang diselenggarakan oleh Universitas Dian Nuswantoro.",
-    imageUrl: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=600&fit=crop",
-  },
-];
+// ─── Data (Moved to state) ───────────────────────────────────────────────────
 
 // ─── Modal Tambah Transkrip ───────────────────────────────────────────────────
 
@@ -894,16 +843,16 @@ function EditKeahlianModal({ initialSelected, onClose, onSave }) {
 export default function ProfilTutor() {
   const fileInputRef = useRef(null);
 
-  const [sertifikasiList, setSertifikasiList] = useState(SERTIFIKASI);
+  const [sertifikasiList, setSertifikasiList] = useState([]);
   const [sertifikatToDelete, setSertifikatToDelete] = useState(null);
 
-  const [portofolioList, setPortofolioList] = useState(PORTOFOLIO);
+  const [portofolioList, setPortofolioList] = useState([]);
   const [portofolioToDelete, setPortofolioToDelete] = useState(null);
 
-  const [transkripList, setTranskripList] = useState(TRANSKRIP);
+  const [transkripList, setTranskripList] = useState([]);
   const [transkripToDelete, setTranskripToDelete] = useState(null);
 
-  const [tarif, setTarif] = useState("Rp 45.000");
+  const [tarif, setTarif] = useState("Rp 0");
   const [showModalTarif, setShowModalTarif] = useState(false);
   const [showModalTranskrip, setShowModalTranskrip] = useState(false);
   const [showModalSertifikasi, setShowModalSertifikasi] = useState(false);
@@ -911,8 +860,8 @@ export default function ProfilTutor() {
   const [showModalMatkul, setShowModalMatkul] = useState(false);
   const [showModalKeahlian, setShowModalKeahlian] = useState(false);
 
-  const [matkulList, setMatkulList] = useState(["Pemrograman Web", "Algoritma & Struktur Data"]);
-  const [keahlianList, setKeahlianList] = useState(["React", "JavaScript", "UI/UX Design"]);
+  const [matkulList, setMatkulList] = useState([]);
+  const [keahlianList, setKeahlianList] = useState([]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
@@ -928,11 +877,15 @@ export default function ProfilTutor() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('/me')
-        if (response.data && response.data.data) {
-          const user = response.data.data
+        const [userRes, tutorRes] = await Promise.all([
+          axios.get('/user'),
+          axios.get('/tutor/profile').catch(() => ({ data: { data: {} } })) // Fallback if not tutor
+        ]);
+        
+        if (userRes.data && userRes.data.user) {
+          const user = userRes.data.user;
           const mappedProfile = {
             nama: user.name || '',
             email: user.email || '',
@@ -942,15 +895,57 @@ export default function ProfilTutor() {
             nim: user.nim || '',
             jurusan: user.major || 'Teknik Informatika',
             fakultas: user.faculty || 'Ilmu Komputer',
+          };
+          setProfil(mappedProfile);
+        }
+        
+        if (tutorRes.data && tutorRes.data.data) {
+          const tutor = tutorRes.data.data;
+          if (tutor.price !== undefined) {
+            setTarif(`Rp ${new Intl.NumberFormat("id-ID").format(tutor.price)}`);
           }
-          setProfil(mappedProfile)
+          if (tutor.skills && Array.isArray(tutor.skills)) {
+            setKeahlianList(tutor.skills);
+          } else {
+            setKeahlianList([]);
+          }
+          if (tutor.taught_courses && Array.isArray(tutor.taught_courses)) {
+            setMatkulList(tutor.taught_courses.map(tc => tc.course_name));
+          } else {
+            setMatkulList([]);
+          }
+          
+          if (tutor.portfolio_url) {
+            setPortofolioList([{
+              id: 1,
+              icon: "📎",
+              title: "Portofolio Utama",
+              issuer: "Dari Pendaftaran",
+              linkUrl: tutor.portfolio_url.startsWith('http') ? tutor.portfolio_url : `https://${tutor.portfolio_url}`
+            }]);
+          } else {
+            setPortofolioList([]);
+          }
+
+          if (tutor.transcript_file) {
+            setTranskripList([{
+              id: 1,
+              semester: `Semester ${tutor.current_semester || '?'}`,
+              fileName: tutor.transcript_file.split('/').pop(),
+              pdfUrl: `http://127.0.0.1:8000/storage/${tutor.transcript_file}`
+            }]);
+          } else {
+            setTranskripList([]);
+          }
+          
+          setSertifikasiList([]);
         }
       } catch (err) {
-        console.error("Gagal mengambil profil:", err)
+        console.error("Gagal mengambil profil tutor:", err);
       }
-    }
-    fetchProfile()
-  }, [])
+    };
+    fetchData();
+  }, []);
 
   const handleSimpan = async () => {
     setIsSubmitting(true);
@@ -1562,7 +1557,15 @@ export default function ProfilTutor() {
         <EditTarifModal
           tarif={tarif}
           onClose={() => setShowModalTarif(false)}
-          onSave={(val) => setTarif(val)}
+          onSave={async (val) => {
+            const rawVal = parseInt(val.replace(/\D/g, ""), 10);
+            setTarif(val);
+            try {
+              await axios.patch('/tutor/profile', { price: rawVal });
+            } catch (err) {
+              console.error("Gagal menyimpan tarif:", err);
+            }
+          }}
         />
       )}
 
@@ -1604,9 +1607,18 @@ export default function ProfilTutor() {
         <EditKeahlianModal 
           initialSelected={keahlianList}
           onClose={() => setShowModalKeahlian(false)}
-          onSave={(selected) => setKeahlianList(selected)}
+          onSave={async (selected) => {
+            setKeahlianList(selected);
+            try {
+              await axios.patch('/tutor/profile', { skills: selected });
+            } catch (err) {
+              console.error("Gagal menyimpan keahlian:", err);
+            }
+          }}
         />
       )}
+
+
 
       {/* ── Modal Konfirmasi Hapus Sertifikat ── */}
       {sertifikatToDelete !== null && (

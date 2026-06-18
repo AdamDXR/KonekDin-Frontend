@@ -18,4 +18,23 @@ axios.interceptors.request.use(config => {
     return config;
 });
 
+// Interceptor untuk menangani error respons secara global
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response && error.response.status === 401) {
+            // Token expired atau tidak valid
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('role');
+            
+            // Redirect ke login jika bukan sedang di halaman login
+            if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+                window.location.href = '/login';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default axios;

@@ -191,6 +191,14 @@ export default function RegisterTutorTinjauan() {
       fd.append("course_id", courseId);
       fd.append("current_semester", formData.semester);
       fd.append("grade", "A");
+      if (formData.portofolio) {
+        let link = formData.portofolio;
+        if (!/^https?:\/\//i.test(link)) link = "https://" + link;
+        fd.append("portfolio_url", link);
+      }
+      if (formData.skills && formData.skills.length > 0) {
+        fd.append("skills", JSON.stringify(formData.skills));
+      }
 
       await axios.post("/register/tutor/upload-document", fd, {
         headers: {
