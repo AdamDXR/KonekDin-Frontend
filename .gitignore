@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 design-pdf/
+
+.agents/*
+skills-lock.json
