@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import axios from "@/lib/axios";
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/utils/cropImage';
 import {
@@ -1008,6 +1009,35 @@ export default function ProfilTutor() {
        setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    const fetchTutorProfile = async () => {
+      try {
+        const response = await axios.get('/api/me');
+        const user = response.data?.data || response.data;
+        
+        setProfil(prev => ({
+          ...prev,
+          nama: user?.name || prev.nama,
+          email: user?.email || prev.email,
+          foto: user?.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : prev.foto
+        }));
+
+        const courses = user?.tutor_profile?.taught_courses?.map(c => c.course_name) 
+                     || user?.taught_courses?.map(c => c.course_name) 
+                     || user?.courses
+                     || [];
+        if (courses.length > 0) {
+          setMatkulList(courses);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil profil tutor:", error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+    fetchTutorProfile();
+  }, []);
 
   // ── State for Cropper ──
   const [imageSrc, setImageSrc] = useState(null);

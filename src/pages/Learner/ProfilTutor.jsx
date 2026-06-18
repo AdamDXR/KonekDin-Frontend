@@ -27,16 +27,20 @@ export default function ProfilTutor() {
           const groupedSchedule = {};
           if (t.schedule && Array.isArray(t.schedule)) {
              t.schedule.forEach(s => {
-                const d = s.day || s.day_of_week;
-                if (!groupedSchedule[d]) groupedSchedule[d] = [];
-                const timeStr = s.time || `${s.start_time?.substring(0,5)} - ${s.end_time?.substring(0,5)}`;
-                groupedSchedule[d].push({ ...s, timeStr });
+                // Hanya masukkan jadwal yang statusnya AVAILABLE
+                if (s.status === 'AVAILABLE' || s.status === 'Available') {
+                  const d = s.day || s.day_of_week || s.hari;
+                  if (!groupedSchedule[d]) groupedSchedule[d] = [];
+                  const timeStr = s.time || s.waktu || `${s.start_time?.substring(0,5)} - ${s.end_time?.substring(0,5)}`;
+                  const matkul = s.course || s.matkul || 'Tanpa Mata Kuliah';
+                  groupedSchedule[d].push({ timeStr, matkul });
+                }
              })
           }
           
           const scheduleArr = Object.keys(groupedSchedule).map(day => ({
              day,
-             times: groupedSchedule[day].map(s => s.timeStr)
+             slots: groupedSchedule[day]
           }));
 
           const mapped = {
@@ -257,9 +261,12 @@ export default function ProfilTutor() {
                 {tutor.schedule && tutor.schedule.length > 0 ? tutor.schedule.map((slot, idx) => (
                   <div key={idx} className="flex flex-col py-3 border-b border-slate-100 last:border-0 gap-2">
                     <span className="font-bold text-slate-700">{slot.day}</span>
-                    <div className="flex flex-wrap gap-2">
-                      {slot.times.map((time, tIdx) => (
-                         <span key={tIdx} className="text-slate-600 bg-teal-50 px-3 py-1 rounded-md text-[11px] font-semibold">{time}</span>
+                    <div className="flex flex-col gap-2">
+                      {slot.slots.map((item, tIdx) => (
+                         <div key={tIdx} className="flex items-center justify-between bg-teal-50 px-3 py-2 rounded-md">
+                           <span className="text-teal-800 text-[12px] font-bold">{item.timeStr}</span>
+                           <span className="text-teal-600 text-[11px] font-semibold">{item.matkul}</span>
+                         </div>
                       ))}
                     </div>
                   </div>

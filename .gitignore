@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 design-pdf/
+
+endpoint.md
+backend.md 
