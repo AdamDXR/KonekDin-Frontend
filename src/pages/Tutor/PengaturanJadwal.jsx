@@ -309,12 +309,33 @@ export default function PengaturanJadwal() {
   const [nextId, setNextId] = useState(100);
   const [matkulOptions, setMatkulOptions] = useState([]);
 
+  // Mapping hari Inggris → Indonesia
+  const DAY_MAP = {
+    "Monday": "Senin", "Tuesday": "Selasa", "Wednesday": "Rabu",
+    "Thursday": "Kamis", "Friday": "Jumat", "Saturday": "Sabtu", "Sunday": "Minggu",
+  };
+  // Mapping balik Indonesia → Inggris (untuk POST)
+  const DAY_MAP_REVERSE = Object.fromEntries(Object.entries(DAY_MAP).map(([k, v]) => [v, k]));
+
   const fetchJadwal = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get('/api/tutor/availability');
-      const data = response.data.data || response.data; // Sesuaikan dengan struktur response
-      setJadwal(data || []);
+      const data = response.data?.data || response.data || [];
+
+      // Backend mengembalikan: { id, day: "Monday", start_time: "10:00", end_time: "12:00" }
+      // Frontend membutuhkan: { id, hari: "Senin", waktu: "10.00 - 12.00", matkul: "...", status: "AVAILABLE" }
+      const mapped = data.map((item) => ({
+        id: item.id,
+        hari: DAY_MAP[item.day] || item.hari || item.day || "Senin",
+        waktu: item.start_time && item.end_time
+          ? `${item.start_time.substring(0, 5).replace(":", ".")} - ${item.end_time.substring(0, 5).replace(":", ".")}`
+          : item.waktu || "-",
+        matkul: item.course?.name || item.course_name || item.matkul || null,
+        status: item.status?.toUpperCase() || "AVAILABLE",
+      }));
+
+      setJadwal(mapped);
     } catch (error) {
       console.error("Terjadi kesalahan saat mengambil data jadwal:", error);
     } finally {
@@ -371,9 +392,18 @@ export default function PengaturanJadwal() {
       setNextId((n) => n + 1);
     }
 
-    // Kirim ke backend (POST atau PUT tergantung implementasi backend)
+    // Kirim ke backend dengan format field yang sesuai
     try {
-      await axios.post('/api/tutor/availability', updatedEntry);
+      // Parse waktu "07.00 - 07.50" → start_time: "07:00", end_time: "07:50"
+      const [startRaw, endRaw] = jam.split(" - ");
+      const payload = {
+        day: DAY_MAP_REVERSE[hari] || hari,
+        start_time: startRaw?.replace(".", ":") || "",
+        end_time: endRaw?.replace(".", ":") || "",
+        course_name: matkulValue,
+        status: statusUpper.toLowerCase(),
+      };
+      await axios.post('/api/tutor/availability', payload);
       // Refetch data untuk memastikan sinkronisasi
       fetchJadwal();
     } catch (error) {
