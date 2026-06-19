@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, Clock, X, CalendarDays } from "lucide-react";
+import { Calendar, Clock, CalendarDays } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import { ULASAN } from "./Ulasan";
 import axios from "@/lib/axios";
 
 // ─── Helper ──────────────────────────────────────────────────────────────────
@@ -52,16 +51,9 @@ function formatWaktu(slots) {
 }
 
 // ─── RiwayatCard ─────────────────────────────────────────────────────────────
-function RiwayatCard({ item, navigate, onShowNoReview }) {
+function RiwayatCard({ item, navigate }) {
   const handleLihatUlasan = () => {
-    const hasReview = ULASAN.some(
-      (u) => u.learnerName.toLowerCase() === item.learnerName.toLowerCase()
-    );
-    if (hasReview) {
-      navigate(`/tutor/ulasan?learner=${encodeURIComponent(item.learnerName)}`);
-    } else {
-      onShowNoReview(item.learnerName);
-    }
+    navigate(`/tutor/ulasan?learner=${encodeURIComponent(item.learnerName)}`);
   };
 
   return (
@@ -111,39 +103,13 @@ function RiwayatCard({ item, navigate, onShowNoReview }) {
           {item.pendapatan}
         </p>
       </div>
-    </div>
-  );
-}
 
-// ─── Modal Belum Ada Ulasan ──────────────────────────────────────────────────
-function NoReviewModal({ learnerName, onClose }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-3xl shadow-2xl p-8 relative max-w-sm w-full text-center">
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </button>
-        <div className="mx-auto w-12 h-12 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-4">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-          </svg>
-        </div>
-        <h2 className="text-xl font-extrabold text-[#0a0f44] mb-2">
-          Belum Ada Ulasan
-        </h2>
-        <p className="text-sm text-slate-500 mb-6 leading-relaxed">
-          Pengguna <span className="font-bold text-[#0a0f44]">{learnerName}</span> belum memberikan ulasan untuk sesi bimbingan ini.
-        </p>
-        <Button
-          onClick={onClose}
-          className="w-full bg-[#0a0f44] hover:bg-[#192257] text-white font-bold py-3 h-auto rounded-xl transition-colors"
-        >
-          Tutup
-        </Button>
-      </div>
+      <Button
+        onClick={handleLihatUlasan}
+        className="bg-[#0a0f44] hover:bg-[#192257] text-white font-semibold rounded-full px-5"
+      >
+        Lihat Ulasan
+      </Button>
     </div>
   );
 }
@@ -154,7 +120,6 @@ export default function RiwayatMengajar() {
   const [riwayat, setRiwayat] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const [noReviewLearner, setNoReviewLearner] = useState(null)
   const itemsPerPage = 5
 
   useEffect(() => {
@@ -240,7 +205,6 @@ export default function RiwayatMengajar() {
               key={item.id} 
               item={item} 
               navigate={navigate} 
-              onShowNoReview={setNoReviewLearner} 
             />
           ))}
         </div>
@@ -297,13 +261,6 @@ export default function RiwayatMengajar() {
         </div>
       )}
 
-      {/* Modal Belum Ada Ulasan */}
-      {noReviewLearner && (
-        <NoReviewModal 
-          learnerName={noReviewLearner} 
-          onClose={() => setNoReviewLearner(null)} 
-        />
-      )}
     </div>
   );
 }
