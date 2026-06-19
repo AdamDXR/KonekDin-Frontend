@@ -23,6 +23,7 @@ import {
   Mail,
   Calendar
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -95,7 +96,7 @@ function TabPengguna() {
   }
 
   // Modals
-  const [viewModal, setViewModal] = useState({ isOpen: false, item: null })
+  const [viewModal, setViewModal] = useState({ isOpen: false, item: null, detail: null })
   const [suspendModal, setSuspendModal] = useState({ isOpen: false, item: null, duration: '1 Minggu' })
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null })
 
@@ -181,44 +182,6 @@ function TabPengguna() {
   return (
     <div className="animate-in fade-in duration-300 relative">
       <ToastNotification toast={toast} onClose={() => setToast({ show: false, message: '', type: 'success' })} />
-
-      {/* Modal Lihat Profil */}
-      {viewModal.isOpen && viewModal.item && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[24px] p-8 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-200">
-            <button onClick={() => setViewModal({ isOpen: false, item: null })} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-            <div className="text-center mb-6">
-              <Avatar className="h-24 w-24 mx-auto mb-4 border-4 border-slate-50">
-                <AvatarImage src={viewModal.item.image} alt={viewModal.item.name} />
-                <AvatarFallback>{viewModal.item.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <h3 className="text-xl font-bold text-[#0a0f44]">{viewModal.item.name}</h3>
-              <p className="text-slate-500 text-sm mb-2">{viewModal.item.email}</p>
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${viewModal.item.role === 'Tutor' ? 'bg-[#A7F3D0] text-[#047857]' : 'bg-[#E4E4E7] text-[#52525B]'}`}>
-                Role: {viewModal.item.role}
-              </span>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-4 space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500 flex items-center gap-2"><Calendar className="w-4 h-4"/> Bergabung</span>
-                <span className="font-bold text-slate-700">{viewModal.item.joinDate}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500 flex items-center gap-2"><ShieldAlert className="w-4 h-4"/> Status</span>
-                <span className={`font-bold ${viewModal.item.status === 'Aktif' ? 'text-emerald-600' : 'text-red-600'}`}>{viewModal.item.status}</span>
-              </div>
-              {viewModal.item.status === 'Suspend' && (
-                <div className="mt-2 pt-2 border-t border-slate-200 text-xs text-red-600">
-                  <p><strong>Alasan:</strong> {viewModal.item.suspendReason}</p>
-                  <p><strong>Sampai:</strong> {viewModal.item.suspendUntil}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal Suspend */}
       {suspendModal.isOpen && suspendModal.item && (
@@ -371,7 +334,7 @@ function TabPengguna() {
                     <td className="px-6 py-4 text-[14px] text-slate-600 font-medium">{user.joinDate}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-3 text-slate-400">
-                        <button onClick={() => setViewModal({ isOpen: true, item: user })} className="hover:text-slate-600 transition-colors p-1" title="Lihat Profil"><Eye className="w-5 h-5" /></button>
+                        <Link to={`/admin/pengguna/${user.id}/profil`} className="hover:text-slate-600 transition-colors p-1" title="Lihat Profil"><Eye className="w-5 h-5" /></Link>
                         {user.status === 'Aktif' && <button onClick={() => setSuspendModal({ isOpen: true, item: user, duration: '1 Minggu' })} className="hover:text-amber-600 transition-colors p-1" title="Suspend"><Ban className="w-5 h-5" /></button>}
                         {user.status === 'Suspend' && <button onClick={() => handleUnsuspend(user.id, user.name)} className="hover:text-emerald-600 transition-colors p-1" title="Buka Suspend"><Unlock className="w-5 h-5" /></button>}
                         <button onClick={() => setDeleteModal({ isOpen: true, item: user })} className="hover:text-red-600 transition-colors p-1" title="Hapus Permanen"><Trash2 className="w-5 h-5" /></button>
@@ -412,17 +375,28 @@ function TabVerifikasiTutor() {
     setError(null)
     try {
       const response = await axios.get('/admin/applications')
-      const formattedApps = response.data.data.map(app => ({
-        id: app.id,
-        name: app.name,
-        email: app.email,
-        joinDate: app.created_at,
-        image: app.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.name)}&background=random`,
-        status: app.status,
-        documents: app.documents || [],
-        matkul: app.matkul || [],
-        keahlian: app.keahlian || []
-      }))
+      const formattedApps = response.data.data
+        .filter(app => app.status === 'pending')
+        .map(app => {
+          const portfolioDocs = (app.portfolio_urls || []).map((url, idx) => ({
+            type: 'link',
+            name: `Portofolio ${idx + 1}`,
+            label: `Portofolio ${idx + 1}`,
+            value: url,
+            url: url
+          }));
+          return {
+            id: app.id,
+            name: app.name,
+            email: app.email,
+            joinDate: app.created_at,
+            image: app.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.name)}&background=random`,
+            status: app.status,
+            documents: [...(app.documents || []), ...portfolioDocs],
+            matkul: app.matkul || [],
+            keahlian: app.keahlian || []
+          };
+        });
       setPendingUsers(formattedApps)
     } catch (err) {
       setError('Gagal memuat data pengajuan tutor.')
@@ -502,15 +476,15 @@ function TabVerifikasiTutor() {
                   {viewModal.item.documents.map((doc, idx) => (
                     <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                       <div className="w-10 h-10 rounded-lg bg-[#000666]/10 flex items-center justify-center text-[#000666]">
-                        {doc.type === 'file' && <FileText className="w-5 h-5" />}
+                        {['file', 'transcript', 'certificate'].includes(doc.type) && <FileText className="w-5 h-5" />}
                         {doc.type === 'link' && <Link2 className="w-5 h-5" />}
                         {doc.type === 'image' && <ImageIcon className="w-5 h-5" />}
                       </div>
                       <div className="overflow-hidden">
                         <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{doc.label}</p>
-                        <p className="text-sm font-semibold text-[#000666] truncate hover:underline cursor-pointer">
+                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#000666] truncate hover:underline cursor-pointer block">
                           {doc.type === 'link' ? doc.value : doc.name}
-                        </p>
+                        </a>
                       </div>
                     </div>
                   ))}

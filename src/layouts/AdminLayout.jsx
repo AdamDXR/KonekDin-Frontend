@@ -99,10 +99,26 @@ export default function AdminLayout() {
       return
     }
 
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
+    const fetchAdminProfile = async () => {
+      try {
+        const response = await axios.get('/user')
+        const userData = response.data?.data || response.data
+        setUser(userData)
+        localStorage.setItem('user', JSON.stringify(userData))
+      } catch (error) {
+        console.error("Gagal mengambil profil admin:", error)
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          navigate('/login', { replace: true })
+        } else {
+          const savedUser = localStorage.getItem('user')
+          if (savedUser) setUser(JSON.parse(savedUser))
+        }
+      }
     }
+
+    fetchAdminProfile()
   }, [navigate])
 
   const handleLogout = async () => {
