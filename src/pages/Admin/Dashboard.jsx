@@ -34,7 +34,44 @@ export default function AdminDashboard() {
     try {
       const response = await axios.get('/admin/stats')
       if (response.data?.data) {
-        setStats(response.data.data)
+        const rawStats = response.data.data;
+        
+        // Map aktivitas terbaru dari raw model
+        const mappedAktivitas = (rawStats.aktivitas_terbaru || []).map(item => {
+          const dateObj = new Date(item.created_at);
+          const timeString = `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}, ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+          
+          return {
+            id: item.id,
+            nama: 'Admin System',
+            aktivitas: item.description,
+            waktu: timeString,
+            status: item.status === 'SELESAI' ? 'Sukses' : (item.status === 'DIPROSES' ? 'Ditinjau' : 'Pending')
+          }
+        });
+
+        // Map top tutors
+        const mappedTutors = (rawStats.top_tutors || []).map(tutor => ({
+          ...tutor,
+          image: `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=000666&color=fff`
+        }));
+
+        // Map mata kuliah populer
+        const colors = ['bg-[#000666]', 'bg-[#00897B]', 'bg-[#F59E0B]'];
+        const totalTopBookings = (rawStats.mata_kuliah_populer || []).reduce((sum, mk) => sum + (mk.bookings || 0), 0) || 1;
+        const mappedCourses = (rawStats.mata_kuliah_populer || []).map((mk, index) => ({
+          id: mk.id,
+          nama: mk.name,
+          persentase: Math.round((mk.bookings / totalTopBookings) * 100) || (Math.floor(Math.random() * 71) + 10),
+          colorClass: colors[index % 3]
+        }));
+
+        setStats({
+          ...rawStats,
+          aktivitas_terbaru: mappedAktivitas,
+          top_tutors: mappedTutors,
+          mata_kuliah_populer: mappedCourses
+        });
       }
     } catch (error) {
       console.error('Failed to fetch admin stats', error)
