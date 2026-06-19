@@ -7,62 +7,42 @@ import {
   Award
 } from 'lucide-react'
 
-// Dummy Data
-const aktivitasData = [
-  {
-    id: 1,
-    nama: 'Andini Saraswati',
-    aktivitas: 'Mendaftarkan Tutor Baru',
-    waktu: '2 menit yang lalu',
-    status: 'Pending',
-  },
-  {
-    id: 2,
-    nama: 'Budi Pratama',
-    aktivitas: 'Memesan Kursus "Basis Data"',
-    waktu: '15 menit yang lalu',
-    status: 'Sukses',
-  },
-  {
-    id: 3,
-    nama: 'Citra Handayani',
-    aktivitas: 'Mengajukan Komplain Refund',
-    waktu: '1 jam yang lalu',
-    status: 'Ditinjau',
-  },
-]
+// Removed dummy data
 
-const topTutors = [
-  {
-    id: 1,
-    name: 'Irkham Wildan',
-    sessions: 128,
-    rating: 4.9,
-    image: 'https://i.pravatar.cc/150?img=11',
-  },
-  {
-    id: 2,
-    name: 'Mery Zahra',
-    sessions: 94,
-    rating: 4.8,
-    image: 'https://i.pravatar.cc/150?img=5',
-  },
-  {
-    id: 3,
-    name: 'Rafi Ardan',
-    sessions: 85,
-    rating: 4.8,
-    image: 'https://i.pravatar.cc/150?img=12',
-  },
-]
-
-const mataKuliahPopuler = [
-  { id: 1, nama: 'Algoritma & Struktur Data', persentase: 84, colorClass: 'bg-[#000666]' },
-  { id: 2, nama: 'Pemrograman Web', persentase: 62, colorClass: 'bg-[#00897B]' },
-  { id: 3, nama: 'Basis Data', persentase: 45, colorClass: 'bg-[#F59E0B]' },
-]
+import { useState, useEffect } from 'react'
+import axios from '@/lib/axios'
+import { Link } from 'react-router-dom'
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState({
+    total_learners: 0,
+    total_tutors: 0,
+    active_complaints: 0,
+    pending_verifications: 0,
+    new_complaints: 0,
+    aktivitas_terbaru: [],
+    top_tutors: [],
+    mata_kuliah_populer: []
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
+
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get('/admin/stats')
+      if (response.data?.data) {
+        setStats(response.data.data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch admin stats', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const renderStatusBadge = (status) => {
     switch (status) {
       case 'Pending':
@@ -100,7 +80,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">TOTAL PELAJAR</div>
-            <div className="text-[32px] font-extrabold text-[#000666] leading-none tracking-tight">1,234</div>
+            <div className="text-[32px] font-extrabold text-[#000666] leading-none tracking-tight">{stats.total_learners}</div>
           </div>
         </div>
 
@@ -116,7 +96,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">TUTOR TERVERIFIKASI</div>
-            <div className="text-[32px] font-extrabold text-[#000666] leading-none tracking-tight">80</div>
+            <div className="text-[32px] font-extrabold text-[#000666] leading-none tracking-tight">{stats.total_tutors}</div>
           </div>
         </div>
 
@@ -132,7 +112,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">KOMPLAIN AKTIF</div>
-            <div className="text-[32px] font-extrabold text-[#000666] leading-none tracking-tight">11</div>
+            <div className="text-[32px] font-extrabold text-[#000666] leading-none tracking-tight">{stats.active_complaints}</div>
           </div>
         </div>
 
@@ -161,22 +141,30 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {aktivitasData.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-4 px-7 whitespace-nowrap">
-                        <span className="font-bold text-[#000666] text-[13px]">{item.nama}</span>
-                      </td>
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        <span className="text-slate-600 text-[13px]">{item.aktivitas}</span>
-                      </td>
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        <span className="text-slate-400 text-[13px]">{item.waktu}</span>
-                      </td>
-                      <td className="py-4 px-7 whitespace-nowrap">
-                        {renderStatusBadge(item.status)}
+                  {stats.aktivitas_terbaru.length > 0 ? (
+                    stats.aktivitas_terbaru.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-4 px-7 whitespace-nowrap">
+                          <span className="font-bold text-[#000666] text-[13px]">{item.nama}</span>
+                        </td>
+                        <td className="py-4 px-4 whitespace-nowrap">
+                          <span className="text-slate-600 text-[13px]">{item.aktivitas}</span>
+                        </td>
+                        <td className="py-4 px-4 whitespace-nowrap">
+                          <span className="text-slate-400 text-[13px]">{item.waktu}</span>
+                        </td>
+                        <td className="py-4 px-7 whitespace-nowrap">
+                          {renderStatusBadge(item.status)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="py-8 text-center text-slate-400 text-[13px]">
+                        Belum ada aktivitas terbaru.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -189,31 +177,37 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100">
               <h2 className="text-[16px] font-bold text-[#000666] mb-6">Performa Tutor Terbaik</h2>
               <div className="space-y-5">
-                {topTutors.map((tutor) => (
-                  <div key={tutor.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      {/* Avatar with floating rating */}
-                      <div className="relative">
-                        <img src={tutor.image} alt={tutor.name} className="w-14 h-14 rounded-xl object-cover border border-slate-100" />
-                        <div className="absolute -top-2 -right-3 bg-white rounded-full px-1.5 py-0.5 border border-slate-100 shadow-sm flex items-center gap-0.5">
-                          <Star className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
-                          <span className="text-[10px] font-bold text-slate-700">{tutor.rating}</span>
+                {stats.top_tutors.length > 0 ? (
+                  stats.top_tutors.map((tutor) => (
+                    <div key={tutor.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        {/* Avatar with floating rating */}
+                        <div className="relative">
+                          <img src={tutor.image} alt={tutor.name} className="w-14 h-14 rounded-xl object-cover border border-slate-100" />
+                          <div className="absolute -top-2 -right-3 bg-white rounded-full px-1.5 py-0.5 border border-slate-100 shadow-sm flex items-center gap-0.5">
+                            <Star className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
+                            <span className="text-[10px] font-bold text-slate-700">{tutor.rating}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-bold text-[#000666] text-[14px] leading-tight mb-0.5">{tutor.name}</div>
+                          <div className="text-[11px] text-slate-400">({tutor.sessions} Sesi Selesai)</div>
                         </div>
                       </div>
-                      <div>
-                        <div className="font-bold text-[#000666] text-[14px] leading-tight mb-0.5">{tutor.name}</div>
-                        <div className="text-[11px] text-slate-400">({tutor.sessions} Sesi)</div>
+                      {/* Top Tutor Badge Icon */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-6 h-6 rounded bg-amber-100 flex items-center justify-center mb-1">
+                          <Award className="w-4 h-4 text-amber-500" />
+                        </div>
+                        <span className="text-[8px] font-bold text-amber-500 uppercase tracking-wider">Top Tutor</span>
                       </div>
                     </div>
-                    {/* Top Tutor Badge Icon */}
-                    <div className="flex flex-col items-center">
-                      <div className="w-6 h-6 rounded bg-amber-100 flex items-center justify-center mb-1">
-                        <Award className="w-4 h-4 text-amber-500" />
-                      </div>
-                      <span className="text-[8px] font-bold text-amber-500 uppercase tracking-wider">Top Tutor</span>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-slate-400 text-[13px]">
+                    Belum ada data tutor.
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -221,22 +215,28 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100">
               <h2 className="text-[16px] font-bold text-[#000666] mb-6">Mata Kuliah Populer</h2>
               <div className="space-y-6">
-                {mataKuliahPopuler.map((mk) => (
-                  <div key={mk.id}>
-                    <div className="flex justify-between items-end mb-2">
-                      <span className={`text-[13px] font-bold ${mk.colorClass.replace('bg-', 'text-')}`}>{mk.nama}</span>
-                      <span className={`text-[11px] font-bold ${mk.colorClass.replace('bg-', 'text-')}`}>{mk.persentase}% Peminat</span>
+                {stats.mata_kuliah_populer.length > 0 ? (
+                  stats.mata_kuliah_populer.map((mk) => (
+                    <div key={mk.id}>
+                      <div className="flex justify-between items-end mb-2">
+                        <span className={`text-[13px] font-bold ${mk.colorClass.replace('bg-', 'text-')}`}>{mk.nama}</span>
+                        <span className={`text-[11px] font-bold ${mk.colorClass.replace('bg-', 'text-')}`}>{mk.persentase}% Peminat</span>
+                      </div>
+                      {/* Progress Bar Container */}
+                      <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        {/* Progress Bar Fill */}
+                        <div 
+                          className={`h-full rounded-full ${mk.colorClass}`} 
+                          style={{ width: `${mk.persentase}%` }}
+                        ></div>
+                      </div>
                     </div>
-                    {/* Progress Bar Container */}
-                    <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      {/* Progress Bar Fill */}
-                      <div 
-                        className={`h-full rounded-full ${mk.colorClass}`} 
-                        style={{ width: `${mk.persentase}%` }}
-                      ></div>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-slate-400 text-[13px]">
+                    Belum ada data mata kuliah.
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -250,28 +250,28 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 border-l-4 border-l-[#000666]">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-[16px] font-bold text-[#000666]">Verifikasi Tutor</h2>
-              <span className="bg-[#EEF2FF] text-[#000666] text-[10px] font-bold px-2 py-1 rounded">12</span>
+              <span className="bg-[#EEF2FF] text-[#000666] text-[10px] font-bold px-2 py-1 rounded">{stats.pending_verifications}</span>
             </div>
             <p className="text-slate-500 text-[13px] mb-5 leading-relaxed">
               Pengajuan verifikasi dokumen tutor tertunda.
             </p>
-            <button className="w-full bg-[#EEF2FF] text-[#000666] font-bold text-[13px] py-2.5 rounded-xl hover:bg-indigo-100 transition-colors">
+            <Link to="/admin/manajemen" className="w-full bg-[#EEF2FF] text-[#000666] font-bold text-[13px] py-2.5 rounded-xl hover:bg-indigo-100 transition-colors flex justify-center">
               Lihat Detail
-            </button>
+            </Link>
           </div>
 
           {/* Action Card: Komplain Baru */}
           <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 border-l-4 border-l-red-600">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-[16px] font-bold text-[#000666]">Komplain Baru</h2>
-              <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-1 rounded">3</span>
+              <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-1 rounded">{stats.new_complaints}</span>
             </div>
             <p className="text-slate-500 text-[13px] mb-5 leading-relaxed">
               Butuh tanggapan admin segera.
             </p>
-            <button className="w-full bg-red-50 text-red-600 font-bold text-[13px] py-2.5 rounded-xl hover:bg-red-100 transition-colors">
+            <Link to="/admin/komplain" className="w-full bg-red-50 text-red-600 font-bold text-[13px] py-2.5 rounded-xl hover:bg-red-100 transition-colors flex justify-center">
               Lihat Detail
-            </button>
+            </Link>
           </div>
 
         </div>
