@@ -22,6 +22,7 @@ import Landing from "@/pages/Landing/Landing";
 import AdminDashboard from '@/pages/Admin/Dashboard'
 import Manajemen from '@/pages/Admin/Manajemen'
 import KomplainModerasi from '@/pages/Admin/KomplainModerasi'
+import AdminProfilUser from '@/pages/Admin/AdminProfilUser'
 // import KelolaMatakuliah from '@/pages/Admin/KelolaMatakuliah'
 // import ValidasiBadge from '@/pages/Admin/ValidasiBadge'
 // import Settings from '@/pages/Admin/Settings'
@@ -62,6 +63,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="manajemen" element={<Manajemen />} />
+          <Route path="pengguna/:id/profil" element={<AdminProfilUser />} />
           <Route path="komplain" element={<KomplainModerasi />} />
           <Route index element={<AdminDashboard />} />
           {/* 

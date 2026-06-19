@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import axios from '@/lib/axios'
 import {
   Star,
   ShieldAlert,
@@ -68,44 +69,9 @@ const generateDummyComplaints = () => {
   return dummy
 }
 
-const activitiesData = [
-  {
-    id: 1,
-    icon: <ShieldAlert className="w-5 h-5 text-orange-600" />,
-    bgIcon: 'bg-orange-100',
-    description: (
-      <>
-        Admin telah menindaklanjuti Tutor <strong>Dukun Samin</strong> atas komplain ketidakhadiran.
-      </>
-    ),
-    meta: '2 JAM YANG LALU • STATUS: DIPROSES',
-  },
-  {
-    id: 2,
-    icon: <Trash2 className="w-5 h-5 text-slate-600" />,
-    bgIcon: 'bg-slate-100',
-    description: (
-      <>
-        Admin telah menghapus ulasan dari Learner <strong>Joko Widodo</strong> karena terdeteksi sebagai troll/spam.
-      </>
-    ),
-    meta: '5 JAM YANG LALU • STATUS: SELESAI',
-  },
-  {
-    id: 3,
-    icon: <ShieldAlert className="w-5 h-5 text-orange-600" />,
-    bgIcon: 'bg-orange-100',
-    description: (
-      <>
-        Admin telah menindaklanjuti Tutor <strong>Bambang Pamungkas</strong> atas laporan metode pengajaran yang tidak sesuai.
-      </>
-    ),
-    meta: 'KEMARIN, 14:20 • STATUS: DIPROSES',
-  },
-]
-
 export default function KomplainModerasi() {
-  const [complaints, setComplaints] = useState(generateDummyComplaints)
+  const [complaints, setComplaints] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   
   // Modal State
@@ -113,6 +79,9 @@ export default function KomplainModerasi() {
   
   // Toast State
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
+
+  const [activities, setActivities] = useState([])
+  const [loadingActivities, setLoadingActivities] = useState(true)
 
   const itemsPerPage = 6
   const totalPages = Math.ceil(complaints.length / itemsPerPage)
@@ -137,28 +106,91 @@ export default function KomplainModerasi() {
     setModalConfig({ isOpen: false, type: null, item: null })
   }
 
-  const handleConfirmAction = () => {
+  useEffect(() => {
+    fetchReviews()
+    fetchActivities()
+  }, [])
+
+  const fetchActivities = async () => {
+    setLoadingActivities(true)
+    try {
+      const response = await axios.get('/admin/moderation/logs')
+      setActivities(response.data?.data || [])
+    } catch (err) {
+      console.error('Failed to fetch moderation logs', err)
+    } finally {
+      setLoadingActivities(false)
+    }
+  }
+
+  const fetchReviews = async () => {
+    setIsLoading(true)
+    try {
+      const response = await axios.get('/admin/moderation/reviews')
+      const data = response.data?.data || []
+      const mapped = data.map(item => ({
+        realId: item.id,
+        id: `#BK-${8000 + item.id}`,
+        waktu: item.tanggal,
+        pelapor: item.learner_name,
+        terlapor: item.tutor_name,
+        rating: item.rating,
+        deskripsi: item.comment,
+        status: item.moderation_status,
+      }))
+      setComplaints(mapped)
+    } catch (error) {
+      console.error("Gagal mengambil daftar ulasan", error)
+      showToast("Gagal mengambil data dari server", "error")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleConfirmAction = async () => {
     const { type, item } = modalConfig
     if (!item) return
 
-    if (type === 'hapus_ulasan') {
-      setComplaints(prev => prev.filter(c => c.id !== item.id))
-      showToast('Ulasan berhasil dihapus dari sistem.')
-    } 
-    else if (type === 'tindak_lanjut') {
-      setComplaints(prev => prev.map(c => 
-        c.id === item.id ? { ...c, status: 'DIPROSES' } : c
-      ))
-      showToast(`Tutor ${item.terlapor} akan segera ditindaklanjuti. Status: Diproses.`)
-    }
-    else if (type === 'selesai') {
-      setComplaints(prev => prev.map(c => 
-        c.id === item.id ? { ...c, status: 'SELESAI' } : c
-      ))
-      showToast(`Laporan terhadap ${item.terlapor} berhasil diselesaikan.`)
+    try {
+      if (type === 'hapus_ulasan') {
+        await axios.delete(`/admin/moderation/reviews/${item.realId}`)
+        setComplaints(prev => prev.filter(c => c.realId !== item.realId))
+        showToast('Ulasan berhasil dihapus dari sistem.')
+      } 
+      else if (type === 'tindak_lanjut') {
+        await axios.patch(`/admin/moderation/reviews/${item.realId}/process`)
+        setComplaints(prev => prev.map(c => 
+          c.realId === item.realId ? { ...c, status: 'DIPROSES' } : c
+        ))
+        showToast(`Tutor ${item.terlapor} akan segera ditindaklanjuti. Status: Diproses.`)
+      }
+      else if (type === 'selesai') {
+        await axios.patch(`/admin/moderation/reviews/${item.realId}/resolve`)
+        setComplaints(prev => prev.map(c => 
+          c.realId === item.realId ? { ...c, status: 'SELESAI' } : c
+        ))
+        showToast(`Laporan terhadap ${item.terlapor} berhasil diselesaikan.`)
+      }
+      
+      // Ambil kembali aktivitas moderasi terbaru
+      fetchActivities();
+    } catch (error) {
+      console.error("Aksi gagal:", error)
+      showToast(error.response?.data?.message || "Terjadi kesalahan saat memproses permintaan", "error")
     }
 
     closeModal()
+  }
+
+  const renderActivityIcon = (action) => {
+    if (action === 'delete_review') {
+       return { icon: <Trash2 className="w-5 h-5 text-slate-600" />, bg: 'bg-slate-100' };
+    } else if (action === 'process_review') {
+       return { icon: <ShieldAlert className="w-5 h-5 text-orange-600" />, bg: 'bg-orange-100' };
+    } else if (action === 'resolve_review') {
+       return { icon: <CheckCircle className="w-5 h-5 text-emerald-600" />, bg: 'bg-emerald-100' };
+    }
+    return { icon: <History className="w-5 h-5 text-[#000666]" />, bg: 'bg-[#000666]/10' };
   }
 
   const renderStars = (rating) => {
@@ -307,12 +339,16 @@ export default function KomplainModerasi() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {currentData.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="py-12 px-6 text-center text-slate-500">Memuat data komplain...</td>
+                </tr>
+              ) : currentData.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 px-6 text-center text-slate-500">Tidak ada komplain yang ditemukan.</td>
                 </tr>
               ) : currentData.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                <tr key={item.realId} className="hover:bg-slate-50/50 transition-colors">
                   <td className="py-5 px-6 whitespace-nowrap">
                     <div className="font-bold text-[#000666] text-[14px] leading-tight">{item.id}</div>
                     <div className="text-[12px] text-slate-500 mt-1">{item.waktu}</div>
@@ -438,23 +474,34 @@ export default function KomplainModerasi() {
         </div>
         
         <div className="space-y-4">
-          {activitiesData.map((activity) => (
-            <div key={activity.id} className="bg-white rounded-[20px] p-6 flex flex-col sm:flex-row sm:items-center justify-between shadow-sm border border-slate-100 gap-4">
-              <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${activity.bgIcon}`}>
-                  {activity.icon}
+          {loadingActivities ? (
+            <div className="text-center py-6 text-slate-500">Memuat log aktivitas...</div>
+          ) : activities.length > 0 ? (
+            activities.map((activity) => {
+              const { icon, bg } = renderActivityIcon(activity.action);
+              return (
+                <div key={activity.id} className="bg-white rounded-[20px] p-6 flex flex-col sm:flex-row sm:items-center justify-between shadow-sm border border-slate-100 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${bg}`}>
+                      {icon}
+                    </div>
+                    <div>
+                      <p className="text-slate-700 text-[14px] leading-relaxed mb-1">
+                        {activity.description}
+                      </p>
+                      <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                        {activity.meta}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-slate-700 text-[14px] leading-relaxed mb-1">
-                    {activity.description}
-                  </p>
-                  <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    {activity.meta}
-                  </p>
-                </div>
-              </div>
+              )
+            })
+          ) : (
+            <div className="text-center py-8 text-slate-400 bg-white rounded-[20px] border border-slate-100 border-dashed">
+              Belum ada aktivitas moderasi tercatat.
             </div>
-          ))}
+          )}
         </div>
       </div>
 
