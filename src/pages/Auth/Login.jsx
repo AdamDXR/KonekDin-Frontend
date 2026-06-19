@@ -11,6 +11,7 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [selectedRole, setSelectedRole] = useState('learner')
   const [errorMsg, setErrorMsg] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
@@ -27,16 +28,32 @@ export default function Login() {
       })
 
       if (response.data && response.data.access_token) {
-        localStorage.setItem('token', response.data.access_token)
+        const token = response.data.access_token;
+        const role = response.data.user?.role || 'learner';
+
+        // Cek jika user mencoba login dari panel Tutor tapi tidak memiliki role Tutor/Admin
+        if (selectedRole === 'tutor' && role !== 'tutor' && role !== 'admin') {
+          setErrorMsg('Akses ditolak: Akun Anda belum terdaftar sebagai Tutor.');
+          // Bersihkan session jika terlanjur terbuat di backend
+          try {
+            await axios.post('http://127.0.0.1:8000/api/logout', {}, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+          } catch(e) {}
+          setIsLoading(false);
+          return;
+        }
+
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(response.data.user))
         
-        // Cek role untuk redirect
-        const role = response.data.user?.role || 'learner' // default fallback
-        
+        // Redirect logic berdasarkan role sebenarnya
         if (role === 'admin') {
           navigate('/admin')
-        } else if (role === 'tutor') {
-          navigate('/tutor')
+        } else if (selectedRole === 'tutor' && role === 'tutor') {
+          navigate('/tutor/dashboard')
         } else {
+          // Walau tutor, kalau dia login pake toggle learner, arahkan ke dashboard learner
           navigate('/learner/dashboard')
         }
       }
@@ -108,18 +125,34 @@ export default function Login() {
               <p className="text-slate-500 dark:text-slate-400">Masuk ke akun KonekDin Anda untuk melanjutkan belajar</p>
             </div>
 
+            {/* Role Toggle Switch */}
+            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mb-6">
+              <button 
+                type="button"
+                onClick={() => { setSelectedRole('learner'); setErrorMsg(null); }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-lg transition-all ${selectedRole === 'learner' ? 'bg-white text-[#1a1a4b] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+              >
+                🎓 Learner
+              </button>
+              <button 
+                type="button"
+                onClick={() => { setSelectedRole('tutor'); setErrorMsg(null); }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-lg transition-all ${selectedRole === 'tutor' ? 'bg-white text-[#1a1a4b] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+              >
+                👨‍🏫 Tutor
+              </button>
+            </div>
+
             {errorMsg && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium border border-red-100">
-                {errorMsg}
+              <div className="mb-5 p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium border border-red-100 flex items-start gap-2">
+                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{errorMsg}</span>
               </div>
             )}
 
             <form className="space-y-5" onSubmit={handleLogin}>
-              {errorMsg && (
-                <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm font-medium border border-red-100">
-                  {errorMsg}
-                </div>
-              )}
               {/* Input Email */}
               <div className="space-y-1">
                 <Label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
