@@ -37,7 +37,7 @@ export default function TutorDashboard() {
       // Fallback API
       const fetchUserProfile = async () => {
         try {
-          const response = await axios.get('/api/me');
+          const response = await axios.get('/me');
           const user = response.data?.data || response.data;
           if (user?.name) {
             setUserName(user.name);
@@ -55,9 +55,9 @@ export default function TutorDashboard() {
       try {
         // Karena data dipecah di beberapa endpoint menurut backend.md, kita fetch sekaligus
         const [dashRes, schedRes, revRes] = await Promise.all([
-          axios.get('/api/tutor/dashboard').catch(() => ({ data: { data: {} } })),
-          axios.get('/api/tutor/schedules').catch(() => ({ data: { data: [] } })),
-          axios.get('/api/tutor/reviews').catch(() => ({ data: { data: [] } }))
+          axios.get('/tutor/dashboard').catch(() => ({ data: { data: {} } })),
+          axios.get('/tutor/bookings').catch(() => ({ data: { data: [] } })),
+          axios.get('/tutor/reviews').catch(() => ({ data: { data: [] } }))
         ]);
 
         const stats = dashRes.data?.data || {};
