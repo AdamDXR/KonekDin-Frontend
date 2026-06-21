@@ -8,6 +8,8 @@ import {
   MapPin,
   MessageSquare,
   CalendarDays,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -55,8 +57,48 @@ function getInitials(name) {
     .toUpperCase();
 }
 
+// ─── ConfirmModal ─────────────────────────────────────────────────────────────
+function ConfirmModal({ session, onConfirm, onCancel, isLoading }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+          </div>
+          <h3 className="text-base font-bold text-[#0a0f44]">Konfirmasi Sesi Selesai</h3>
+        </div>
+        <p className="text-sm text-slate-600 mb-1">
+          Tandai sesi belajar dengan <span className="font-semibold text-[#0a0f44]">{session.learnerName}</span> sebagai selesai?
+        </p>
+        <p className="text-xs text-slate-400 mb-6">
+          Setelah dikonfirmasi, sesi akan pindah ke riwayat dan learner dapat memberikan ulasan.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+            className="rounded-xl px-5 h-10 text-sm font-semibold border-slate-200 text-slate-600 hover:bg-slate-50"
+          >
+            Batal
+          </Button>
+          <Button
+            onClick={onConfirm}
+            disabled={isLoading}
+            className="rounded-xl px-5 h-10 text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white gap-2"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            {isLoading ? "Memproses..." : "Ya, Selesaikan"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── SessionCard ─────────────────────────────────────────────────────────────
-function SessionCard({ session, isHighlighted, cardRef }) {
+function SessionCard({ session, isHighlighted, cardRef, onComplete, isCompleting }) {
   const {
     learnerName,
     subject,
@@ -107,18 +149,28 @@ function SessionCard({ session, isHighlighted, cardRef }) {
 
           {/* Konten di Kanan */}
           <div className="flex-1 flex flex-col gap-4 w-full">
-            {/* Top Row: Name and Button */}
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full">
+            {/* Top Row: Name and Buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 w-full">
               <h3 className="text-xl font-bold text-[#0a0f44] leading-tight">
                 {learnerName}
               </h3>
-              <Button
-                onClick={handleContact}
-                className="bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold rounded-xl px-5 h-11 text-sm gap-2 transition-colors duration-150 w-full sm:w-auto flex items-center justify-center flex-shrink-0"
-              >
-                <MessageSquare className="h-4 w-4" strokeWidth={2} />
-                Hubungi Learner
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
+                <Button
+                  onClick={handleContact}
+                  className="bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold rounded-xl px-5 h-10 text-sm gap-2 transition-colors duration-150 w-full sm:w-auto flex items-center justify-center"
+                >
+                  <MessageSquare className="h-4 w-4" strokeWidth={2} />
+                  Hubungi Learner
+                </Button>
+                <Button
+                  onClick={() => onComplete(session)}
+                  disabled={isCompleting}
+                  className="bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-semibold rounded-xl px-5 h-10 text-sm gap-2 transition-colors duration-150 w-full sm:w-auto flex items-center justify-center"
+                >
+                  <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
+                  {isCompleting ? "Memproses..." : "Sesi Selesai"}
+                </Button>
+              </div>
             </div>
 
             {/* Detail grid 2 kolom dengan background toska muda */}
@@ -195,40 +247,59 @@ export default function JadwalMengajar() {
   const highlightRef = useRef(null);
   const itemsPerPage = 5;
 
+  // State untuk "Sesi Selesai"
+  const [confirmSession, setConfirmSession] = useState(null); // session yang sedang dikonfirmasi
+  const [completingId, setCompletingId] = useState(null);     // id yang sedang diproses
+  const [completeError, setCompleteError] = useState(null);
+
+  const handleRequestComplete = (session) => {
+    setCompleteError(null);
+    setConfirmSession(session);
+  };
+
+  const handleConfirmComplete = async () => {
+    if (!confirmSession) return;
+    const id = confirmSession.id;
+    setCompletingId(id);
+    try {
+      await axios.patch(`/tutor/bookings/${id}/complete`);
+      setSessions((prev) => prev.filter((s) => s.id !== id));
+      setConfirmSession(null);
+    } catch (err) {
+      console.error("Gagal menyelesaikan sesi:", err);
+      setCompleteError(
+        err.response?.data?.message || "Gagal menyelesaikan sesi. Coba lagi."
+      );
+    } finally {
+      setCompletingId(null);
+    }
+  };
+
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const response = await axios.get("/tutor/schedules");
+        const response = await axios.get("/tutor/bookings");
         console.log("Response Jadwal Mengajar:", response.data);
 
         if (response.data && response.data.data) {
           const formatted = response.data.data.map((item) => {
-            // Gabungkan waktu dari semua slot
-            const slots = item.booking_slots || [];
-            const timeStr =
-              slots.length > 0
-                ? slots
-                    .map(
-                      (s) =>
-                        `${s.start_time?.substring(0, 5) || ""} - ${s.end_time?.substring(0, 5) || ""}`,
-                    )
-                    .join(", ")
-                : "-";
+            // slots adalah array of strings: ["07:00 - 07:50", "07:50 - 08:40"]
+            const slots = item.slots || [];
+            const timeStr = slots.length > 0 ? slots.join(", ") : "-";
+            const learnerName = item.learner || "Learner";
 
             return {
               id: item.id,
-              learnerName: item.learner?.name || "Learner",
-              subject: item.course?.name || "Mata Kuliah",
+              learnerName,
+              subject: item.course || "Mata Kuliah",
               subjectType: "book",
-              schedule: formatDate(item.booking_date),
-              time: timeStr ? `${timeStr} WIB` : "-",
+              schedule: formatDate(item.date),
+              time: timeStr !== "-" ? `${timeStr} WIB` : "-",
               location: "Menyesuaikan",
-              avatarUrl: item.learner?.avatar
-                ? (item.learner.avatar.startsWith('http') ? item.learner.avatar : `http://127.0.0.1:8000/storage/${item.learner.avatar}`)
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.learner?.name || "Learner")}&background=random`,
-              avatarFallback: getInitials(item.learner?.name),
-              whatsappNumber: item.learner?.phone
-                ? String(item.learner.phone).replace(/[^0-9]/g, "")
+              avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(learnerName)}&background=0a0f44&color=fff`,
+              avatarFallback: getInitials(learnerName),
+              whatsappNumber: item.learner_phone
+                ? String(item.learner_phone).replace(/[^0-9]/g, "")
                 : "",
             };
           });
@@ -295,6 +366,16 @@ export default function JadwalMengajar() {
 
   return (
     <div className="flex flex-col min-h-full pb-10">
+      {/* Modal Konfirmasi Sesi Selesai */}
+      {confirmSession && (
+        <ConfirmModal
+          session={confirmSession}
+          onConfirm={handleConfirmComplete}
+          onCancel={() => { setConfirmSession(null); setCompleteError(null); }}
+          isLoading={completingId === confirmSession.id}
+        />
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
@@ -304,6 +385,13 @@ export default function JadwalMengajar() {
           Yuk siapkan materi dan pastikan semuanya sudah siap.
         </p>
       </div>
+
+      {/* Error complete */}
+      {completeError && (
+        <div className="mb-4 p-4 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100">
+          {completeError}
+        </div>
+      )}
 
       {/* Error State */}
       {errorMsg && !isLoading && (
@@ -338,6 +426,8 @@ export default function JadwalMengajar() {
               session={session}
               isHighlighted={session.id === highlightedId}
               cardRef={session.id === highlightedId ? highlightRef : null}
+              onComplete={handleRequestComplete}
+              isCompleting={completingId === session.id}
             />
           ))}
         </div>

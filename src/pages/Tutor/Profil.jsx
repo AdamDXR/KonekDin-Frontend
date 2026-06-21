@@ -1030,8 +1030,6 @@ export default function ProfilTutor() {
         }
       } catch (error) {
         console.error("Gagal mengambil profil tutor:", error);
-      } finally {
-        setIsLoadingProfile(false);
       }
     };
     fetchTutorProfile();
