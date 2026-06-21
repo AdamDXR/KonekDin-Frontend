@@ -108,7 +108,7 @@ export default function DetailPesanan() {
                   <div className="flex items-center gap-6">
                     <div className="relative">
                       <img 
-                        src={tutor.avatar ? `http://127.0.0.1:8000/storage/${tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`} 
+                        src={tutor.avatar ? (tutor.avatar.startsWith('http') ? tutor.avatar : `http://127.0.0.1:8000/storage/${tutor.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`} 
                         alt="Tutor" 
                         className="w-24 h-24 rounded-2xl object-cover border border-slate-100" 
                       />

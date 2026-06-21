@@ -25,17 +25,14 @@ export default function ProfilTutor() {
           
           // Kelompokkan jadwal berdasarkan hari
           const groupedSchedule = {};
-          if (t.schedule && Array.isArray(t.schedule)) {
-             t.schedule.forEach(s => {
-                // Hanya masukkan jadwal yang statusnya AVAILABLE
-                if (s.status === 'AVAILABLE' || s.status === 'Available') {
+          if (t.available_slots && Array.isArray(t.available_slots)) {
+              t.available_slots.forEach(s => {
                   const d = s.day || s.day_of_week || s.hari;
                   if (!groupedSchedule[d]) groupedSchedule[d] = [];
                   const timeStr = s.time || s.waktu || `${s.start_time?.substring(0,5)} - ${s.end_time?.substring(0,5)}`;
-                  const matkul = s.course || s.matkul || 'Tanpa Mata Kuliah';
+                  const matkul = s.course || s.course_name || s.matkul || 'Tersedia';
                   groupedSchedule[d].push({ timeStr, matkul });
-                }
-             })
+              })
           }
           
           const scheduleArr = Object.keys(groupedSchedule).map(day => ({
@@ -54,13 +51,13 @@ export default function ProfilTutor() {
             rating: Number(t.rating_avg) || 0,
             sessionsCompleted: t.review_count || 0,
             price: Number(t.price) || 0,
-            image: t.avatar ? `http://127.0.0.1:8000/storage/${t.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=random`,
-            ipk: 3.85, 
-            courses: t.courses ? t.courses.map(c => ({ name: c.name || c, grade: 'A' })) : [],
+            image: t.avatar ? (t.avatar.startsWith('http') ? t.avatar : `http://127.0.0.1:8000/storage/${t.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=random`,
+            ipk: t.ipk || 3.85, 
+            courses: t.taught_courses ? t.taught_courses.map(c => ({ name: c.course_name, grade: c.grade || 'A' })) : [],
             skills: t.skills || [],
             schedule: scheduleArr,
-            rawSlots: t.schedule || [],
-            rawCourses: t.courses || [],
+            rawSlots: t.available_slots || t.schedule || [],
+            rawCourses: t.taught_courses || t.courses || [],
             reviews: t.reviews ? t.reviews.map(r => ({
               name: r.learner?.name || r.user?.name || 'Anonim',
               role: 'Learner',

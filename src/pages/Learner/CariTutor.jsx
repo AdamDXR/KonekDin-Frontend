@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axios from '@/lib/axios'
 import {
   Search,
   SlidersHorizontal,
@@ -79,7 +79,7 @@ export default function CariTutor() {
         }
 
         const headers = { Authorization: `Bearer ${token}` };
-        const response = await axios.get('http://127.0.0.1:8000/api/tutors', { headers });
+        const response = await axios.get('/tutors');
         console.log("Response dari API:", response.data);
         
         if (response.data && response.data.data) {
@@ -87,14 +87,12 @@ export default function CariTutor() {
             const scheduleMap = {};
             if (tutor.available_slots) {
               tutor.available_slots.forEach(slot => {
-                if (slot.status === 'AVAILABLE' || slot.status === 'Available') {
-                  if (!scheduleMap[slot.day_of_week]) {
-                    scheduleMap[slot.day_of_week] = [];
-                  }
-                  const timeStr = `${slot.start_time} - ${slot.end_time}`;
-                  const matkul = slot.course || slot.course_name || 'Tanpa Mata Kuliah';
-                  scheduleMap[slot.day_of_week].push({ time: timeStr, matkul: matkul });
+                if (!scheduleMap[slot.day_of_week]) {
+                  scheduleMap[slot.day_of_week] = [];
                 }
+                const timeStr = `${slot.start_time} - ${slot.end_time}`;
+                const matkul = slot.course || slot.course_name || 'Tersedia';
+                scheduleMap[slot.day_of_week].push({ time: timeStr, matkul: matkul });
               });
             }
             const scheduleArray = Object.keys(scheduleMap).map(day => ({
@@ -103,11 +101,14 @@ export default function CariTutor() {
               times: scheduleMap[day].map(s => s.time) // Fallback for backward compatibility
             }));
 
+            const rawCourses = tutor.taught_courses ? tutor.taught_courses.map(c => c.course_name) : [];
+            const mergedCourses = rawCourses.length > 0 ? rawCourses : (tutor.skills || []);
+
             return {
-              id: tutor.tutor_id,
+              id: tutor.tutor_id || tutor.id,
               name: tutor.name || 'Tutor',
               university: "Universitas Dian Nuswantoro", 
-              courses: tutor.taught_courses ? tutor.taught_courses.map(c => c.course_name) : [],
+              courses: mergedCourses,
               rawCourses: tutor.taught_courses || [],
               rating: Number(tutor.rating_avg) || 0,
               isTopTutor: (Number(tutor.rating_avg) || 0) >= 4.8,
@@ -115,7 +116,7 @@ export default function CariTutor() {
               rawSlots: tutor.available_slots || [],
               price: tutor.price || 0,
               image: tutor.avatar 
-                 ? `http://127.0.0.1:8000/storage/${tutor.avatar}` 
+                 ? (tutor.avatar.startsWith('http') ? tutor.avatar : `http://127.0.0.1:8000/storage/${tutor.avatar}`)
                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`
             };
           });

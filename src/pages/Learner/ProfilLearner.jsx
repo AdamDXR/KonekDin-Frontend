@@ -362,30 +362,32 @@ export default function ProfilLearner() {
       </div>
 
       {/* ── Banner CTA ── */}
-      {tutorStatus !== 'approved' && (
-        <div className="bg-[#0a0f44] rounded-2xl px-8 py-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-          <div>
-            <h3 className="text-xl font-extrabold text-white">
-              {tutorStatus === 'pending' ? 'Pendaftaran Sedang Diproses' : 'Yuk daftar jadi tutor!'}
-            </h3>
-            <p className="text-sm text-slate-300 mt-1 max-w-sm leading-relaxed">
-              {tutorStatus === 'pending' 
-                ? "Tim kami sedang meninjau dokumen dan kualifikasi Anda. Harap tunggu informasi selanjutnya."
-                : '"Bagikan keahlianmu dan bantu mahasiswa lain berkembang bersama."'}
-            </p>
-          </div>
-          <Button
-            onClick={handleDaftarTutorClick}
-            className={`flex-shrink-0 font-bold px-6 py-2.5 h-auto rounded-xl text-sm transition-colors shadow-sm ${
-              tutorStatus === 'pending'
-                ? 'bg-slate-700 text-slate-300 cursor-not-allowed hover:bg-slate-700'
-                : 'bg-white text-[#0a0f44] hover:bg-slate-100'
-            }`}
-          >
-            {tutorStatus === 'pending' ? 'Menunggu Review' : 'Daftar Tutor'}
-          </Button>
+      <div className="bg-[#0a0f44] rounded-2xl px-8 py-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div>
+          <h3 className="text-xl font-extrabold text-white">
+            {tutorStatus === 'pending' 
+              ? 'Pendaftaran Sedang Diproses' 
+              : tutorStatus === 'approved' 
+                ? 'Tambah Mata Kuliah yang Diajar' 
+                : 'Yuk daftar jadi tutor!'}
+          </h3>
+          <p className="text-sm text-slate-300 mt-1 max-w-sm leading-relaxed">
+            {tutorStatus === 'pending' 
+              ? "Tim kami sedang meninjau dokumen dan kualifikasi Anda. Harap tunggu informasi selanjutnya."
+              : '"Bagikan keahlianmu dan bantu mahasiswa lain berkembang bersama."'}
+          </p>
         </div>
-      )}
+        <Button
+          onClick={handleDaftarTutorClick}
+          className={`flex-shrink-0 font-bold px-6 py-2.5 h-auto rounded-xl text-sm transition-colors shadow-sm ${
+            tutorStatus === 'pending'
+              ? 'bg-slate-700 text-slate-300 cursor-not-allowed hover:bg-slate-700'
+              : 'bg-white text-[#0a0f44] hover:bg-slate-100'
+          }`}
+        >
+          {tutorStatus === 'pending' ? 'Menunggu Review' : 'Daftar Tutor'}
+        </Button>
+      </div>
 
       {/* ── Modal Crop Foto ── */}
       {imageSrc && (

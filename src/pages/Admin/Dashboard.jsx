@@ -38,15 +38,21 @@ export default function AdminDashboard() {
         
         // Map aktivitas terbaru dari raw model
         const mappedAktivitas = (rawStats.aktivitas_terbaru || []).map(item => {
-          const dateObj = new Date(item.created_at);
-          const timeString = `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}, ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+          const dateObj = new Date(item.time);
+          const timeString = isNaN(dateObj) ? 'Waktu tidak valid' : `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}, ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
           
+          let displayStatus = 'Pending';
+          const s = (item.status || '').toLowerCase();
+          if (s === 'selesai' || s === 'completed' || s === 'approved' || s === 'paid') displayStatus = 'Sukses';
+          if (s === 'diproses' || s === 'pending' || s === 'menunggu') displayStatus = 'Pending';
+          if (s === 'ditolak' || s === 'cancelled' || s === 'failed') displayStatus = 'Gagal';
+
           return {
             id: item.id,
-            nama: 'Admin System',
-            aktivitas: item.description,
+            nama: item.user_name || 'System',
+            aktivitas: item.activity || 'Aktivitas',
             waktu: timeString,
-            status: item.status === 'SELESAI' ? 'Sukses' : (item.status === 'DIPROSES' ? 'Ditinjau' : 'Pending')
+            status: displayStatus
           }
         });
 

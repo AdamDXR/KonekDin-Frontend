@@ -90,7 +90,7 @@ export default function JadwalBelajar() {
            const formatted = response.data.data.map(item => ({
               id: item.id,
               tutorNama: item.tutor?.name || item.tutor || 'Tutor',
-              tutorFoto: item.tutor?.avatar ? `http://127.0.0.1:8000/storage/${item.tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.tutor?.name || item.tutor || 'Tutor')}&background=random`,
+              tutorFoto: item.tutor?.avatar ? (item.tutor.avatar.startsWith('http') ? item.tutor.avatar : `http://127.0.0.1:8000/storage/${item.tutor.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.tutor?.name || item.tutor || 'Tutor')}&background=random`,
               tutorRating: Number(item.tutor?.rating_avg) || 0,
               mataKuliah: item.course?.name || item.course || 'Materi Belajar',
               tanggal: formatDate(item.booking_date),

@@ -173,7 +173,7 @@ export default function Pembayaran() {
                 <div>
                   <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Tutor</div>
                   <div className="flex items-center gap-3">
-                    <img src={tutor.avatar ? `http://127.0.0.1:8000/storage/${tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`} alt="Tutor" className="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-100" />
+                    <img src={tutor.avatar ? (tutor.avatar.startsWith('http') ? tutor.avatar : `http://127.0.0.1:8000/storage/${tutor.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`} alt="Tutor" className="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-100" />
                     <div className="font-bold text-slate-900 text-lg">{tutor.name}</div>
                   </div>
                 </div>

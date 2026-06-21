@@ -274,6 +274,9 @@ export default function PengaturanJadwal() {
       setSaveError("Slot ini sudah BOOKED dan tidak dapat diubah.");
       return;
     }
+    
+    // Update local state temporarily for snappy UI
+    setJadwal(newJadwal);
 
     const newStatus = status === "Available" ? "AVAILABLE" : "NON AVAILABLE";
 
