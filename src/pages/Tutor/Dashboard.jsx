@@ -56,7 +56,7 @@ export default function TutorDashboard() {
         // Karena data dipecah di beberapa endpoint menurut backend.md, kita fetch sekaligus
         const [dashRes, schedRes, revRes] = await Promise.all([
           axios.get('/tutor/dashboard').catch(() => ({ data: { data: {} } })),
-          axios.get('/tutor/schedules').catch(() => ({ data: { data: [] } })),
+          axios.get('/tutor/bookings').catch(() => ({ data: { data: [] } })),
           axios.get('/tutor/reviews').catch(() => ({ data: { data: [] } }))
         ]);
 
@@ -76,19 +76,17 @@ export default function TutorDashboard() {
         setPersentaseRating(0);
         
         // 2. Set Jadwal (Ambil maksimal 3 jadwal terdekat sebagai contoh "Hari Ini")
+        // slots adalah array of strings: ["07:00 - 07:50"]
         const formattedSchedules = schedules.slice(0, 3).map((item) => {
-          let timeStr = item.time;
-          if (!timeStr && item.slots && item.slots.length > 0) {
-            timeStr = `${item.slots[0].start_time.substring(0, 5)} - ${item.slots[0].end_time.substring(0, 5)}`;
-          }
+          const slots = item.slots || [];
+          const timeStr = slots.length > 0 ? slots.join(", ") : null;
+          const learnerName = item.learner || "Learner";
           return {
             id: item.id,
-            learnerName: item.learner?.name || item.learner || "Learner",
-            subject: item.course?.name || "Mata Kuliah",
+            learnerName,
+            subject: item.course || "Mata Kuliah",
             time: timeStr ? `${timeStr} WIB` : "Waktu tidak ditentukan",
-            avatar: item.learner?.avatar 
-              ? (item.learner.avatar.startsWith('http') ? item.learner.avatar : `http://127.0.0.1:8000/storage/${item.learner.avatar}`) 
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.learner?.name || item.learner || "Learner")}&background=random`
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(learnerName)}&background=0a0f44&color=fff`
           };
         });
         setTodaySessions(formattedSchedules);

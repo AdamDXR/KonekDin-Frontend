@@ -275,9 +275,6 @@ export default function PengaturanJadwal() {
       return;
     }
     
-    // Update local state temporarily for snappy UI
-    setJadwal(newJadwal);
-
     const newStatus = status === "Available" ? "AVAILABLE" : "NON AVAILABLE";
 
     // Hitung state jadwal setelah perubahan diterapkan (untuk optimistic update)
@@ -313,18 +310,21 @@ export default function PengaturanJadwal() {
        *
        * Kita kirim SEMUA slot AVAILABLE dari state terbaru.
        * Slot NON AVAILABLE tidak dikirim — absen dari array = NON AVAILABLE di DB.
+       * Backend sekarang require min:1 slot, jadi slots[] kosong = 422.
        */
       const slots = updatedJadwal
         .filter((slot) => slot.status === "AVAILABLE")
         .map((slot) => {
-          // "07.00 - 07.50" → "07:00 - 07:50" untuk lookup ke masterSlotMap
-          const timeKey = dotToColonRange(slot.waktu);
+          // Normalisasi: "07.00 - 07.50" → pisah → "07:00" dan "07:50"
+          // lalu cari di masterSlotMap dengan key "07:00 - 07:50"
+          const [rawStart, rawEnd] = slot.waktu.split(" - ");
+          const timeKey = `${rawStart.replace(".", ":")} - ${rawEnd.replace(".", ":")}`;
           const masterSlotId = masterSlotMap.get(timeKey);
 
           if (!masterSlotId) {
             throw new Error(
-              `Master slot tidak ditemukan untuk waktu "${slot.waktu}". ` +
-              `Key yang dicari: "${timeKey}". ` +
+              `Master slot tidak ditemukan untuk "${slot.waktu}" (key: "${timeKey}"). ` +
+              `Pastikan seeder master_slots sudah dijalankan. ` +
               `Keys tersedia: [${[...masterSlotMap.keys()].join(", ")}]`
             );
           }
@@ -336,7 +336,17 @@ export default function PengaturanJadwal() {
           };
         });
 
-      console.log("[PengaturanJadwal] POST /tutor/availability payload:", { slots });
+      // Guard: slots kosong berarti semua NON AVAILABLE.
+      // Backend sekarang tolak slots:[] dengan 422 (min:1).
+      // Tampilkan pesan yang jelas alih-alih mengirim request yang pasti gagal.
+      if (slots.length === 0) {
+        throw new Error(
+          "Minimal satu slot harus berstatus AVAILABLE. " +
+          "Tidak bisa menyimpan jadwal tanpa slot yang tersedia."
+        );
+      }
+
+      console.log("[PengaturanJadwal] POST /tutor/availability payload:", JSON.stringify({ slots }, null, 2));
 
       // POST /tutor/availability
       const res = await axios.post("/tutor/availability", { slots });
@@ -348,6 +358,7 @@ export default function PengaturanJadwal() {
 
     } catch (err) {
       console.error("[PengaturanJadwal] Gagal menyimpan jadwal:", err);
+      console.error("[PengaturanJadwal] Response body:", JSON.stringify(err.response?.data));
       const msg =
         err.response?.data?.message ??
         err.response?.data?.errors?.slots?.[0] ??
