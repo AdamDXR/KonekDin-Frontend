@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, GraduationCap } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axios from '@/lib/axios'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -22,7 +22,7 @@ export default function Login() {
     setErrorMsg(null)
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login', {
+      const response = await axios.post('/login', {
         email,
         password
       })
@@ -36,7 +36,7 @@ export default function Login() {
           setErrorMsg('Akses ditolak: Akun Anda belum terdaftar sebagai Tutor.');
           // Bersihkan session jika terlanjur terbuat di backend
           try {
-            await axios.post('http://127.0.0.1:8000/api/logout', {}, {
+            await axios.post('/logout', {}, {
               headers: { Authorization: `Bearer ${token}` }
             });
           } catch(e) {}
