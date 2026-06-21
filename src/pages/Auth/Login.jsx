@@ -132,14 +132,14 @@ export default function Login() {
                 onClick={() => { setSelectedRole('learner'); setErrorMsg(null); }}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-lg transition-all ${selectedRole === 'learner' ? 'bg-white text-[#1a1a4b] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
               >
-                🎓 Learner
+                Learner
               </button>
               <button 
                 type="button"
                 onClick={() => { setSelectedRole('tutor'); setErrorMsg(null); }}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-lg transition-all ${selectedRole === 'tutor' ? 'bg-white text-[#1a1a4b] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
               >
-                👨‍🏫 Tutor
+                Tutor
               </button>
             </div>
 
