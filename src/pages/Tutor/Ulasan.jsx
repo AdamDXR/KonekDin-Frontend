@@ -222,7 +222,13 @@ export default function Ulasan() {
         const formattedReviews = listData.map((item) => {
           const learner = item.learner || item.user || item.student || {};
           const learnerName = formatName(learner);
-          const avatar = formatAvatar(learner) || `https://i.pravatar.cc/150?u=${encodeURIComponent(learnerName)}`;
+          let avatar = formatAvatar(learner);
+          if (avatar && !avatar.startsWith('http')) {
+            avatar = `http://127.0.0.1:8000/storage/${avatar}`;
+          }
+          if (!avatar) {
+            avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(learnerName)}&background=random`;
+          }
           const dateTime = normalizeDateTime(item);
 
           return {

@@ -73,7 +73,7 @@ export default function AdminProfilUser() {
           {/* Card Foto Profil */}
           <div className={`bg-white rounded-[24px] border border-slate-100 shadow-sm p-8 text-center ${isTutor ? '' : 'md:w-1/3 flex flex-col items-center justify-center'}`}>
              <div className="w-32 h-32 mx-auto rounded-[24px] overflow-hidden mb-4 border-4 border-slate-50 bg-teal-50">
-               <img src={user.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} alt={user.name} className="w-full h-full object-cover" />
+               <img src={user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} alt={user.name} className="w-full h-full object-cover" />
              </div>
              <h2 className="text-xl font-bold text-[#0a0f44] mb-1">{user.name}</h2>
              <p className="text-sm text-slate-500 mb-3">{user.email}</p>

@@ -1011,14 +1011,14 @@ export default function ProfilTutor() {
   useEffect(() => {
     const fetchTutorProfile = async () => {
       try {
-        const response = await axios.get('/api/me');
+        const response = await axios.get('/me');
         const user = response.data?.data || response.data;
         
         setProfil(prev => ({
           ...prev,
           nama: user?.name || prev.nama,
           email: user?.email || prev.email,
-          foto: user?.avatar ? `http://127.0.0.1:8000/storage/${user.avatar}` : prev.foto
+          foto: user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`) : prev.foto
         }));
 
         const courses = user?.tutor_profile?.taught_courses?.map(c => c.course_name) 

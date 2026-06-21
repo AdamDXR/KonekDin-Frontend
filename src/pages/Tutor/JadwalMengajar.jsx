@@ -224,7 +224,7 @@ export default function JadwalMengajar() {
               time: timeStr ? `${timeStr} WIB` : "-",
               location: "Menyesuaikan",
               avatarUrl: item.learner?.avatar
-                ? `http://127.0.0.1:8000/storage/${item.learner.avatar}`
+                ? (item.learner.avatar.startsWith('http') ? item.learner.avatar : `http://127.0.0.1:8000/storage/${item.learner.avatar}`)
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.learner?.name || "Learner")}&background=random`,
               avatarFallback: getInitials(item.learner?.name),
               whatsappNumber: item.learner?.phone

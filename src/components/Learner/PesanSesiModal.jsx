@@ -7,12 +7,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { format, addDays } from 'date-fns'
 import idLocale from 'date-fns/locale/id'
-import axios from 'axios'
+import axios from '@/lib/axios'
 
 // Helper to map indonesian day names to JS getDay() indices
 const dayNameToIndex = {
   'minggu': 0, 'senin': 1, 'selasa': 2, 'rabu': 3,
-  'kamis': 4, 'jumat': 5, 'sabtu': 6
+  'kamis': 4, 'jumat': 5, 'sabtu': 6,
+  'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
+  'thursday': 4, 'friday': 5, 'saturday': 6
 }
 
 
@@ -126,7 +128,7 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
       }
 
       const headers = { Authorization: `Bearer ${token}` }
-      await axios.post('http://127.0.0.1:8000/api/learner/bookings', payload, { headers })
+      await axios.post('/learner/bookings', payload)
 
       onClose()
       navigate('/learner/detail-pesanan')

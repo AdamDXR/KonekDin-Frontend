@@ -126,7 +126,7 @@ export default function RiwayatMengajar() {
     const fetchRiwayat = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get('/api/tutor/history');
+        const response = await axios.get('/tutor/history');
         const data = response.data?.data || [];
 
         const formatted = data.map((item) => {
@@ -135,7 +135,7 @@ export default function RiwayatMengajar() {
             id: item.id,
             learnerName: item.learner?.name || item.learner || "Learner",
             avatar: item.learner?.avatar
-              ? `http://127.0.0.1:8000/storage/${item.learner.avatar}`
+              ? (item.learner.avatar.startsWith('http') ? item.learner.avatar : `http://127.0.0.1:8000/storage/${item.learner.avatar}`)
               : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.learner?.name || item.learner || "Learner")}&background=0a0f44&color=fff`,
             avatarFallback: getInitials(item.learner?.name || item.learner),
             subject: item.course?.name || item.subject || "Mata Kuliah",

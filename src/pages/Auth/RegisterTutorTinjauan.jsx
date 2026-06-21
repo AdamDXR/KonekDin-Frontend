@@ -194,8 +194,13 @@ export default function RegisterTutorTinjauan() {
       }
 
       const fd = new FormData();
-      if (formData.transkripFiles[0]) {
-        fd.append("transcript_files[]", formData.transkripFiles[0]);
+      if (formData.transkripFiles && formData.transkripFiles.length > 0) {
+        formData.transkripFiles.forEach(file => {
+          if (file) fd.append("transcript_files[]", file);
+        });
+      }
+      if (formData.sertifikatFile) {
+        fd.append("certificate_files[]", formData.sertifikatFile);
       }
       courseIds.forEach(id => {
         fd.append("course_ids[]", id);

@@ -186,14 +186,15 @@ export default function PengaturanJadwal() {
     const run = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get("/api/tutor/availability");
+        const response = await axios.get("/tutor/availability");
         const data = response.data?.data || response.data || [];
 
         const mapped = data.map((item) => ({
           id: item.id,
           hari: DAY_MAP[item.day] || item.hari || item.day || "Senin",
-          waktu:
-            item.start_time && item.end_time
+          waktu: item.time
+            ? item.time.replace(/:/g, ".")
+            : item.start_time && item.end_time
               ? `${item.start_time.substring(0, 5).replace(":", ".")} - ${item.end_time.substring(0, 5).replace(":", ".")}`
               : item.waktu || "-",
           status: item.status?.toUpperCase() || "AVAILABLE",
@@ -216,7 +217,6 @@ export default function PengaturanJadwal() {
 
   const handleSaveJadwal = async ({ hari, jam, status }) => {
     const statusUpper = status === "Available" ? "AVAILABLE" : "NON AVAILABLE";
-
     const exists = jadwal.find((item) => item.hari === hari && item.waktu === jam);
 
     const updatedEntry = {
@@ -226,32 +226,40 @@ export default function PengaturanJadwal() {
       status: statusUpper,
     };
 
+    let newJadwal;
     if (exists) {
-      setJadwal((prev) =>
-        prev.map((item) => (item.hari === hari && item.waktu === jam ? updatedEntry : item))
-      );
+      newJadwal = jadwal.map((item) => (item.hari === hari && item.waktu === jam ? updatedEntry : item));
     } else {
-      setJadwal((prev) => [...prev, updatedEntry]);
+      newJadwal = [...jadwal, updatedEntry];
       setNextId((n) => n + 1);
     }
+    
+    // Update local state temporarily for snappy UI
+    setJadwal(newJadwal);
 
     try {
-      const [startRaw, endRaw] = jam.split(" - ");
-      const payload = {
-        day: DAY_MAP_REVERSE[hari] || hari,
-        start_time: startRaw?.replace(".", ":") || "",
-        end_time: endRaw?.replace(".", ":") || "",
-        status: statusUpper.toLowerCase(),
-      };
-      await axios.post("/api/tutor/availability", payload);
+      // Backend expects: { slots: [ { day_of_week: "Monday", master_slot_id: 1, is_active: true } ] }
+      // master_slot_id in backend usually corresponds to index + 1 of the seeded slots
+      const payloadSlots = newJadwal.map((j) => {
+        const slotIndex = JAM_OPTIONS.indexOf(j.waktu);
+        return {
+          day_of_week: DAY_MAP_REVERSE[j.hari] || j.hari,
+          master_slot_id: slotIndex !== -1 ? slotIndex + 1 : 1,
+          is_active: j.status === "AVAILABLE"
+        };
+      });
 
-      const response = await axios.get("/api/tutor/availability");
+      await axios.post("/tutor/availability", { slots: payloadSlots });
+
+      // Refresh data from server to get real IDs
+      const response = await axios.get("/tutor/availability");
       const data = response.data?.data || response.data || [];
       const mapped = data.map((item) => ({
         id: item.id,
         hari: DAY_MAP[item.day] || item.hari || item.day || "Senin",
-        waktu:
-          item.start_time && item.end_time
+        waktu: item.time
+          ? item.time.replace(/:/g, ".")
+          : item.start_time && item.end_time
             ? `${item.start_time.substring(0, 5).replace(":", ".")} - ${item.end_time.substring(0, 5).replace(":", ".")}`
             : item.waktu || "-",
         status: item.status?.toUpperCase() || "AVAILABLE",
@@ -259,6 +267,7 @@ export default function PengaturanJadwal() {
       setJadwal(mapped);
     } catch (error) {
       console.error("Gagal menyimpan jadwal ke backend:", error);
+      alert(error.response?.data?.message || "Gagal menyimpan jadwal. Pastikan Anda sudah mengatur tarif mengajar di profil Anda.");
     }
   };
 

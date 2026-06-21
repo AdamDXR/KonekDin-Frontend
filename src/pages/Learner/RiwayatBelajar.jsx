@@ -304,7 +304,7 @@ export default function RiwayatBelajar() {
                id: order.id,
                tutorId: tutor.tutor_id,
                tutorNama: tutor.name || 'Tutor',
-               tutorFoto: tutor.avatar ? `http://127.0.0.1:8000/storage/${tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`,
+               tutorFoto: tutor.avatar ? (tutor.avatar.startsWith('http') ? tutor.avatar : `http://127.0.0.1:8000/storage/${tutor.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name || 'Tutor')}&background=random`,
                tutorRating: Number(tutor.rating_avg) || 0,
                mataKuliah: course.name || 'Mata Kuliah',
                tanggal: formatDate(order.booking_date),

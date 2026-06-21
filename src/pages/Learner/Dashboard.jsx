@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '@/lib/axios';
 import BookingCard from '@/components/shared/BookingCard';
 import { 
   CheckCircle, 
@@ -177,7 +177,7 @@ export default function LearnerDashboard() {
                 <div className="animate-pulse bg-slate-100 rounded-2xl h-40 w-full"></div>
               ) : upcomingSchedule ? (
                 <BookingCard
-                  image={upcomingSchedule.tutor?.avatar ? `http://127.0.0.1:8000/storage/${upcomingSchedule.tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(upcomingSchedule.tutor?.name || upcomingSchedule.tutor || 'Tutor')}&background=random`}
+                  image={upcomingSchedule.tutor?.avatar ? (upcomingSchedule.tutor.avatar.startsWith('http') ? upcomingSchedule.tutor.avatar : `http://127.0.0.1:8000/storage/${upcomingSchedule.tutor.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(upcomingSchedule.tutor?.name || upcomingSchedule.tutor || 'Tutor')}&background=random`}
                   rating={Number(upcomingSchedule.tutor?.rating_avg || 0)}
                   title={upcomingSchedule.tutor?.name || upcomingSchedule.tutor || 'Nama Tutor'}
                   subtitle={upcomingSchedule.course?.name || upcomingSchedule.course || 'Sesi Belajar'}
@@ -268,7 +268,7 @@ export default function LearnerDashboard() {
                     <div className="flex items-center justify-between group cursor-pointer" onClick={() => navigate(`/learner/profil-tutor/${tutor.id}`)}>
                       <div className="flex items-center gap-4">
                         <div className="relative flex-shrink-0">
-                          <img src={tutor.avatar ? `http://127.0.0.1:8000/storage/${tutor.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name)}&background=random`} alt={tutor.name} className="w-24 h-24 rounded-xl object-cover border border-slate-100 group-hover:ring-2 ring-teal-500 ring-offset-2 transition-all" />
+                          <img src={tutor.avatar ? (tutor.avatar.startsWith('http') ? tutor.avatar : `http://127.0.0.1:8000/storage/${tutor.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.name)}&background=random`} alt={tutor.name} className="w-24 h-24 rounded-xl object-cover border border-slate-100 group-hover:ring-2 ring-teal-500 ring-offset-2 transition-all" />
                           <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-xs font-bold shadow-sm">
                             <Star className="w-2 h-2 text-yellow-400 fill-yellow-400" /> {Number(tutor.rating_avg || tutor.rating || 0).toFixed(1)}
                           </div>

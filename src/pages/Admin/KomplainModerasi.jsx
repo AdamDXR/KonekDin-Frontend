@@ -127,7 +127,7 @@ export default function KomplainModerasi() {
     setIsLoading(true)
     try {
       const response = await axios.get('/admin/moderation/reviews')
-      const data = response.data?.data || []
+      const data = response.data?.data?.reviews || []
       const mapped = data.map(item => ({
         realId: item.id,
         id: `#BK-${8000 + item.id}`,
@@ -183,11 +183,11 @@ export default function KomplainModerasi() {
   }
 
   const renderActivityIcon = (action) => {
-    if (action === 'delete_review') {
+    if (action === 'DIHAPUS') {
        return { icon: <Trash2 className="w-5 h-5 text-slate-600" />, bg: 'bg-slate-100' };
-    } else if (action === 'process_review') {
+    } else if (action === 'DIPROSES') {
        return { icon: <ShieldAlert className="w-5 h-5 text-orange-600" />, bg: 'bg-orange-100' };
-    } else if (action === 'resolve_review') {
+    } else if (action === 'SELESAI') {
        return { icon: <CheckCircle className="w-5 h-5 text-emerald-600" />, bg: 'bg-emerald-100' };
     }
     return { icon: <History className="w-5 h-5 text-[#000666]" />, bg: 'bg-[#000666]/10' };
@@ -487,10 +487,21 @@ export default function KomplainModerasi() {
                     </div>
                     <div>
                       <p className="text-slate-700 text-[14px] leading-relaxed mb-1">
-                        {activity.description}
+                        {(() => {
+                           const learner = activity.details?.learner_name || 'Learner';
+                           const tutor = activity.details?.tutor_name || 'Tutor';
+                           if (activity.action === 'DIHAPUS') {
+                             return `Admin telah menghapus ulasan dari Learner ${learner}${activity.reason ? ` karena ${activity.reason.toLowerCase()}` : '.'}`;
+                           } else if (activity.action === 'SELESAI') {
+                             return `Admin telah menyelesaikan tinjauan komplain untuk Tutor ${tutor}.`;
+                           } else if (activity.action === 'DIPROSES') {
+                             return `Admin telah menindaklanjuti Tutor ${tutor} atas komplain ulasan bintang rendah.`;
+                           }
+                           return `${activity.admin_name} melakukan aksi ${activity.action} pada ulasan.`;
+                        })()}
                       </p>
                       <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                        {activity.meta}
+                        {activity.tanggal} • STATUS: {activity.action === 'DIHAPUS' ? 'SELESAI' : activity.action}
                       </p>
                     </div>
                   </div>

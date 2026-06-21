@@ -37,7 +37,7 @@ export default function TutorDashboard() {
       // Fallback API
       const fetchUserProfile = async () => {
         try {
-          const response = await axios.get('/api/me');
+          const response = await axios.get('/me');
           const user = response.data?.data || response.data;
           if (user?.name) {
             setUserName(user.name);
@@ -55,9 +55,9 @@ export default function TutorDashboard() {
       try {
         // Karena data dipecah di beberapa endpoint menurut backend.md, kita fetch sekaligus
         const [dashRes, schedRes, revRes] = await Promise.all([
-          axios.get('/api/tutor/dashboard').catch(() => ({ data: { data: {} } })),
-          axios.get('/api/tutor/schedules').catch(() => ({ data: { data: [] } })),
-          axios.get('/api/tutor/reviews').catch(() => ({ data: { data: [] } }))
+          axios.get('/tutor/dashboard').catch(() => ({ data: { data: {} } })),
+          axios.get('/tutor/schedules').catch(() => ({ data: { data: [] } })),
+          axios.get('/tutor/reviews').catch(() => ({ data: { data: [] } }))
         ]);
 
         const stats = dashRes.data?.data || {};
@@ -76,22 +76,32 @@ export default function TutorDashboard() {
         setPersentaseRating(0);
         
         // 2. Set Jadwal (Ambil maksimal 3 jadwal terdekat sebagai contoh "Hari Ini")
-        const formattedSchedules = schedules.slice(0, 3).map((item) => ({
-          id: item.id,
-          learnerName: item.learner || "Learner",
-          subject: "Sesi Bimbingan", // Bisa diganti jika backend menambahkan field course/matkul
-          time: item.time || "Waktu tidak ditentukan",
-          avatar: "https://i.pravatar.cc/150?img=11" // Default avatar
-        }));
+        const formattedSchedules = schedules.slice(0, 3).map((item) => {
+          let timeStr = item.time;
+          if (!timeStr && item.slots && item.slots.length > 0) {
+            timeStr = `${item.slots[0].start_time.substring(0, 5)} - ${item.slots[0].end_time.substring(0, 5)}`;
+          }
+          return {
+            id: item.id,
+            learnerName: item.learner?.name || item.learner || "Learner",
+            subject: item.course?.name || "Mata Kuliah",
+            time: timeStr ? `${timeStr} WIB` : "Waktu tidak ditentukan",
+            avatar: item.learner?.avatar 
+              ? (item.learner.avatar.startsWith('http') ? item.learner.avatar : `http://127.0.0.1:8000/storage/${item.learner.avatar}`) 
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.learner?.name || item.learner || "Learner")}&background=random`
+          };
+        });
         setTodaySessions(formattedSchedules);
 
         // 3. Set Ulasan (Ambil 3 ulasan terbaru)
         const formattedReviews = reviewsData.slice(0, 3).map((item) => ({
           id: item.id,
-          name: item.learner || "Anonim",
+          name: item.learner?.name || item.learner || "Anonim",
           rating: item.rating || 5,
           text: item.comment || "",
-          avatar: "https://i.pravatar.cc/150?img=12" // Default avatar
+          avatar: item.learner?.avatar 
+            ? (item.learner.avatar.startsWith('http') ? item.learner.avatar : `http://127.0.0.1:8000/storage/${item.learner.avatar}`)
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.learner?.name || item.learner || "Anonim")}&background=random`
         }));
         setReviews(formattedReviews);
         
