@@ -32,7 +32,7 @@ export default function BookingCard({
             </Avatar>
           )}
 
-          {rating && (
+          {rating > 0 && (
             <div className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full flex items-center gap-1 text-[10px] sm:text-xs font-bold shadow-sm">
               <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
               {rating}
