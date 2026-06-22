@@ -134,19 +134,23 @@ export default function Notifikasi() {
   const [errorMsg, setErrorMsg] = useState(null)
 
   useEffect(() => {
+    let ignore = false
+
     const fetchNotif = async () => {
       try {
-        const response = await axios.get('/learner/notification')
-        console.log("Response Notifikasi:", response.data)
+        const response = await axios.get('/learner/notifications')
+        if (ignore) return
+
         if (response.data && response.data.data) {
           const notifications = response.data.data
           setRawNotif(notifications)
 
-          // THE TRICK: Cek apakah ada notifikasi persetujuan tutor
+          // Cek apakah ada notifikasi persetujuan tutor
           const hasApproval = notifications.some(n => {
-            const title = (n.data?.title || '').toLowerCase()
-            const msg = (n.data?.message || '').toLowerCase()
-            return title.includes('disetujui') || msg.includes('disetujui') || title.includes('diterima') || msg.includes('diterima')
+            const title = (n.data?.title || n.title || '').toLowerCase()
+            const msg = (n.data?.message || n.message || '').toLowerCase()
+            return title.includes('disetujui') || msg.includes('disetujui') ||
+                   title.includes('diterima') || msg.includes('diterima')
           })
 
           if (hasApproval) {
@@ -162,13 +166,17 @@ export default function Notifikasi() {
           window.dispatchEvent(new Event('notificationsUpdated'))
         }
       } catch (err) {
-        console.error("Gagal memuat notifikasi:", err)
-        setErrorMsg(err.response?.data?.message || "Gagal memuat notifikasi dari server")
+        if (!ignore) {
+          console.error("Gagal memuat notifikasi:", err)
+          setErrorMsg(err.response?.data?.message || "Gagal memuat notifikasi dari server")
+        }
       } finally {
-        setIsLoading(false)
+        if (!ignore) setIsLoading(false)
       }
     }
+
     fetchNotif()
+    return () => { ignore = true }
   }, [])
 
   useEffect(() => {
@@ -211,51 +219,79 @@ export default function Notifikasi() {
     if (rawNotif.length === 0) return []
 
     const items = rawNotif.map(n => {
+      // Ambil judul & pesan dari nested data ATAU root-level (fallback)
+      const titleRaw = n.data?.title || n.title || ''
+      const msgRaw   = n.data?.message || n.message || 'Ada pemberitahuan baru untuk Anda.'
+
       let tipe = 'info'
       let judul = 'Pemberitahuan'
-      
-      const typeStr = String(n.type).toLowerCase()
-      if (typeStr.includes('payment') || typeStr.includes('bayar')) {
-         tipe = 'pembayaran'
-         judul = 'Status Pembayaran'
-      } else if (typeStr.includes('reminder') || typeStr.includes('pengingat')) {
-         tipe = 'pengingat'
-         judul = 'Pengingat Sesi'
-      } else if (typeStr.includes('booking') || typeStr.includes('pesanan')) {
-         tipe = 'info'
-         judul = 'Status Pesanan'
+
+      const typeStr = String(n.type || '').toLowerCase()
+      if (typeStr.includes('payment') || typeStr.includes('bayar') ||
+          typeStr.includes('paid') || typeStr.includes('transfer')) {
+        tipe = 'pembayaran'
+        judul = 'Status Pembayaran'
+      } else if (typeStr.includes('reminder') || typeStr.includes('pengingat') ||
+                 typeStr.includes('session')) {
+        // Bedakan pengingat 30 menit vs hari-H
+        tipe = (typeStr.includes('30') || msgRaw.toLowerCase().includes('30 menit'))
+          ? 'pengingat_30m'
+          : 'pengingat'
+        judul = 'Pengingat Sesi'
+      } else if (typeStr.includes('booking') || typeStr.includes('pesanan') ||
+                 typeStr.includes('order')) {
+        tipe = 'info'
+        judul = 'Status Pesanan'
       }
 
-      // Menentukan CTA jika ada action tertentu di data
+      // Tentukan CTA berdasarkan action field
       let cta = null
       let cta2 = null
-
-      if (n.data?.action === 'BAYAR') {
-         tipe = 'menunggu_pembayaran'
-         judul = 'Menunggu Pembayaran'
-         cta = { label: 'Bayar', action: 'BAYAR' }
-         cta2 = { label: 'Ubah Metode Pembayaran', action: 'UBAH_METODE' }
+      const action = n.data?.action || n.action
+      if (action === 'BAYAR') {
+        tipe = 'menunggu_pembayaran'
+        judul = 'Menunggu Pembayaran'
+        cta  = { label: 'Bayar', action: 'BAYAR' }
+        cta2 = { label: 'Ubah Metode Pembayaran', action: 'UBAH_METODE' }
       }
 
       return {
         id: n.id,
-        tipe: tipe,
-        judul: n.data?.title || judul,
-        waktu: n.created_at ? new Date(n.created_at).toLocaleDateString('id-ID') : 'Baru saja',
+        tipe,
+        judul: titleRaw || judul,
+        waktu: n.created_at
+          ? new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(n.created_at))
+          : 'Baru saja',
+        dateObj: n.created_at ? new Date(n.created_at) : null,
         isBaru: !n.read_at,
-        pesan: [n.data?.message || 'Ada pemberitahuan baru untuk Anda.'],
-        cta: cta,
-        cta2: cta2
+        pesan: [msgRaw],
+        cta,
+        cta2,
       }
     })
 
-    // Kelompokkan semua ke dalam "TERBARU" untuk sementara
-    return [
-      {
-        grup: 'TERBARU',
-        items: items
+    // Urutkan terbaru dulu
+    items.sort((a, b) => (b.dateObj?.getTime() || 0) - (a.dateObj?.getTime() || 0))
+
+    // Kelompokkan per hari
+    const now = new Date()
+    const groupMap = new Map()
+    items.forEach(item => {
+      let label = 'TERBARU'
+      if (item.dateObj) {
+        const diffDays = Math.floor(
+          (Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) -
+           Date.UTC(item.dateObj.getFullYear(), item.dateObj.getMonth(), item.dateObj.getDate())) / 86400000
+        )
+        if (diffDays === 0) label = 'HARI INI'
+        else if (diffDays === 1) label = 'KEMARIN'
+        else label = new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(item.dateObj)
       }
-    ]
+      if (!groupMap.has(label)) groupMap.set(label, [])
+      groupMap.get(label).push(item)
+    })
+
+    return Array.from(groupMap.entries()).map(([grup, grpItems]) => ({ grup, items: grpItems }))
   }, [rawNotif])
 
   const handleActionClick = (action) => {
