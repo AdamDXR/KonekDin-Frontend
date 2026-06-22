@@ -59,7 +59,7 @@ export default function LearnerDashboard() {
     // 2. Fetch dashboard data dari server
     const fetchDashboard = async () => {
       try {
-        const response = await axios.get('/learner/dashboard');
+        const response = await axios.get('/dashboard');
         console.log("Dashboard Response:", response.data);
         if (response.data && response.data.data) {
           const { stats, upcoming_schedule, recommended_tutors } = response.data.data;

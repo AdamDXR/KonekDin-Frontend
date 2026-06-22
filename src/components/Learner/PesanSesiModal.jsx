@@ -147,7 +147,7 @@ export default function PesanSesiModal({ isOpen, onClose, tutor }) {
     }
   }
 
-  const serviceFee = 15000;
+  const serviceFee = 1000;
   const totalPrice = (tutor?.price || 0) + serviceFee;
 
   return (
