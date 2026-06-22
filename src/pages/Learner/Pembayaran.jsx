@@ -133,7 +133,7 @@ export default function Pembayaran() {
   // Asumsi harga per sesi di backend
   const basePrice = tutor.price || 45000;
   const totalPrice = basePrice * (sessionCount || 1);
-  const serviceFee = 15000;
+  const serviceFee = 1000;
   const grandTotal = totalPrice + serviceFee;
 
   return (
