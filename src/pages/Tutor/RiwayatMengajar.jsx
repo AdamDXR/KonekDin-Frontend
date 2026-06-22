@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, CalendarDays } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,24 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination'
+} from "@/components/ui/pagination";
 import axios from "@/lib/axios";
 
 // ─── Helper ──────────────────────────────────────────────────────────────────
-const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+const BULAN = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
+];
 
 function formatTanggal(dateStr) {
   if (!dateStr) return "-";
@@ -22,7 +35,11 @@ function formatTanggal(dateStr) {
   const datePart = String(dateStr).split("T")[0];
   const parts = datePart.split("-");
   if (parts.length === 3) {
-    const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    const d = new Date(
+      Number(parts[0]),
+      Number(parts[1]) - 1,
+      Number(parts[2]),
+    );
     return `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
   }
   return dateStr;
@@ -30,19 +47,28 @@ function formatTanggal(dateStr) {
 
 function getInitials(name) {
   if (!name) return "LR";
-  return name.split(" ").filter(Boolean).slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 }
 
 // Hitung durasi dari string "HH:MM - HH:MM"
 function hitungDurasiDariString(timeStr) {
-  if (!timeStr || timeStr === "-") return "50 Menit";
-  const firstRange = timeStr.split(",")[0].trim().replace(/\s*WIB\s*/gi, "");
+  if (!timeStr || timeStr === "-");
+  const firstRange = timeStr
+    .split(",")[0]
+    .trim()
+    .replace(/\s*WIB\s*/gi, "");
   const [start, end] = firstRange.split(" - ");
   if (!start || !end) return "50 Menit";
   const [sh, sm] = start.trim().split(":").map(Number);
   const [eh, em] = end.trim().split(":").map(Number);
   if ([sh, sm, eh, em].some(isNaN)) return "50 Menit";
-  const menit = (eh * 60 + em) - (sh * 60 + sm);
+  const menit = eh * 60 + em - (sh * 60 + sm);
   return menit > 0 ? `${menit} Menit` : "50 Menit";
 }
 
@@ -66,7 +92,11 @@ function RiwayatCard({ item, navigate }) {
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-5 hover:shadow-md transition-shadow duration-200">
       {/* Avatar */}
       <Avatar className="h-24 w-24 rounded-2xl flex-shrink-0 border border-slate-100">
-        <AvatarImage src={item.avatar} alt={item.learnerName} className="object-cover" />
+        <AvatarImage
+          src={item.avatar}
+          alt={item.learnerName}
+          className="object-cover"
+        />
         <AvatarFallback className="rounded-2xl bg-[#0a0f44] text-white text-lg font-semibold">
           {item.avatarFallback}
         </AvatarFallback>
@@ -74,7 +104,9 @@ function RiwayatCard({ item, navigate }) {
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-xl font-bold text-[#0a0f44] leading-tight">{item.learnerName}</h3>
+        <h3 className="text-xl font-bold text-[#0a0f44] leading-tight">
+          {item.learnerName}
+        </h3>
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">
           {item.subject}
         </p>
@@ -90,17 +122,13 @@ function RiwayatCard({ item, navigate }) {
         </div>
       </div>
 
-      {/* Durasi */}
-      <div className="text-center flex-shrink-0 hidden sm:block">
-        <p className="text-xs text-slate-400 font-medium mb-1">Durasi</p>
-        <p className="text-base font-extrabold text-[#312e81]">{item.durasi}</p>
-      </div>
-
       {/* Pendapatan */}
-      <div className="text-center flex-shrink-0 hidden sm:block">
+      {/* <div className="text-center flex-shrink-0 hidden sm:block">
         <p className="text-xs text-slate-400 font-medium mb-1">Pendapatan</p>
-        <p className="text-base font-extrabold text-[#0d7c6b]">{item.pendapatan}</p>
-      </div>
+        <p className="text-base font-extrabold text-[#0d7c6b]">
+          {item.pendapatan}
+        </p>
+      </div> */}
 
       <Button
         onClick={handleLihatUlasan}
@@ -127,22 +155,32 @@ export default function RiwayatMengajar() {
         // Fetch reviews (sumber data utama — sudah lengkap: nama, course, tanggal, jam)
         // dan history (untuk dapat total_price / pendapatan)
         const [reviewsRes, historyRes] = await Promise.all([
-          axios.get('/tutor/reviews', { params: { per_page: 1000 } }),
-          axios.get('/tutor/history').catch(() => ({ data: { data: [] } })),
+          axios.get("/tutor/reviews", { params: { per_page: 1000 } }),
+          axios.get("/tutor/history").catch(() => ({ data: { data: [] } })),
         ]);
 
         const reviewsData = reviewsRes.data?.data || [];
         const historyData = historyRes.data?.data || [];
 
-        // Buat map dari history: key = "learner_id_YYYY-MM-DD" → booking item
-        // untuk cross-reference total_price
+        // Buat map dari history untuk cross-reference total_price
         const historyMap = {};
         historyData.forEach((item) => {
-          const date = item.booking_date
+          let dateStr = item.booking_date
             ? String(item.booking_date).split("T")[0]
             : null;
-          if (item.learner_id && date) {
-            historyMap[`${item.learner_id}_${date}`] = item;
+
+          if (!dateStr && item.detail && item.detail.includes(" - ")) {
+            dateStr = item.detail.split(" - ")[1];
+          }
+
+          const learnerId = item.learner_id || null;
+          const learnerName = item.learner?.name || item.title || null;
+
+          if (learnerId && dateStr) {
+            historyMap[`${learnerId}_${dateStr}`] = item;
+          }
+          if (learnerName && dateStr) {
+            historyMap[`${learnerName.toLowerCase()}_${dateStr}`] = item;
           }
         });
 
@@ -154,15 +192,31 @@ export default function RiwayatMengajar() {
           const sessionDate = r.session_date
             ? String(r.session_date).split("T")[0]
             : null;
+          const formattedDate = formatTanggal(sessionDate);
           const learnerId = r.learner?.id;
-          const histKey = `${learnerId}_${sessionDate}`;
-          reviewedLearnerDateKeys.add(histKey);
 
-          const historyItem = historyMap[histKey] || null;
-
-          const timeStr = r.session_time && r.session_time !== "-"
-            ? r.session_time
+          const keyWithId =
+            learnerId && sessionDate ? `${learnerId}_${sessionDate}` : null;
+          const keyWithNameFormatted = formattedDate
+            ? `${learnerName.toLowerCase()}_${formattedDate}`
             : null;
+          const keyWithNameRaw = sessionDate
+            ? `${learnerName.toLowerCase()}_${sessionDate}`
+            : null;
+
+          if (keyWithId) reviewedLearnerDateKeys.add(keyWithId);
+          if (keyWithNameFormatted)
+            reviewedLearnerDateKeys.add(keyWithNameFormatted);
+          if (keyWithNameRaw) reviewedLearnerDateKeys.add(keyWithNameRaw);
+
+          const historyItem =
+            (keyWithId && historyMap[keyWithId]) ||
+            (keyWithNameFormatted && historyMap[keyWithNameFormatted]) ||
+            (keyWithNameRaw && historyMap[keyWithNameRaw]) ||
+            null;
+
+          const timeStr =
+            r.session_time && r.session_time !== "-" ? r.session_time : null;
 
           return {
             id: `review_${r.id}`,
@@ -170,7 +224,7 @@ export default function RiwayatMengajar() {
             avatar: buildAvatar(r.learner?.avatar, learnerName),
             avatarFallback: getInitials(learnerName),
             subject: r.course?.name || "-",
-            date: formatTanggal(sessionDate),
+            date: formattedDate,
             time: timeStr ? `${timeStr} WIB` : "-",
             durasi: hitungDurasiDariString(timeStr || "-"),
             pendapatan: historyItem?.total_price
@@ -183,23 +237,51 @@ export default function RiwayatMengajar() {
         // ─── Bagian 2: Sesi selesai tapi belum ada ulasan ───
         const fromHistoryOnly = historyData
           .filter((item) => {
-            const date = item.booking_date
+            let dateStr = item.booking_date
               ? String(item.booking_date).split("T")[0]
               : null;
-            return !reviewedLearnerDateKeys.has(`${item.learner_id}_${date}`);
+            if (!dateStr && item.detail && item.detail.includes(" - ")) {
+              dateStr = item.detail.split(" - ")[1];
+            }
+
+            const learnerId = item.learner_id;
+            const learnerName = item.learner?.name || item.title || "";
+
+            const keyWithId =
+              learnerId && dateStr ? `${learnerId}_${dateStr}` : null;
+            const keyWithName =
+              learnerName && dateStr
+                ? `${learnerName.toLowerCase()}_${dateStr}`
+                : null;
+
+            const isReviewed =
+              (keyWithId && reviewedLearnerDateKeys.has(keyWithId)) ||
+              (keyWithName && reviewedLearnerDateKeys.has(keyWithName));
+
+            return !isReviewed;
           })
           .map((item) => {
-            const learnerName = item.learner?.name || "Menunggu data...";
-            const date = item.booking_date
+            const learnerName = item.learner?.name || item.title || "Learner";
+            let dateStr = item.booking_date
               ? String(item.booking_date).split("T")[0]
               : null;
+            let subject = "-";
+
+            if (!dateStr && item.detail && item.detail.includes(" - ")) {
+              const parts = item.detail.split(" - ");
+              subject = parts[0];
+              dateStr = parts[1];
+            } else {
+              subject = item.detail || "-";
+            }
+
             return {
               id: `history_${item.id}`,
               learnerName,
               avatar: buildAvatar(item.learner?.avatar, learnerName),
               avatarFallback: getInitials(learnerName),
-              subject: "-",
-              date: formatTanggal(date),
+              subject: subject,
+              date: formatTanggal(dateStr),
               time: "Menunggu ulasan...",
               durasi: "-",
               pendapatan: item.total_price
@@ -233,7 +315,9 @@ export default function RiwayatMengajar() {
     <div className="flex flex-col min-h-full pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">Riwayat Mengajar</h1>
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
+          Riwayat Mengajar
+        </h1>
         <p className="text-slate-500">
           Lihat kembali perjalanan mengajar Anda dan mulai sesi mengajar lagi.
         </p>
@@ -272,8 +356,15 @@ export default function RiwayatMengajar() {
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
-                  onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(currentPage - 1);
+                  }}
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
                 />
               </PaginationItem>
               {[...Array(totalPages)].map((_, i) => (
@@ -281,8 +372,15 @@ export default function RiwayatMengajar() {
                   <PaginationLink
                     href="#"
                     isActive={currentPage === i + 1}
-                    onClick={(e) => { e.preventDefault(); handlePageChange(i + 1); }}
-                    className={currentPage === i + 1 ? "bg-teal-50 text-teal-600 border-teal-200" : ""}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(i + 1);
+                    }}
+                    className={
+                      currentPage === i + 1
+                        ? "bg-teal-50 text-teal-600 border-teal-200"
+                        : ""
+                    }
                   >
                     {i + 1}
                   </PaginationLink>
@@ -291,15 +389,27 @@ export default function RiwayatMengajar() {
               <PaginationItem>
                 <PaginationNext
                   href="#"
-                  onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(currentPage + 1);
+                  }}
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
                 />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
           <div className="mt-4 text-center text-slate-600 font-medium text-sm">
-            Menampilkan <span className="font-bold text-[#1E1B4B]">{currentRiwayat.length}</span> dari{" "}
-            <span className="font-bold text-[#1E1B4B]">{riwayat.length}</span> riwayat mengajar
+            Menampilkan{" "}
+            <span className="font-bold text-[#1E1B4B]">
+              {currentRiwayat.length}
+            </span>{" "}
+            dari{" "}
+            <span className="font-bold text-[#1E1B4B]">{riwayat.length}</span>{" "}
+            riwayat mengajar
           </div>
         </div>
       )}
