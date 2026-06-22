@@ -153,7 +153,7 @@ export default function LearnerLayout() {
 
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get('/learner/notifications')
+        const response = await axios.get('/learner/notification')
         if (response.data && response.data.data) {
           const notifications = response.data.data
           const unreadCount = notifications.filter(n => !n.read_at).length

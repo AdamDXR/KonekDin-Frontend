@@ -138,7 +138,7 @@ export default function Notifikasi() {
 
     const fetchNotif = async () => {
       try {
-        const response = await axios.get('/learner/notifications')
+        const response = await axios.get('/learner/notification')
         if (ignore) return
 
         if (response.data && response.data.data) {

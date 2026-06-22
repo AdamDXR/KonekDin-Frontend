@@ -20,6 +20,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+// ─── Format NIM ───────────────────────────────────────────────────────────────
+function formatNIM(nim) {
+  if (!nim) return '';
+  const raw = String(nim).replace(/\./g, '');
+  if (raw.length <= 3) return raw;
+  if (raw.length <= 7) return raw.slice(0, 3) + '.' + raw.slice(3);
+  return raw.slice(0, 3) + '.' + raw.slice(3, 7) + '.' + raw.slice(7);
+}
+
 // ─── Data (Moved to state) ───────────────────────────────────────────────────
 
 // ─── Modal Tambah Transkrip ───────────────────────────────────────────────────
@@ -580,8 +589,8 @@ function TambahPortofolioModal({ onClose, onSave }) {
 // ─── Modal Edit Tarif ─────────────────────────────────────────────────────────
 
 function EditTarifModal({ tarif, onClose, onSave }) {
-  // Extract numeric part and remove existing dots
-  const initialRaw = tarif.startsWith("Rp ") ? tarif.slice(3).replace(/\./g, "") : tarif.replace(/\./g, "");
+  // Extract numeric part — strip all non-digit characters
+  const initialRaw = tarif.replace(/[^\d]/g, "");
   
   const [nilai, setNilai] = useState(
     initialRaw ? new Intl.NumberFormat("id-ID").format(parseInt(initialRaw, 10)) : ""
@@ -589,12 +598,12 @@ function EditTarifModal({ tarif, onClose, onSave }) {
   const [error, setError] = useState("");
 
   const handleSave = () => {
-    const rawVal = parseInt(nilai.replace(/\./g, ""), 10);
+    const rawVal = parseInt(nilai.replace(/[.,\s]/g, ""), 10);
     if (isNaN(rawVal) || rawVal < 100) {
       setError("Tarif minimal adalah Rp 100");
       return;
     }
-    onSave(`Rp ${nilai}`);
+    onSave(rawVal);
     onClose();
   };
 
@@ -1344,7 +1353,7 @@ export default function ProfilTutor() {
                 />
               ) : (
                 <div className="bg-[#f1f3f5] rounded-xl px-4 py-3 text-sm text-[#0a0f44] font-medium h-11 flex items-center">
-                  {profil[key]}
+                  {key === 'nim' ? formatNIM(profil[key]) : profil[key]}
                 </div>
               )}
             </div>
@@ -1649,13 +1658,19 @@ export default function ProfilTutor() {
         <EditTarifModal
           tarif={tarif}
           onClose={() => setShowModalTarif(false)}
-          onSave={async (val) => {
-            const rawVal = parseInt(val.replace(/\D/g, ""), 10);
-            setTarif(val);
+          onSave={async (rawVal) => {
+            const prevTarif = tarif;
+            setTarif(`Rp ${new Intl.NumberFormat("id-ID").format(rawVal)}`);
             try {
               await axios.patch('/tutor/profile', { price: rawVal });
+              const verifyRes = await axios.get('/tutor/profile');
+              const confirmedPrice = verifyRes.data?.data?.price;
+              if (confirmedPrice !== undefined) {
+                setTarif(`Rp ${new Intl.NumberFormat("id-ID").format(confirmedPrice)}`);
+              }
             } catch (err) {
-              console.error("Gagal menyimpan tarif:", err);
+              setTarif(prevTarif);
+              alert(err.response?.data?.message || "Gagal menyimpan tarif. Coba lagi.");
             }
           }}
         />

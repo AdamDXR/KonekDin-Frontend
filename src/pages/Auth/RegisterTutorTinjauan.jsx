@@ -362,7 +362,7 @@ export default function RegisterTutorTinjauan() {
         </div>
       </main>
 
-      {submitted && <SuccessModal onClose={() => navigate("/")} />}
+      {submitted && <SuccessModal onClose={() => navigate("/learner/dashboard")} />}
     </div>
   );
 }
