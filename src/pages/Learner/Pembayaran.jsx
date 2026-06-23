@@ -87,12 +87,10 @@ export default function Pembayaran() {
     
     try {
       const payment_method = selectedMethod === 'Transfer' ? `${selectedBank} VA` : selectedEWallet;
-      
-      // Mengirim konfirmasi pembayaran (PATCH)
-      await axios.patch(`/learner/bookings/${orderId}/pay`, {
+
+      // Simulasi konfirmasi pembayaran setelah user klik OK di popup VA/EWallet
+      await axios.patch(`/learner/bookings/${orderId}/simulate-payment`, {
         payment_method: payment_method,
-        // Backend minta proof_of_payment, kita beri base64 kosong atau url sementara
-        proof_of_payment: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
       });
       
       setModalType(null)

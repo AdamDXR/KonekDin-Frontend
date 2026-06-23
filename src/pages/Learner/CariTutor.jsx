@@ -22,14 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
+import KonekDinPagination from '@/components/ui/KonekDinPagination'
 
 // Mock Data Tutor - di-export untuk sementara digunakan di Dashboard/ProfilTutor mock
 export const mockTutors = [
@@ -78,28 +71,34 @@ export default function CariTutor() {
            return;
         }
 
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await axios.get('/tutors');
+        // Ambil semua tutor aktif sekaligus agar filter client-side tidak terpotong pagination
+        const response = await axios.get('/tutors?per_page=100');
         console.log("Response dari API:", response.data);
         
         if (response.data && response.data.data) {
+          const DAY_EN_TO_ID = {
+            Monday: 'Senin', Tuesday: 'Selasa', Wednesday: 'Rabu',
+            Thursday: 'Kamis', Friday: 'Jumat', Saturday: 'Sabtu', Sunday: 'Minggu',
+          };
           const formattedTutors = response.data.data.map(tutor => {
             const scheduleMap = {};
             if (tutor.available_slots) {
               tutor.available_slots.forEach(slot => {
-                if (!scheduleMap[slot.day_of_week]) {
-                  scheduleMap[slot.day_of_week] = [];
-                }
+                const dayID = DAY_EN_TO_ID[slot.day_of_week] || slot.day_of_week;
+                if (!scheduleMap[dayID]) scheduleMap[dayID] = [];
                 const timeStr = `${slot.start_time} - ${slot.end_time}`;
                 const matkul = slot.course || slot.course_name || 'Tersedia';
-                scheduleMap[slot.day_of_week].push({ time: timeStr, matkul: matkul });
+                scheduleMap[dayID].push({ time: timeStr, matkul });
               });
             }
-            const scheduleArray = Object.keys(scheduleMap).map(day => ({
-              day: day,
-              slots: scheduleMap[day],
-              times: scheduleMap[day].map(s => s.time) // Fallback for backward compatibility
-            }));
+            const DAY_ORDER = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+            const scheduleArray = Object.keys(scheduleMap)
+              .sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b))
+              .map(day => ({
+                day,
+                slots: scheduleMap[day],
+                times: scheduleMap[day].map(s => s.time),
+              }));
 
             const rawCourses = tutor.taught_courses ? tutor.taught_courses.map(c => c.course_name) : [];
             const mergedCourses = rawCourses.length > 0 ? rawCourses : (tutor.skills || []);
@@ -147,13 +146,20 @@ export default function CariTutor() {
     const dataToFilter = tutorsData.length > 0 ? tutorsData : []
     
     const filtered = dataToFilter.filter(tutor => {
-      const matchSearch = tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          tutor.courses.some(course => course.toLowerCase().includes(searchTerm.toLowerCase()))
-      
-      const matchCourse = filterCourse === 'semua' || tutor.courses.includes(filterCourse)
-      
-      const matchDay = filterDay === 'semua' || tutor.schedule.some(s => s.day === filterDay)
-      const matchTime = filterTime === 'semua' || tutor.schedule.some(s => (s.slots && s.slots.some(slot => slot.time.includes(filterTime))) || (s.times && s.times.includes(filterTime)))
+      const matchSearch = searchTerm === '' ||
+        tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tutor.courses.some(c => c.toLowerCase().includes(searchTerm.toLowerCase()))
+
+      const matchCourse = filterCourse === 'semua' ||
+        tutor.courses.some(c => c.trim().toLowerCase() === filterCourse.trim().toLowerCase())
+
+      const matchDay = filterDay === 'semua' ||
+        tutor.schedule.some(s => s.day === filterDay)
+
+      const matchTime = filterTime === 'semua' ||
+        tutor.schedule.some(s =>
+          s.slots && s.slots.some(slot => slot.time.trim() === filterTime.trim())
+        )
 
       return matchSearch && matchCourse && matchDay && matchTime
     })
@@ -229,9 +235,37 @@ export default function CariTutor() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="semua">Semua Mata Kuliah</SelectItem>
+                    <SelectItem value="Kalkulus">Kalkulus</SelectItem>
+                    <SelectItem value="Fisika">Fisika</SelectItem>
+                    <SelectItem value="Dasar Pemrograman">Dasar Pemrograman</SelectItem>
+                    <SelectItem value="Interpersonal">Interpersonal</SelectItem>
+                    <SelectItem value="Dasar Komputasi">Dasar Komputasi</SelectItem>
+                    <SelectItem value="Bahasa Indonesia">Bahasa Indonesia</SelectItem>
+                    <SelectItem value="Agama Islam">Agama Islam</SelectItem>
+                    <SelectItem value="Pengantar Teknologi Informasi">Pengantar Teknologi Informasi</SelectItem>
+                    <SelectItem value="Matriks Ruang Vektor">Matriks Ruang Vektor</SelectItem>
+                    <SelectItem value="Pancasila">Pancasila</SelectItem>
+                    <SelectItem value="Algoritma Struktur Data">Algoritma Struktur Data</SelectItem>
+                    <SelectItem value="Matematika Diskrit">Matematika Diskrit</SelectItem>
+                    <SelectItem value="Probabilitas dan Statistika">Probabilitas dan Statistika</SelectItem>
+                    <SelectItem value="Logika Informatika">Logika Informatika</SelectItem>
                     <SelectItem value="Basis Data">Basis Data</SelectItem>
-                    <SelectItem value="Algoritma dan Struktur Data">Algoritma dan Struktur Data</SelectItem>
-                    <SelectItem value="Pemrograman Berbasis Web">Pemrograman Berbasis Web</SelectItem>
+                    <SelectItem value="Sistem Operasi">Sistem Operasi</SelectItem>
+                    <SelectItem value="Kriptografi">Kriptografi</SelectItem>
+                    <SelectItem value="Pemrograman Web">Pemrograman Web</SelectItem>
+                    <SelectItem value="Penambangan Data">Penambangan Data</SelectItem>
+                    <SelectItem value="Pengembangan Perangkat Lunak">Pengembangan Perangkat Lunak</SelectItem>
+                    <SelectItem value="Otomata dan Teori Bahasa">Otomata dan Teori Bahasa</SelectItem>
+                    <SelectItem value="Literasi Informasi">Literasi Informasi</SelectItem>
+                    <SelectItem value="Pembelajaran Mesin">Pembelajaran Mesin</SelectItem>
+                    <SelectItem value="Jaringan Komputer">Jaringan Komputer</SelectItem>
+                    <SelectItem value="Sistem Basis Data">Sistem Basis Data</SelectItem>
+                    <SelectItem value="Rangkaian Logika Digital">Rangkaian Logika Digital</SelectItem>
+                    <SelectItem value="Keamanan Siber">Keamanan Siber</SelectItem>
+                    <SelectItem value="Pemrograman Mobile">Pemrograman Mobile</SelectItem>
+                    <SelectItem value="Rekayasa Perangkat Lunak Lanjut">Rekayasa Perangkat Lunak Lanjut</SelectItem>
+                    <SelectItem value="Kecerdasan Buatan">Kecerdasan Buatan</SelectItem>
+                    <SelectItem value="Manajemen Proyek TI">Manajemen Proyek TI</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -263,10 +297,18 @@ export default function CariTutor() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="semua">Semua Jam</SelectItem>
-                    <SelectItem value="07:00 - 08:00">07:00 - 08:00</SelectItem>
-                    <SelectItem value="08:00 - 09:00">08:00 - 09:00</SelectItem>
-                    <SelectItem value="09:00 - 10:00">09:00 - 10:00</SelectItem>
-                    <SelectItem value="10:00 - 11:00">10:00 - 11:00</SelectItem>
+                    <SelectItem value="07:00 - 07:50">07:00 - 07:50</SelectItem>
+                    <SelectItem value="07:50 - 08:40">07:50 - 08:40</SelectItem>
+                    <SelectItem value="08:40 - 09:30">08:40 - 09:30</SelectItem>
+                    <SelectItem value="09:30 - 10:20">09:30 - 10:20</SelectItem>
+                    <SelectItem value="10:20 - 11:10">10:20 - 11:10</SelectItem>
+                    <SelectItem value="11:10 - 12:00">11:10 - 12:00</SelectItem>
+                    <SelectItem value="12:30 - 13:20">12:30 - 13:20</SelectItem>
+                    <SelectItem value="13:20 - 14:10">13:20 - 14:10</SelectItem>
+                    <SelectItem value="14:10 - 15:00">14:10 - 15:00</SelectItem>
+                    <SelectItem value="15:30 - 16:20">15:30 - 16:20</SelectItem>
+                    <SelectItem value="16:20 - 17:10">16:20 - 17:10</SelectItem>
+                    <SelectItem value="17:10 - 18:00">17:10 - 18:00</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -334,56 +376,14 @@ export default function CariTutor() {
         )}
       </div>
 
-      {/* Pagination - Fixed at bottom by flex-1 of the grid wrapper */}
-      <div className="py-4 border-t border-slate-100">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                href="#" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePageChange(currentPage - 1);
-                }}
-                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-              />
-            </PaginationItem>
-            
-            {[...Array(totalPages)].map((_, i) => (
-              <PaginationItem key={i + 1}>
-                <PaginationLink 
-                  href="#"
-                  isActive={currentPage === i + 1}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(i + 1);
-                  }}
-                  className={currentPage === i + 1 ? 'bg-teal-50 text-teal-600 border-teal-200' : ''}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            <PaginationItem>
-              <PaginationNext 
-                href="#" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePageChange(currentPage + 1);
-                }}
-                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-        
-        {filteredTutors.length > 0 && (
-          <div className="mt-4 text-center text-slate-600 font-medium text-sm">
-            Menampilkan <span className="font-bold text-[#1E1B4B]">{paginatedTutors.length}</span> dari <span className="font-bold text-[#1E1B4B]">{filteredTutors.length}</span> tutor tersedia
-          </div>
-        )}
-      </div>
+      <KonekDinPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        totalItems={filteredTutors.length > 0 ? filteredTutors.length : null}
+        shownItems={filteredTutors.length > 0 ? paginatedTutors.length : null}
+        itemLabel="tutor"
+      />
 
       {isModalOpen && selectedTutor && (
         <PesanSesiModal 

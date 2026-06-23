@@ -13,14 +13,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import KonekDinPagination from "@/components/ui/KonekDinPagination";
 import axios from "@/lib/axios";
 
 // ─── Helper ────────────────────────────────────────────────────────────────────
@@ -433,74 +426,15 @@ export default function JadwalMengajar() {
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="py-4 border-t border-slate-100 mt-8">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage - 1);
-                  }}
-                  className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-
-              {[...Array(totalPages)].map((_, i) => (
-                <PaginationItem key={i + 1}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === i + 1}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageChange(i + 1);
-                    }}
-                    className={
-                      currentPage === i + 1
-                        ? "bg-teal-50 text-teal-600 border-teal-200"
-                        : ""
-                    }
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage + 1);
-                  }}
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-
-          <div className="mt-4 text-center text-slate-600 font-medium text-sm">
-            Menampilkan{" "}
-            <span className="font-bold text-[#1E1B4B]">
-              {currentSessions.length}
-            </span>{" "}
-            dari{" "}
-            <span className="font-bold text-[#1E1B4B]">{sessions.length}</span>{" "}
-            sesi mengajar
-          </div>
-        </div>
-      )}
+      <KonekDinPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        totalItems={sessions.length}
+        shownItems={currentSessions.length}
+        itemLabel="sesi mengajar"
+        className="mt-8"
+      />
     </div>
   );
 }

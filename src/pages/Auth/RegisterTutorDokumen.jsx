@@ -390,7 +390,7 @@ export default function RegisterTutorDokumen() {
           {/* Footer */}
           <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-100">
             <button 
-              onClick={() => navigate('/learner/profil-learner')}
+              onClick={() => navigate(-1)}
               className="flex items-center gap-1.5 text-sm font-semibold text-[#0d7c6b] hover:text-[#0a5a4e] transition-colors"
             >
               <span>←</span>

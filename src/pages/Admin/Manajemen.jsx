@@ -14,16 +14,16 @@ import {
   CheckCircle2,
   FileText,
   UserCheck,
-  ShieldAlert,
   AlertTriangle,
   Link2,
   Image as ImageIcon,
   GraduationCap,
   Zap,
   Mail,
-  Calendar
+  Calendar,
+
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -121,8 +121,11 @@ function TabPengguna() {
       })
       setUsers(formattedUsers)
     } catch (err) {
-      setError('Gagal memuat data pengguna.')
-      console.error(err)
+      if (err.response?.status === 403) {
+        setError('Akses ditolak (403). Pastikan Anda login sebagai Admin.')
+      } else {
+        setError('Gagal memuat data pengguna.')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -399,8 +402,7 @@ function TabVerifikasiTutor() {
         });
       setPendingUsers(formattedApps)
     } catch (err) {
-      setError('Gagal memuat data pengajuan tutor.')
-      console.error(err)
+      setError(err.response?.status === 403 ? 'Akses ditolak (403). Pastikan Anda login sebagai Admin.' : 'Gagal memuat data pengajuan tutor.')
     } finally {
       setIsLoading(false)
     }
@@ -643,8 +645,7 @@ function TabKeuangan() {
       const response = await axios.get('/admin/payments')
       setTransaksi(response.data.data)
     } catch (err) {
-      setError('Gagal memuat data keuangan.')
-      console.error(err)
+      setError(err.response?.status === 403 ? 'Akses ditolak (403). Pastikan Anda login sebagai Admin.' : 'Gagal memuat data keuangan.')
     } finally {
       setIsLoading(false)
     }
@@ -714,7 +715,13 @@ function TabKeuangan() {
                 <tr><td colSpan={7} className="py-12 px-6 text-center text-red-500">{error}</td></tr>
               ) : transaksi.length === 0 ? (
                 <tr><td colSpan={7} className="py-12 px-6 text-center text-slate-500">Tidak ada data pembayaran.</td></tr>
-              ) : transaksi.map((trx) => (
+              ) : transaksi.map((trx) => {
+                const statusLower = (trx.status || '').toLowerCase()
+                const isPending = ['pending', 'menunggu', 'unpaid'].includes(statusLower)
+                const STATUS_LABEL = { completed: 'Selesai', accepted: 'Selesai', selesai: 'Selesai', paid: 'Dibayar', failed: 'Gagal', cancelled: 'Dibatalkan', rejected: 'Ditolak' }
+                const statusLabel = STATUS_LABEL[statusLower] || trx.status
+                const statusStyle = ['completed','accepted','selesai','paid'].includes(statusLower) ? 'bg-emerald-50 text-emerald-600' : ['failed','cancelled','rejected'].includes(statusLower) ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'
+                return (
                 <tr key={trx.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="py-4 px-6 font-bold text-[#000666]">TRX-{trx.id}</td>
                   <td className="py-4 px-6 text-slate-500">{trx.tanggal}</td>
@@ -725,20 +732,21 @@ function TabKeuangan() {
                   </td>
                   <td className="py-4 px-6 font-bold text-emerald-600">Rp {trx.nominal?.toLocaleString('id-ID')}</td>
                   <td className="py-4 px-6">
-                    {trx.status === 'pending' || trx.status === 'Menunggu' ? (
-                      <button onClick={() => setModalConfig({ isOpen: true, item: trx })} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-emerald-200 shadow-sm flex items-center gap-1.5 w-full justify-center">
+                    {isPending ? (
+                      <button onClick={() => setModalConfig({ isOpen: true, item: trx })} className="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-colors shadow flex items-center gap-1.5 w-full justify-center">
                         <CheckCircle className="w-3.5 h-3.5" /> ACC
                       </button>
                     ) : (
                       <div className="flex justify-center">
-                        <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${trx.status === 'accepted' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
-                          {trx.status === 'accepted' ? 'Selesai' : trx.status}
+                        <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${statusStyle}`}>
+                          {statusLabel}
                         </span>
                       </div>
                     )}
                   </td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -749,7 +757,11 @@ function TabKeuangan() {
 
 // ─── Main Page Component ──────────────────────────────────────────────────────
 export default function Manajemen() {
-  const [activeTab, setActiveTab] = useState('pengguna')
+  const [searchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(
+    ['verifikasi', 'keuangan', 'pengguna'].includes(initialTab) ? initialTab : 'pengguna'
+  )
 
   return (
     <div className="flex flex-col min-h-full pb-10">
