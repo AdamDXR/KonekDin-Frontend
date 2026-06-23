@@ -171,7 +171,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-slate-100">
             <div className="px-7 py-6 flex justify-between items-center border-b border-slate-100">
               <h2 className="text-[18px] font-bold text-[#000666]">Aktivitas Terbaru</h2>
-              <button className="text-[13px] font-bold text-[#00897B] hover:text-teal-700 transition-colors">Lihat Semua</button>
+              <Link to="/admin/activities" className="text-[13px] font-bold text-[#00897B] hover:text-teal-700 transition-colors">Lihat Semua</Link>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
