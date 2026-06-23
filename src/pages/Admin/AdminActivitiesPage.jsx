@@ -28,9 +28,18 @@ export default function AdminActivitiesPage() {
 
   const filteredLogs = logs.filter(log => {
     const term = search.toLowerCase()
+    let detailsString = '';
+    if (log.details) {
+      if (typeof log.details === 'object') {
+        detailsString = `${log.details.rating || ''} ${log.details.comment || ''} ${JSON.stringify(log.details)}`;
+      } else {
+        detailsString = String(log.details);
+      }
+    }
     return (log.admin_name?.toLowerCase().includes(term) ||
             log.action?.toLowerCase().includes(term) ||
-            log.reason?.toLowerCase().includes(term))
+            log.reason?.toLowerCase().includes(term) ||
+            detailsString.toLowerCase().includes(term))
   })
 
   return (
@@ -111,7 +120,7 @@ export default function AdminActivitiesPage() {
               <tbody className="divide-y divide-slate-100">
                 {filteredLogs.map(log => {
                   const dateObj = new Date(log.created_at || log.time)
-                  const timeString = isNaN(dateObj) ? '-' : `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}, ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`
+                  const timeString = log.tanggal || (isNaN(dateObj) ? '-' : `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}, ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`)
                   
                   return (
                     <tr key={log.id} className="hover:bg-white transition-colors">
@@ -130,7 +139,20 @@ export default function AdminActivitiesPage() {
                         </span>
                       </td>
                       <td className="py-4 px-6">
-                        <p className="text-slate-600 text-[13px] line-clamp-2">{log.reason || log.details || '-'}</p>
+                        <p className="font-bold text-slate-600 text-[13px] mb-0.5">Alasan: {log.reason || '-'}</p>
+                        {log.details && (
+                          <div className="text-xs text-slate-500 font-medium leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-200 mt-1.5 font-mono">
+                            {typeof log.details === 'object' ? (
+                              <>
+                                {log.details.rating && <div className="mb-1">⭐ {log.details.rating}</div>}
+                                {log.details.comment && <div>Ulasan: "{log.details.comment}"</div>}
+                                {!log.details.rating && !log.details.comment && JSON.stringify(log.details)}
+                              </>
+                            ) : (
+                              log.details
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )

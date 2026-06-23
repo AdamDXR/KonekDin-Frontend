@@ -298,7 +298,7 @@ export default function AdminDashboard() {
             <p className="text-slate-500 text-[13px] mb-5 leading-relaxed">
               Pengajuan verifikasi dokumen tutor tertunda.
             </p>
-            <Link to="/admin/manajemen" className="w-full bg-[#EEF2FF] text-[#000666] font-bold text-[13px] py-2.5 rounded-xl hover:bg-indigo-100 transition-colors flex justify-center">
+            <Link to="/admin/manajemen" state={{ tab: 'verifikasi' }} className="w-full bg-[#EEF2FF] text-[#000666] font-bold text-[13px] py-2.5 rounded-xl hover:bg-indigo-100 transition-colors flex justify-center">
               Lihat Detail
             </Link>
           </div>

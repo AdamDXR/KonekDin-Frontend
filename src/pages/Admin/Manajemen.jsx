@@ -24,7 +24,7 @@ import {
   Calendar,
   History
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -750,7 +750,8 @@ function TabKeuangan() {
 
 // ─── Main Page Component ──────────────────────────────────────────────────────
 export default function Manajemen() {
-  const [activeTab, setActiveTab] = useState('pengguna')
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'pengguna')
 
   return (
     <div className="flex flex-col min-h-full pb-10">
