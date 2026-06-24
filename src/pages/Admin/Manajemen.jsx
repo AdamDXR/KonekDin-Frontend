@@ -790,6 +790,12 @@ export default function Manajemen() {
         >
           <Wallet className="w-4 h-4" /> Manajemen Keuangan
         </button>
+        <Link
+          to="/admin/activities"
+          className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-all text-slate-500 hover:text-slate-700 hover:bg-slate-100/50"
+        >
+          <History className="w-4 h-4" /> Riwayat Aktivitas
+        </Link>
       </div>
 
       {/* Tab Content */}

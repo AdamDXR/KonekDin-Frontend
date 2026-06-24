@@ -59,13 +59,20 @@ function ConfirmModal({ session, onConfirm, onCancel, isLoading }) {
           <div className="h-10 w-10 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
           </div>
-          <h3 className="text-base font-bold text-[#0a0f44]">Konfirmasi Sesi Selesai</h3>
+          <h3 className="text-base font-bold text-[#0a0f44]">
+            Konfirmasi Sesi Selesai
+          </h3>
         </div>
         <p className="text-sm text-slate-600 mb-1">
-          Tandai sesi belajar dengan <span className="font-semibold text-[#0a0f44]">{session.learnerName}</span> sebagai selesai?
+          Tandai sesi belajar dengan{" "}
+          <span className="font-semibold text-[#0a0f44]">
+            {session.learnerName}
+          </span>{" "}
+          sebagai selesai?
         </p>
         <p className="text-xs text-slate-400 mb-6">
-          Setelah dikonfirmasi, sesi akan pindah ke riwayat dan learner dapat memberikan ulasan.
+          Setelah dikonfirmasi, sesi akan pindah ke riwayat dan learner dapat
+          memberikan ulasan.
         </p>
         <div className="flex gap-3 justify-end">
           <Button
@@ -91,7 +98,13 @@ function ConfirmModal({ session, onConfirm, onCancel, isLoading }) {
 }
 
 // ─── SessionCard ─────────────────────────────────────────────────────────────
-function SessionCard({ session, isHighlighted, cardRef, onComplete, isCompleting }) {
+function SessionCard({
+  session,
+  isHighlighted,
+  cardRef,
+  onComplete,
+  isCompleting,
+}) {
   const {
     learnerName,
     subject,
@@ -107,11 +120,8 @@ function SessionCard({ session, isHighlighted, cardRef, onComplete, isCompleting
   const SubjectIcon = subjectType === "code" ? Code : BookOpen;
 
   const handleContact = () => {
-    if (!whatsappNumber) {
-      alert("Nomor WhatsApp learner tidak tersedia.");
-      return;
-    }
-    window.open(`https://wa.me/${whatsappNumber}`, "_blank");
+    const targetNumber = "6282329448088";
+    window.open(`https://wa.me/${targetNumber}`, "_blank");
   };
 
   return (
@@ -242,7 +252,7 @@ export default function JadwalMengajar() {
 
   // State untuk "Sesi Selesai"
   const [confirmSession, setConfirmSession] = useState(null); // session yang sedang dikonfirmasi
-  const [completingId, setCompletingId] = useState(null);     // id yang sedang diproses
+  const [completingId, setCompletingId] = useState(null); // id yang sedang diproses
   const [completeError, setCompleteError] = useState(null);
 
   const handleRequestComplete = (session) => {
@@ -261,7 +271,7 @@ export default function JadwalMengajar() {
     } catch (err) {
       console.error("Gagal menyelesaikan sesi:", err);
       setCompleteError(
-        err.response?.data?.message || "Gagal menyelesaikan sesi. Coba lagi."
+        err.response?.data?.message || "Gagal menyelesaikan sesi. Coba lagi.",
       );
     } finally {
       setCompletingId(null);
@@ -306,7 +316,9 @@ export default function JadwalMengajar() {
           return;
         }
         if (error.response?.status === 403) {
-          setErrorMsg("Akses ditolak: Akun Anda belum terdaftar atau disetujui sebagai tutor.");
+          setErrorMsg(
+            "Akses ditolak: Akun Anda belum terdaftar atau disetujui sebagai tutor.",
+          );
           return;
         }
         setErrorMsg(
@@ -364,7 +376,10 @@ export default function JadwalMengajar() {
         <ConfirmModal
           session={confirmSession}
           onConfirm={handleConfirmComplete}
-          onCancel={() => { setConfirmSession(null); setCompleteError(null); }}
+          onCancel={() => {
+            setConfirmSession(null);
+            setCompleteError(null);
+          }}
           isLoading={completingId === confirmSession.id}
         />
       )}
