@@ -124,7 +124,7 @@ export default function AdminProfilUser() {
                 <h3 className="font-bold text-[#0a0f44]">Mata Kuliah Diajarkan</h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                {user.courses && user.courses.length > 0 ? user.courses.map((mk, idx) => (
+                {(user.courses || user.matkul) && (user.courses || user.matkul).length > 0 ? (user.courses || user.matkul).map((mk, idx) => (
                   <span key={idx} className="px-3 py-1.5 bg-[#0d7c6b]/10 text-[#0d7c6b] rounded-full text-sm font-bold border border-[#0d7c6b]/20">
                     {mk.name || mk}
                   </span>
@@ -136,7 +136,7 @@ export default function AdminProfilUser() {
             <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm">
               <h3 className="font-bold text-[#0a0f44] mb-4">Keahlian Tambahan</h3>
               <div className="flex flex-wrap gap-2">
-                {user.skills && user.skills.length > 0 ? user.skills.map((skill, idx) => (
+                {(user.skills || user.keahlian) && (user.skills || user.keahlian).length > 0 ? (user.skills || user.keahlian).map((skill, idx) => (
                   <span key={idx} className="bg-slate-100 border border-slate-200 text-slate-600 text-sm font-semibold px-3.5 py-1.5 rounded-full">
                     {skill.name || skill}
                   </span>
@@ -148,7 +148,7 @@ export default function AdminProfilUser() {
             <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm">
               <h3 className="font-bold text-[#0a0f44] mb-4">Dokumen & Portofolio</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {user.documents && user.documents.length > 0 ? user.documents.map((doc, idx) => (
+                {[...(user.documents || []), ...(user.portfolio_urls || []).map((url, idx) => ({ type: 'link', name: `Portofolio ${idx + 1}`, label: `Portofolio ${idx + 1}`, value: url, url: url }))].length > 0 ? [...(user.documents || []), ...(user.portfolio_urls || []).map((url, idx) => ({ type: 'link', name: `Portofolio ${idx + 1}`, label: `Portofolio ${idx + 1}`, value: url, url: url }))].map((doc, idx) => (
                   <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <div className="w-10 h-10 rounded-lg bg-[#000666]/10 flex items-center justify-center text-[#000666]">
                       {['file', 'transcript', 'certificate'].includes(doc.type) && <FileText className="w-5 h-5" />}

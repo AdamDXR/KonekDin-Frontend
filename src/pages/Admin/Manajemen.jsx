@@ -372,6 +372,7 @@ function TabVerifikasiTutor() {
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
   const [viewModal, setViewModal] = useState({ isOpen: false, item: null })
   const [rejectModal, setRejectModal] = useState({ isOpen: false, item: null, reason: 'Dokumen tidak valid' })
+  const [approvedMatkul, setApprovedMatkul] = useState([])
 
   const fetchApplications = async () => {
     setIsLoading(true)
@@ -417,9 +418,13 @@ function TabVerifikasiTutor() {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000)
   }
 
-  const handleAcc = async (user) => {
+  const handleAcc = async (user, matkulList = user.matkul) => {
+    if (matkulList.length === 0) {
+      showToast('Pilih minimal satu mata kuliah untuk disetujui.', 'error');
+      return;
+    }
     try {
-      await axios.patch(`/admin/applications/${user.id}/approve`)
+      await axios.patch(`/admin/applications/${user.id}/approve`, { approved_matkul: matkulList })
       showToast(`Pendaftaran Tutor untuk ${user.name} disetujui. Notifikasi otomatis dikirimkan ke Learner.`)
       setViewModal({ isOpen: false, item: null })
       fetchApplications()
@@ -499,10 +504,21 @@ function TabVerifikasiTutor() {
                   <GraduationCap className="w-5 h-5 text-[#000666]" />
                   <h4 className="font-bold text-slate-800">Mata Kuliah Diajukan</h4>
                 </div>
+                <p className="text-xs text-slate-500 mb-2">Centang mata kuliah yang disetujui (minimal 1):</p>
                 <div className="flex flex-wrap gap-2">
-                  {viewModal.item.matkul.map(mk => (
-                    <span key={mk} className="px-3 py-1.5 bg-[#0d7c6b]/10 text-[#0d7c6b] rounded-full text-sm font-bold border border-[#0d7c6b]/20">{mk}</span>
-                  ))}
+                  {viewModal.item.matkul.map(mk => {
+                    const isSelected = approvedMatkul.includes(mk);
+                    return (
+                      <label key={mk} className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold border transition-colors ${isSelected ? 'bg-[#0d7c6b]/10 text-[#0d7c6b] border-[#0d7c6b]/30' : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'}`}>
+                        <input type="checkbox" className="hidden" checked={isSelected} onChange={() => {
+                          if (isSelected) setApprovedMatkul(prev => prev.filter(m => m !== mk));
+                          else setApprovedMatkul(prev => [...prev, mk]);
+                        }} />
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        {mk}
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -522,7 +538,7 @@ function TabVerifikasiTutor() {
 
             <div className="mt-8 pt-6 border-t flex items-center gap-3">
               <button onClick={() => setViewModal({ isOpen: false, item: null })} className="flex-1 py-3.5 px-4 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Tutup</button>
-              <button onClick={() => handleAcc(viewModal.item)} className="flex-1 py-3.5 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+              <button onClick={() => handleAcc(viewModal.item, approvedMatkul)} disabled={approvedMatkul.length === 0} className={`flex-1 py-3.5 px-4 rounded-xl font-bold text-white transition-colors shadow-sm flex items-center justify-center gap-2 ${approvedMatkul.length === 0 ? 'bg-slate-300 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
                 <CheckCircle2 className="w-5 h-5" /> ACC Pendaftaran
               </button>
             </div>
@@ -609,7 +625,7 @@ function TabVerifikasiTutor() {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => setViewModal({ isOpen: true, item: user })} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
+                      <button onClick={() => { setApprovedMatkul(user.matkul); setViewModal({ isOpen: true, item: user }); }} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" /> Lihat Berkas
                       </button>
                       <button onClick={() => setRejectModal({ isOpen: true, item: user, reason: 'Dokumen tidak valid' })} className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-red-200 shadow-sm flex items-center gap-1.5">
@@ -718,7 +734,7 @@ function TabKeuangan() {
               ) : transaksi.map((trx) => {
                 const statusLower = (trx.status || '').toLowerCase()
                 const isPending = ['pending', 'menunggu', 'unpaid'].includes(statusLower)
-                const STATUS_LABEL = { completed: 'Selesai', accepted: 'Selesai', selesai: 'Selesai', paid: 'Dibayar', failed: 'Gagal', cancelled: 'Dibatalkan', rejected: 'Ditolak' }
+                const STATUS_LABEL = { completed: 'Selesai', accepted: 'Selesai', selesai: 'Selesai', paid: 'Selesai', failed: 'Gagal', cancelled: 'Dibatalkan', rejected: 'Ditolak' }
                 const statusLabel = STATUS_LABEL[statusLower] || trx.status
                 const statusStyle = ['completed','accepted','selesai','paid'].includes(statusLower) ? 'bg-emerald-50 text-emerald-600' : ['failed','cancelled','rejected'].includes(statusLower) ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'
                 return (
@@ -762,6 +778,13 @@ export default function Manajemen() {
   const [activeTab, setActiveTab] = useState(
     ['verifikasi', 'keuangan', 'pengguna'].includes(initialTab) ? initialTab : 'pengguna'
   )
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (['verifikasi', 'keuangan', 'pengguna'].includes(tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
 
   return (
     <div className="flex flex-col min-h-full pb-10">
