@@ -586,6 +586,53 @@ function TambahPortofolioModal({ onClose, onSave }) {
   );
 }
 
+// ─── Modal Konfirmasi Nonaktifkan ─────────────────────────────────────────────
+
+function KonfirmasiNonaktifModal({ onKonfirmasi, onBatal }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 relative w-full max-w-sm animate-in fade-in zoom-in-95 duration-200">
+        {/* Icon */}
+        <div className="flex justify-center mb-5">
+          <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Judul */}
+        <h2 className="text-xl font-extrabold text-[#0a0f44] text-center mb-2">
+          Nonaktifkan Status?
+        </h2>
+
+        {/* Deskripsi */}
+        <p className="text-sm text-slate-500 text-center leading-relaxed mb-7">
+          Profilmu <span className="font-semibold text-[#0a0f44]">tidak akan muncul</span> di pencarian learner selama kamu nonaktif. Kamu bisa mengaktifkannya kembali kapan saja.
+        </p>
+
+        {/* Tombol */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={onKonfirmasi}
+            className="w-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-bold py-3 rounded-2xl text-sm transition-colors duration-150"
+          >
+            Ya, Nonaktifkan
+          </button>
+          <button
+            onClick={onBatal}
+            className="w-full bg-[#f1f3f5] hover:bg-slate-200 active:bg-slate-300 text-[#0a0f44] font-bold py-3 rounded-2xl text-sm transition-colors duration-150"
+          >
+            Batal
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Modal Edit Tarif ─────────────────────────────────────────────────────────
 
 function EditTarifModal({ tarif, onClose, onSave }) {
@@ -887,7 +934,11 @@ export default function ProfilTutor() {
   const [keahlianList, setKeahlianList] = useState([]);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(() => {
+    const saved = localStorage.getItem('tutor_is_active');
+    return saved === null ? true : saved === 'true';
+  });
+  const [showKonfirmasiNonaktif, setShowKonfirmasiNonaktif] = useState(false);
   const [profil, setProfil] = useState({
     foto: "https://ui-avatars.com/api/?name=Loading&background=random",
     nama: "Loading...",
@@ -924,6 +975,12 @@ export default function ProfilTutor() {
         
         if (tutorRes.data && tutorRes.data.data) {
           const tutor = tutorRes.data.data;
+          // Baca is_active dari backend jika tersedia, lalu sinkronkan dengan localStorage
+          if (tutor.is_active !== undefined && tutor.is_active !== null) {
+            const activeVal = Boolean(tutor.is_active);
+            setIsAvailable(activeVal);
+            localStorage.setItem('tutor_is_active', String(activeVal));
+          }
           if (tutor.price !== undefined) {
             setTarif(`Rp ${new Intl.NumberFormat("id-ID").format(tutor.price)}`);
           }
@@ -959,19 +1016,29 @@ export default function ProfilTutor() {
             setPortofolioList([]);
           }
 
-          if (tutor.transcript_file) {
-            setTranskripList([{
-              id: 1,
-              semester: `Semester ${tutor.current_semester || '?'}`,
-              fileName: tutor.transcript_file.split('/').pop(),
-              pdfUrl: tutor.transcript_file.startsWith('http') ? tutor.transcript_file : `http://127.0.0.1:8000/storage/${tutor.transcript_file}`
-            }]);
+          const transcriptDocs = Array.isArray(tutor.documents)
+            ? tutor.documents.filter(d => d.type === 'transcript')
+            : [];
+          if (transcriptDocs.length > 0) {
+            setTranskripList(transcriptDocs.map((doc, idx) => ({
+              id: idx + 1,
+              semester: doc.label && doc.label !== 'Transkrip Nilai'
+                ? doc.label
+                : `Transkrip Smt ${idx + 1}`,
+              fileName: `Transkrip_Smt_${idx + 1}.pdf`,
+              pdfUrl: doc.url || '',
+            })));
           } else {
             setTranskripList([]);
           }
           
-          if (tutor.certificate_files && tutor.certificate_files.length > 0) {
-            setSertifikasiList(tutor.certificate_files.map((url, idx) => ({
+          const certFiles = tutor.certificate_files?.length > 0
+            ? tutor.certificate_files
+            : (Array.isArray(tutor.documents)
+                ? tutor.documents.filter(d => d.type === 'certificate').map(d => d.url)
+                : []);
+          if (certFiles.length > 0) {
+            setSertifikasiList(certFiles.map((url, idx) => ({
               id: idx + 1,
               title: "Sertifikat",
               desc: "Sertifikat Tersimpan",
@@ -1157,6 +1224,21 @@ export default function ProfilTutor() {
     }
   };
 
+  const handleToggleAktif = async (newVal) => {
+    setIsAvailable(newVal);
+    localStorage.setItem('tutor_is_active', String(newVal));
+    try {
+      await axios.patch('/tutor/profile', {
+        is_active: newVal,
+        nim: profil.nim || '',
+        name: profil.nama || '',
+        phone: profil.telepon || '',
+      });
+    } catch {
+      // backend mungkin tidak support is_active, state tetap tersimpan di localStorage
+    }
+  };
+
   const handleAddTranskrip = (newItem) => {
     setTranskripList([...transkripList, { id: Date.now(), ...newItem }]);
   };
@@ -1260,9 +1342,15 @@ export default function ProfilTutor() {
             </div>
             {/* Toggle switch */}
             <button
-              onClick={() => setIsAvailable((v) => !v)}
+              onClick={() => {
+                if (isAvailable) {
+                  setShowKonfirmasiNonaktif(true);
+                } else {
+                  handleToggleAktif(true);
+                }
+              }}
               className={`relative inline-flex h-7 w-13 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none mt-1 ${
-                isAvailable ? "bg-[#0d7c6b]" : "bg-slate-200"
+                isAvailable ? "bg-[#0d7c6b]" : "bg-slate-300 dark:bg-slate-700"
               }`}
               style={{ width: "52px" }}
               role="switch"
@@ -1369,13 +1457,13 @@ export default function ProfilTutor() {
             <h2 className="text-lg font-extrabold text-[#0d7c6b]">
               Mata Kuliah Diajarkan
             </h2>
-            <button 
-              onClick={() => setShowModalMatkul(true)}
+            <Link
+              to="/register/tutor/dokumen"
               className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline"
             >
-              <Pencil className="h-3.5 w-3.5" />
-              Edit Mata Kuliah
-            </button>
+              <Plus className="h-3.5 w-3.5" />
+              Tambah Mata Kuliah
+            </Link>
           </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 min-h-[120px]">
             {matkulList.length === 0 ? (
@@ -1653,6 +1741,17 @@ export default function ProfilTutor() {
         </div>
       )}
 
+      {/* Modal Konfirmasi Nonaktifkan */}
+      {showKonfirmasiNonaktif && (
+        <KonfirmasiNonaktifModal
+          onKonfirmasi={() => {
+            setShowKonfirmasiNonaktif(false);
+            handleToggleAktif(false);
+          }}
+          onBatal={() => setShowKonfirmasiNonaktif(false)}
+        />
+      )}
+
       {/* Modal Edit Tarif */}
       {showModalTarif && (
         <EditTarifModal
@@ -1662,7 +1761,12 @@ export default function ProfilTutor() {
             const prevTarif = tarif;
             setTarif(`Rp ${new Intl.NumberFormat("id-ID").format(rawVal)}`);
             try {
-              await axios.patch('/tutor/profile', { price: rawVal });
+              await axios.patch('/tutor/profile', {
+                price: rawVal,
+                nim: profil.nim || '',
+                name: profil.nama || '',
+                phone: profil.telepon || '',
+              });
               const verifyRes = await axios.get('/tutor/profile');
               const confirmedPrice = verifyRes.data?.data?.price;
               if (confirmedPrice !== undefined) {

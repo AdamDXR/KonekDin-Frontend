@@ -139,13 +139,17 @@ export default function ProfilLearner() {
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels)
       
-      // Langsung kirim foto ke backend
+      // Langsung kirim foto ke backend — sertakan NIM agar validasi tidak gagal
       let formData = new FormData()
       formData.append('_method', 'PATCH')
       const res = await fetch(croppedImage)
       const blob = await res.blob()
       formData.append('avatar', blob, 'avatar.png')
-      
+      const cleanNim = (profil.nim || '').replace(/\./g, '')
+      if (cleanNim) formData.append('nim', cleanNim)
+      if (profil.nama) formData.append('name', profil.nama)
+      if (profil.phone) formData.append('phone', profil.phone)
+
       const response = await axios.post('/me', formData, {
          headers: { 'Content-Type': 'multipart/form-data' }
       })
@@ -182,12 +186,17 @@ export default function ProfilLearner() {
   }
 
   const handleSimpan = async () => {
+    const cleanNim = (draft.nim || '').replace(/\./g, '')
+    if (cleanNim && cleanNim.length !== 12) {
+      alert('NIM harus terdiri dari 12 digit angka. Masukkan tanpa titik — titik pemisah akan otomatis ditambahkan.')
+      return
+    }
     setIsSubmitting(true)
     try {
       const payload = {
          name: draft.nama || '',
          phone: draft.phone || '',
-         nim: draft.nim || ''
+         nim: cleanNim || ''
       }
       if (draft.email) payload.email = draft.email
       

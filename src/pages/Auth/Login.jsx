@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Mail, Lock, Eye, EyeOff, GraduationCap } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Mail, Lock, Eye, EyeOff, GraduationCap, AlertTriangle } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import axios from '@/lib/axios'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,20 @@ export default function Login() {
   const [selectedRole, setSelectedRole] = useState('learner')
   const [errorMsg, setErrorMsg] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showSuspendedModal, setShowSuspendedModal] = useState(false)
+  const [suspendedMessage, setSuspendedMessage] = useState('')
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  useEffect(() => {
+    const isSuspended = searchParams.get('suspended')
+    const msg = searchParams.get('message')
+    if (isSuspended === 'true') {
+      setShowSuspendedModal(true)
+      setSuspendedMessage(msg || 'Akun Anda telah disuspend. Anda tidak dapat login sampai batas waktu yang ditentukan.')
+      setSearchParams(new URLSearchParams())
+    }
+  }, [searchParams, setSearchParams])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -58,7 +71,13 @@ export default function Login() {
         }
       }
     } catch (error) {
-      if (error.response?.status === 401) {
+      const msg = error.response?.data?.message?.toLowerCase() || '';
+      const isSuspended = msg.includes('suspend') || msg.includes('ditangguhkan');
+      
+      if (isSuspended) {
+        setShowSuspendedModal(true);
+        setSuspendedMessage(error.response?.data?.message || 'Akun Anda telah disuspend. Anda tidak dapat login sampai batas waktu yang ditentukan.');
+      } else if (error.response?.status === 401) {
         setErrorMsg('Email atau password salah.')
       } else {
         setErrorMsg(error.response?.data?.message || 'Terjadi kesalahan koneksi ke server.')
@@ -322,6 +341,31 @@ export default function Login() {
           </div>
         </div>
       </footer>
+
+      {/* Suspended Modal Overlay */}
+      {showSuspendedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-6">
+                <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                Akun Disuspend
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                {suspendedMessage}
+              </p>
+              <Button
+                onClick={() => setShowSuspendedModal(false)}
+                className="w-full bg-[#1a1a4b] hover:bg-[#121235] text-white h-12 rounded-xl font-semibold transition-colors"
+              >
+                Mengerti
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

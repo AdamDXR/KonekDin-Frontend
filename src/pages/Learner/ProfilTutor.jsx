@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Star, Clock, Zap, BookOpen, UserCircle, CheckCircle2, ChevronRight, MessageSquareMore } from 'lucide-react'
+import { ArrowLeft, Star, Clock, Zap, BookOpen, UserCircle, CheckCircle2, ChevronRight, MessageSquareMore, Link2, Award } from 'lucide-react'
 import PesanSesiModal from '@/components/Learner/PesanSesiModal'
 import axios from '@/lib/axios'
 
@@ -23,22 +23,27 @@ export default function ProfilTutor() {
         if (response.data && response.data.data) {
           const t = response.data.data;
           
-          // Kelompokkan jadwal berdasarkan hari
+          // Kelompokkan jadwal berdasarkan hari (konversi English → Indonesia)
+          const DAY_EN_TO_ID = {
+            Monday: 'Senin', Tuesday: 'Selasa', Wednesday: 'Rabu',
+            Thursday: 'Kamis', Friday: 'Jumat', Saturday: 'Sabtu', Sunday: 'Minggu',
+          };
+          const DAY_ORDER = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
           const groupedSchedule = {};
           if (t.available_slots && Array.isArray(t.available_slots)) {
               t.available_slots.forEach(s => {
-                  const d = s.day || s.day_of_week || s.hari;
+                  const rawDay = s.day_of_week || s.day || s.hari;
+                  const d = DAY_EN_TO_ID[rawDay] || rawDay;
                   if (!groupedSchedule[d]) groupedSchedule[d] = [];
                   const timeStr = s.time || s.waktu || `${s.start_time?.substring(0,5)} - ${s.end_time?.substring(0,5)}`;
                   const matkul = s.course || s.course_name || s.matkul || 'Tersedia';
                   groupedSchedule[d].push({ timeStr, matkul });
-              })
+              });
           }
-          
-          const scheduleArr = Object.keys(groupedSchedule).map(day => ({
-             day,
-             slots: groupedSchedule[day]
-          }));
+
+          const scheduleArr = Object.keys(groupedSchedule)
+            .sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b))
+            .map(day => ({ day, slots: groupedSchedule[day] }));
 
           const mapped = {
             id: t.id,
@@ -52,9 +57,13 @@ export default function ProfilTutor() {
             sessionsCompleted: t.review_count || 0,
             price: Number(t.price) || 0,
             image: t.avatar ? (t.avatar.startsWith('http') ? t.avatar : `http://127.0.0.1:8000/storage/${t.avatar}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=random`,
-            ipk: t.ipk || 3.85, 
+            ipk: t.ipk || 3.85,
             courses: t.taught_courses ? t.taught_courses.map(c => ({ name: c.course_name, grade: c.grade || 'A' })) : [],
             skills: t.skills || [],
+            portfolio: Array.isArray(t.portfolio_urls) ? t.portfolio_urls : [],
+            certificates: Array.isArray(t.certificate_files)
+              ? t.certificate_files
+              : (Array.isArray(t.documents) ? t.documents.filter(d => d.type === 'certificate').map(d => d.url) : []),
             schedule: scheduleArr,
             rawSlots: t.available_slots || t.schedule || [],
             rawCourses: t.taught_courses || t.courses || [],
@@ -112,9 +121,9 @@ export default function ProfilTutor() {
   }
 
   return (
-    <div className="flex flex-col min-h-full">
+    <div className="w-full flex flex-col pb-10">
       {/* Header / Hero Area */}
-      <div className="bg-white rounded-[24px] border border-slate-200 p-8 mb-8 shadow-sm">
+      <div className="w-full bg-white rounded-[24px] border border-slate-200 p-8 mb-8 shadow-sm">
         <div>
           <button 
             onClick={() => navigate(-1)}
@@ -152,91 +161,127 @@ export default function ProfilTutor() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 pb-10">
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Left Column */}
-          <div className="flex-1 space-y-8">
-            
+      {/* Main Content — 2 kolom sama lebar */}
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
+        {/* Kolom Kiri */}
+        <div className="space-y-6">
 
-
-
-            {/* IPK */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center">
-                <BookOpen className="w-6 h-6 mr-2 text-indigo-600" />
-                IPK (Indeks Prestasi Kumulatif)
-              </h2>
-              <div className="flex items-center gap-4">
-                <div className="bg-indigo-50 border border-indigo-100 px-6 py-4 rounded-xl flex items-baseline justify-center">
-                  <span className="text-3xl font-extrabold text-indigo-700">{tutor.ipk || (Math.random() * (4.0 - 3.5) + 3.5).toFixed(2)}</span>
-                  <span className="text-base font-bold text-indigo-400 ml-1.5">/ 4.00</span>
-                </div>
-                <p className="text-slate-500 text-sm font-medium flex-1">
-                  Tutor ini memiliki riwayat akademik yang memuaskan dan telah terverifikasi oleh KonekDin.
-                </p>
+          {/* IPK */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200">
+            <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center">
+              <BookOpen className="w-6 h-6 mr-2 text-indigo-600" />
+              IPK (Indeks Prestasi Kumulatif)
+            </h2>
+            <div className="flex items-center gap-4">
+              <div className="bg-indigo-50 border border-indigo-100 px-6 py-4 rounded-xl flex items-baseline justify-center flex-shrink-0">
+                <span className="text-3xl font-extrabold text-indigo-700">{tutor.ipk || (Math.random() * (4.0 - 3.5) + 3.5).toFixed(2)}</span>
+                <span className="text-base font-bold text-indigo-400 ml-1.5">/ 4.00</span>
               </div>
-            </div>
-
-            {/* Reviews */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200">
-              <div className="mb-6">
-                <h2 className="text-xl font-bold text-slate-900 flex items-center">
-                  <MessageSquareMore className="w-6 h-6 mr-2 text-green-800" />
-                  Ulasan Mahasiswa
-                </h2>
-                <p className="text-sm font-semibold text-slate-500 mt-1 ml-8">Top Review</p>
-              </div>
-              <div className="space-y-4">
-                {tutor.reviews && tutor.reviews.length > 0 ? tutor.reviews.slice(0, 5).map((review, idx) => (
-                  <div key={idx} className="bg-slate-50 p-4 rounded-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <div className="font-bold text-slate-900">{review.name}</div>
-                        <div className="text-xs text-slate-500">{review.role}</div>
-                      </div>
-                      <div className="flex">
-                        {[...Array(review.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                        ))}
-                        {[...Array(5 - review.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 text-slate-200" />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-slate-700 text-sm italic">"{review.text}"</p>
-                  </div>
-                )) : (
-                  <p className="text-slate-500 italic text-sm py-2">Belum ada ulasan untuk tutor ini.</p>
-                )}
-              </div>
-            </div>
-            
-          </div>
-
-          {/* Right Column (Sidebar) */}
-          <div className="w-full lg:w-[380px] space-y-6">
-            
-            {/* CTA Card */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="text-slate-500 font-medium mb-1">Tarif Sesi mulai dari</div>
-              <div className="text-3xl font-bold text-slate-900 mb-6">Rp {tutor.price.toLocaleString('id-ID')}<span className="text-base font-normal text-slate-500">/sesi</span></div>
-              
-              <Button 
-                onClick={() => setIsModalOpen(true)}
-                className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-base rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center"
-              >
-                <Zap className="w-5 h-5 mr-2" />
-                Pesan Sesi Sekarang
-              </Button>
-              <p className="text-xs text-center text-slate-500 mt-4">
-                Pembayaran aman melalui sistem KonekDin
+              <p className="text-slate-500 text-sm font-medium">
+                Tutor ini memiliki riwayat akademik yang memuaskan dan telah terverifikasi oleh KonekDin.
               </p>
             </div>
+          </div>
 
-            {/* Skills */}
+          {/* Portofolio */}
+          {tutor.portfolio && tutor.portfolio.length > 0 && (
+            <div className="bg-white p-6 rounded-2xl border border-slate-200">
+              <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center">
+                <Link2 className="w-6 h-6 mr-2 text-violet-600" />
+                Portofolio
+              </h2>
+              <div className="space-y-2">
+                {tutor.portfolio.map((url, idx) => (
+                  <a key={idx} href={url} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-violet-700 hover:text-violet-900 hover:underline font-medium truncate">
+                    <Link2 className="w-4 h-4 flex-shrink-0" />
+                    {url}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sertifikat */}
+          {tutor.certificates && tutor.certificates.length > 0 && (
+            <div className="bg-white p-6 rounded-2xl border border-slate-200">
+              <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center">
+                <Award className="w-6 h-6 mr-2 text-amber-600" />
+                Sertifikat
+              </h2>
+              <div className="flex flex-col gap-2">
+                {tutor.certificates.map((url, idx) => (
+                  <a key={idx} href={url} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl hover:bg-amber-100 transition-colors">
+                    <Award className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                    <span className="text-sm font-semibold text-amber-800">Sertifikat {idx + 1}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reviews */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center">
+                <MessageSquareMore className="w-6 h-6 mr-2 text-green-800" />
+                Ulasan Mahasiswa
+              </h2>
+              <p className="text-sm font-semibold text-slate-500 mt-1 ml-8">Top Review</p>
+            </div>
+            <div className="space-y-4">
+              {tutor.reviews && tutor.reviews.length > 0 ? tutor.reviews.slice(0, 5).map((review, idx) => (
+                <div key={idx} className="bg-slate-50 p-4 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <div className="font-bold text-slate-900">{review.name}</div>
+                      <div className="text-xs text-slate-500">{review.role}</div>
+                    </div>
+                    <div className="flex">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      ))}
+                      {[...Array(5 - review.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-slate-200" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-slate-700 text-sm italic">"{review.text}"</p>
+                </div>
+              )) : (
+                <p className="text-slate-500 italic text-sm py-2">Belum ada ulasan untuk tutor ini.</p>
+              )}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Kolom Kanan */}
+        <div className="space-y-6">
+
+          {/* CTA Card */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="text-slate-500 font-medium mb-1">Tarif Sesi mulai dari</div>
+            <div className="text-3xl font-bold text-slate-900 mb-6">
+              Rp {tutor.price.toLocaleString('id-ID')}
+              <span className="text-base font-normal text-slate-500">/sesi</span>
+            </div>
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-base rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center"
+            >
+              <Zap className="w-5 h-5 mr-2" />
+              Pesan Sesi Sekarang
+            </Button>
+            <p className="text-xs text-center text-slate-500 mt-4">
+              Pembayaran aman melalui sistem KonekDin
+            </p>
+          </div>
+
+          {/* Keahlian Utama */}
+          {tutor.skills && tutor.skills.length > 0 && (
             <div className="bg-white p-6 rounded-2xl border border-slate-200">
               <h3 className="font-bold text-slate-900 mb-4">Keahlian Utama</h3>
               <div className="flex flex-wrap gap-2">
@@ -247,32 +292,33 @@ export default function ProfilTutor() {
                 ))}
               </div>
             </div>
+          )}
 
-            {/* Schedule */}
-            <div id="jadwal-ketersediaan" className="bg-white p-6 rounded-2xl border border-slate-200 scroll-mt-24">
-              <h3 className="font-bold text-slate-900 mb-4 flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-teal-600" />
-                Jadwal Ketersediaan
-              </h3>
-              <div className="space-y-3">
-                {tutor.schedule && tutor.schedule.length > 0 ? tutor.schedule.map((slot, idx) => (
-                  <div key={idx} className="flex flex-col py-3 border-b border-slate-100 last:border-0 gap-2">
-                    <span className="font-bold text-slate-700">{slot.day}</span>
-                    <div className="flex flex-col gap-2">
-                      {slot.slots.map((item, tIdx) => (
-                         <div key={tIdx} className="flex items-center justify-between bg-teal-50 px-3 py-2 rounded-md">
-                           <span className="text-teal-800 text-[12px] font-bold">{item.timeStr}</span>
-                           <span className="text-teal-600 text-[11px] font-semibold">{item.matkul}</span>
-                         </div>
-                      ))}
-                    </div>
+          {/* Jadwal Ketersediaan */}
+          <div id="jadwal-ketersediaan" className="bg-white p-6 rounded-2xl border border-slate-200 scroll-mt-24">
+            <h3 className="font-bold text-slate-900 mb-4 flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-teal-600" />
+              Jadwal Ketersediaan
+            </h3>
+            <div className="space-y-3">
+              {tutor.schedule && tutor.schedule.length > 0 ? tutor.schedule.map((slot, idx) => (
+                <div key={idx} className="flex flex-col py-3 border-b border-slate-100 last:border-0 gap-2">
+                  <span className="font-bold text-slate-700">{slot.day}</span>
+                  <div className="flex flex-col gap-2">
+                    {slot.slots.map((item, tIdx) => (
+                      <div key={tIdx} className="flex items-center justify-between bg-teal-50 px-3 py-2 rounded-md">
+                        <span className="text-teal-800 text-[12px] font-bold">{item.timeStr}</span>
+                        <span className="text-teal-600 text-[11px] font-semibold">{item.matkul}</span>
+                      </div>
+                    ))}
                   </div>
-                )) : (
-                  <p className="text-slate-500 text-sm italic">Belum ada jadwal yang tersedia.</p>
-                )}
-              </div>
+                </div>
+              )) : (
+                <p className="text-slate-500 text-sm italic">Belum ada jadwal yang tersedia.</p>
+              )}
             </div>
           </div>
+
         </div>
       </div>
 

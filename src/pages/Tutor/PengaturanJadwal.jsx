@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Clock, Plus, X, Info, Loader2 } from "lucide-react";
+import { Clock, Plus, X, Info, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/shared/StatusBadge";
+import KonekDinPagination from "@/components/ui/KonekDinPagination";
 import axios from "@/lib/axios";
+import { useNavigate } from "react-router-dom";
 
 // ─── Konstanta ────────────────────────────────────────────────────────────────
 
@@ -94,6 +96,60 @@ function buildMasterSlotMap(masterSlots) {
  */
 function dotToColonRange(waktuDot) {
   return waktuDot.replace(/\./g, ":");
+}
+
+// ─── Modal Profil Tidak Lengkap ──────────────────────────────────────────────
+
+function ProfilTidakLengkapModal({ missingFields, onClose, onGoToProfil }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 relative w-full max-w-md">
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+            <AlertTriangle className="h-8 w-8 text-amber-500" />
+          </div>
+          <h2 className="text-xl font-extrabold text-[#0a0f44] mb-2">
+            Lengkapi Profil Terlebih Dahulu
+          </h2>
+          <p className="text-sm text-slate-500 mb-5 leading-relaxed">
+            Sebelum mengatur jadwal, kamu harus melengkapi data berikut di halaman <strong>Profil</strong>:
+          </p>
+
+          <ul className="w-full text-left space-y-2 mb-6">
+            {missingFields.map((field) => (
+              <li key={field} className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+                <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
+                <span className="text-sm font-semibold text-red-600">{field}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex gap-3 w-full">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="flex-1 font-semibold rounded-xl text-slate-600 border-slate-300 hover:bg-slate-50"
+            >
+              Nanti
+            </Button>
+            <Button
+              onClick={onGoToProfil}
+              className="flex-1 font-semibold rounded-xl bg-[#0a0f44] hover:bg-[#151a5c] text-white"
+            >
+              Lengkapi Profil
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Modal Edit Jadwal ────────────────────────────────────────────────────────
@@ -208,6 +264,8 @@ function EditJadwalModal({ onClose, onSave, isSaving, saveError }) {
 // ─── Halaman Utama ────────────────────────────────────────────────────────────
 
 export default function PengaturanJadwal() {
+  const navigate = useNavigate();
+
   // Grid 84 slot — selalu penuh, default NON AVAILABLE
   const [jadwal, setJadwal] = useState(buildDefaultGrid);
   const [isLoading, setIsLoading] = useState(true);
@@ -216,6 +274,9 @@ export default function PengaturanJadwal() {
   const [filterHari, setFilterHari] = useState("Semua Hari");
   const [filterStatus, setFilterStatus] = useState("Semua Status");
   const [showModal, setShowModal] = useState(false);
+  const [missingFields, setMissingFields] = useState([]);
+  const [showProfilModal, setShowProfilModal] = useState(false);
+  const tutorProfilRef = useRef(null);
 
   // masterSlotMap: "07:00 - 07:50" → master_slot_id (integer)
   // Disimpan di ref karena tidak perlu re-render saat berubah
@@ -255,14 +316,33 @@ export default function PengaturanJadwal() {
     }
   }, []);
 
+  // Fetch profil tutor untuk pengecekan kelengkapan data
+  const fetchTutorProfil = useCallback(async () => {
+    try {
+      const [profilRes, userRes] = await Promise.all([
+        axios.get("/tutor/profile"),
+        axios.get("/user"),
+      ]);
+      const tutor = profilRes.data?.data ?? {};
+      const user = userRes.data?.user ?? {};
+      tutorProfilRef.current = {
+        nim: user.nim || tutor.nim || "",
+        phone: user.phone || tutor.phone || "",
+        price: tutor.price ?? 0,
+      };
+    } catch {
+      tutorProfilRef.current = null;
+    }
+  }, []);
+
   // Fetch keduanya saat mount — master slots dulu, lalu jadwal
   useEffect(() => {
     const init = async () => {
-      await fetchMasterSlots(); // pastikan map sudah siap sebelum jadwal tampil
+      await Promise.all([fetchMasterSlots(), fetchTutorProfil()]);
       await fetchJadwal();
     };
     init();
-  }, [fetchMasterSlots, fetchJadwal]);
+  }, [fetchMasterSlots, fetchJadwal, fetchTutorProfil]);
 
   // ── 3. Simpan perubahan slot ───────────────────────────────────────────────
   const handleSaveJadwal = async ({ hari, jam, status }) => {
@@ -372,8 +452,28 @@ export default function PengaturanJadwal() {
     }
   };
 
-  // ── 4. Filter & Sort ──────────────────────────────────────────────────────
-  const displayed = jadwal
+  // ── 4. Cek kelengkapan profil sebelum buka modal edit ────────────────────
+  const handleBukaEditJadwal = () => {
+    setSaveError("");
+    const profil = tutorProfilRef.current;
+    const missing = [];
+    if (!profil || !profil.nim || profil.nim.trim() === "") missing.push("NIM");
+    if (!profil || !profil.phone || profil.phone.trim() === "") missing.push("Nomor Telepon");
+    if (!profil || !profil.price || profil.price <= 0) missing.push("Tarif Mengajar");
+
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      setShowProfilModal(true);
+      return;
+    }
+    setShowModal(true);
+  };
+
+  // ── 5. Filter & Sort ──────────────────────────────────────────────────────
+  const [jadwalPage, setJadwalPage] = useState(1);
+  const JADWAL_PER_PAGE = 12;
+
+  const filteredJadwal = jadwal
     .filter((item) => {
       const hariOk = filterHari === "Semua Hari" || item.hari === filterHari;
       const statusOk = filterStatus === "Semua Status" || item.status === filterStatus;
@@ -384,6 +484,12 @@ export default function PengaturanJadwal() {
       if (hariDiff !== 0) return hariDiff;
       return JAM_OPTIONS.indexOf(a.waktu) - JAM_OPTIONS.indexOf(b.waktu);
     });
+
+  const totalJadwalPages = Math.max(1, Math.ceil(filteredJadwal.length / JADWAL_PER_PAGE));
+  const displayed = filteredJadwal.slice((jadwalPage - 1) * JADWAL_PER_PAGE, jadwalPage * JADWAL_PER_PAGE);
+
+  // Reset page saat filter berubah
+  useEffect(() => { setJadwalPage(1); }, [filterHari, filterStatus]);
 
   const selectClass =
     "bg-white border border-slate-200 text-[#0a0f44] text-sm font-semibold rounded-xl px-4 py-2.5 appearance-none outline-none cursor-pointer pr-8";
@@ -399,7 +505,7 @@ export default function PengaturanJadwal() {
 
       {/* Tombol buka modal */}
       <Button
-        onClick={() => { setSaveError(""); setShowModal(true); }}
+        onClick={handleBukaEditJadwal}
         className="w-fit bg-[#0a0f44] hover:bg-[#151a5c] text-white font-bold px-6 py-3 h-auto rounded-2xl text-sm gap-2 flex items-center mb-7"
       >
         <Plus className="h-4 w-4" />
@@ -479,7 +585,24 @@ export default function PengaturanJadwal() {
         )}
       </div>
 
+      <KonekDinPagination
+        currentPage={jadwalPage}
+        totalPages={totalJadwalPages}
+        onPageChange={setJadwalPage}
+        totalItems={filteredJadwal.length}
+        shownItems={displayed.length}
+        itemLabel="slot jadwal"
+      />
+
       {/* Modal */}
+      {showProfilModal && (
+        <ProfilTidakLengkapModal
+          missingFields={missingFields}
+          onClose={() => setShowProfilModal(false)}
+          onGoToProfil={() => navigate("/tutor/profil")}
+        />
+      )}
+
       {showModal && (
         <EditJadwalModal
           onClose={() => !isSaving && setShowModal(false)}

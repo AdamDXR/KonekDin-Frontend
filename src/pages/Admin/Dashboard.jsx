@@ -171,7 +171,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-slate-100">
             <div className="px-7 py-6 flex justify-between items-center border-b border-slate-100">
               <h2 className="text-[18px] font-bold text-[#000666]">Aktivitas Terbaru</h2>
-              <Link to="/admin/activities" className="text-[13px] font-bold text-[#00897B] hover:text-teal-700 transition-colors">Lihat Semua</Link>
+              <Link to="/admin/manajemen" className="text-[13px] font-bold text-[#00897B] hover:text-teal-700 transition-colors">Lihat Semua</Link>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -298,8 +298,8 @@ export default function AdminDashboard() {
             <p className="text-slate-500 text-[13px] mb-5 leading-relaxed">
               Pengajuan verifikasi dokumen tutor tertunda.
             </p>
-            <Link to="/admin/manajemen" state={{ tab: 'verifikasi' }} className="w-full bg-[#EEF2FF] text-[#000666] font-bold text-[13px] py-2.5 rounded-xl hover:bg-indigo-100 transition-colors flex justify-center">
-              Lihat Detail
+            <Link to="/admin/manajemen?tab=verifikasi" className="w-full bg-[#EEF2FF] text-[#000666] font-bold text-[13px] py-2.5 rounded-xl hover:bg-indigo-100 transition-colors flex justify-center">
+              Lihat Detail Verifikasi Tutor
             </Link>
           </div>
 
