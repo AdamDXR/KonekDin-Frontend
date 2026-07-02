@@ -995,8 +995,12 @@ export default function ProfilTutor() {
             setMatkulList([]);
           }
           
-          if (tutor.portfolio_urls && tutor.portfolio_urls.length > 0) {
-            setPortofolioList(tutor.portfolio_urls.map((url, idx) => ({
+          let parsedUrls = tutor.portfolio_urls;
+          if (typeof parsedUrls === 'string') {
+            try { parsedUrls = JSON.parse(parsedUrls); } catch(e) { parsedUrls = [parsedUrls]; }
+          }
+          if (parsedUrls && Array.isArray(parsedUrls) && parsedUrls.length > 0) {
+            setPortofolioList(parsedUrls.map((url, idx) => ({
               id: idx + 1,
               icon: "📎",
               title: url,
@@ -1016,8 +1020,12 @@ export default function ProfilTutor() {
             setPortofolioList([]);
           }
 
-          const transcriptDocs = Array.isArray(tutor.documents)
-            ? tutor.documents.filter(d => d.type === 'transcript')
+          let parsedDocs = tutor.documents;
+          if (typeof parsedDocs === 'string') {
+            try { parsedDocs = JSON.parse(parsedDocs); } catch(e) { parsedDocs = []; }
+          }
+          const transcriptDocs = Array.isArray(parsedDocs)
+            ? parsedDocs.filter(d => d.type === 'transcript')
             : [];
           if (transcriptDocs.length > 0) {
             setTranskripList(transcriptDocs.map((doc, idx) => ({
@@ -1032,10 +1040,14 @@ export default function ProfilTutor() {
             setTranskripList([]);
           }
           
-          const certFiles = tutor.certificate_files?.length > 0
-            ? tutor.certificate_files
-            : (Array.isArray(tutor.documents)
-                ? tutor.documents.filter(d => d.type === 'certificate').map(d => d.url)
+          let parsedCerts = tutor.certificate_files;
+          if (typeof parsedCerts === 'string') {
+             try { parsedCerts = JSON.parse(parsedCerts); } catch(e) { parsedCerts = []; }
+          }
+          const certFiles = parsedCerts?.length > 0
+            ? parsedCerts
+            : (Array.isArray(parsedDocs)
+                ? parsedDocs.filter(d => d.type === 'certificate').map(d => d.url)
                 : []);
           if (certFiles.length > 0) {
             setSertifikasiList(certFiles.map((url, idx) => ({
@@ -1062,7 +1074,7 @@ export default function ProfilTutor() {
       const payload = {
          name: profil.nama || '',
          phone: profil.telepon || '',
-         nim: profil.nim || ''
+         nim: profil.nim ? String(profil.nim).replace(/\./g, '') : ''
       };
       if (profil.email) payload.email = profil.email;
       
@@ -1145,6 +1157,10 @@ export default function ProfilTutor() {
       const res = await fetch(croppedImage);
       const blob = await res.blob();
       formData.append('avatar', blob, 'avatar.png');
+      
+      if (profil.nama) formData.append('name', profil.nama);
+      if (profil.telepon) formData.append('phone', profil.telepon);
+      if (profil.nim) formData.append('nim', String(profil.nim).replace(/\./g, ''));
       
       const response = await axios.post('/me', formData, {
          headers: { 'Content-Type': 'multipart/form-data' }

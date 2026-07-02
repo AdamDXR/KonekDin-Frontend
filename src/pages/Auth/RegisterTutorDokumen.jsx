@@ -399,6 +399,7 @@ export default function RegisterTutorDokumen() {
             <button 
               onClick={() => navigate('/register/tutor/mata-kuliah', { 
                 state: { 
+                  ...location.state,
                   semester: parseInt(semester, 10),
                   transkripFiles: transkripFiles.slice(0, numTranscripts),
                   portofolio,

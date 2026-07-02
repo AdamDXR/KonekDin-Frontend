@@ -150,7 +150,7 @@ export default function RegisterTutorKeahlian() {
           </div>
 
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
-            <button onClick={() => navigate("/register/tutor/mata-kuliah", { state: location.state })}
+            <button onClick={() => navigate("/register/tutor/mata-kuliah", { state: { ...location.state, skills } })}
               className="flex items-center gap-1.5 text-sm font-semibold text-[#0d7c6b] hover:text-[#0a5a4e] transition-colors">
               ← Kembali
             </button>
