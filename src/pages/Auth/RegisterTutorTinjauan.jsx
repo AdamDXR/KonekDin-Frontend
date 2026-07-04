@@ -193,34 +193,45 @@ export default function RegisterTutorTinjauan() {
         courseIds = [1];
       }
 
-      const fd = new FormData();
-      if (formData.transkripFiles && formData.transkripFiles.length > 0) {
-        formData.transkripFiles.forEach(file => {
-          if (file) fd.append("transcript_files[]", file);
+      for (const id of courseIds) {
+        const fd = new FormData();
+        
+        if (formData.transkripFiles && formData.transkripFiles.length > 0) {
+          formData.transkripFiles.forEach(file => {
+            if (file) fd.append("transcript_files[]", file);
+          });
+        }
+        if (formData.sertifikatFile) {
+          fd.append("certificate_files[]", formData.sertifikatFile);
+        }
+        
+        // Memecah pendaftaran per mata kuliah (1 API call per matkul)
+        fd.append("course_ids[]", id);
+        fd.append("current_semester", formData.semester);
+        fd.append("grade", "A");
+        
+        if (formData.portofolio) {
+          let link = formData.portofolio;
+          if (!/^https?:\/\//i.test(link)) link = "https://" + link;
+          fd.append("portfolio_urls[]", link);
+        }
+        
+        if (formData.skills && formData.skills.length > 0) {
+          // Kirim dalam format JSON String
+          fd.append("skills", JSON.stringify(formData.skills));
+          // Kirim juga dalam format Array agar ditangkap backend dengan benar
+          formData.skills.forEach(skill => {
+            fd.append("skills[]", skill);
+            fd.append("keahlian[]", skill);
+          });
+        }
+
+        await axios.post("/register/tutor/upload-document", fd, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
         });
       }
-      if (formData.sertifikatFile) {
-        fd.append("certificate_files[]", formData.sertifikatFile);
-      }
-      courseIds.forEach(id => {
-        fd.append("course_ids[]", id);
-      });
-      fd.append("current_semester", formData.semester);
-      fd.append("grade", "A");
-      if (formData.portofolio) {
-        let link = formData.portofolio;
-        if (!/^https?:\/\//i.test(link)) link = "https://" + link;
-        fd.append("portfolio_urls[]", link);
-      }
-      if (formData.skills && formData.skills.length > 0) {
-        fd.append("skills", JSON.stringify(formData.skills));
-      }
-
-      await axios.post("/register/tutor/upload-document", fd, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
 
       setSubmitted(true);
     } catch (error) {
