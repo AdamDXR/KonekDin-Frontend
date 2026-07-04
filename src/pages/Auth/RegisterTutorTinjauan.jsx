@@ -217,13 +217,8 @@ export default function RegisterTutorTinjauan() {
         }
         
         if (formData.skills && formData.skills.length > 0) {
-          // Kirim dalam format JSON String
+          // Backend secara eksplisit meminta valid JSON string (error 422)
           fd.append("skills", JSON.stringify(formData.skills));
-          // Kirim juga dalam format Array agar ditangkap backend dengan benar
-          formData.skills.forEach(skill => {
-            fd.append("skills[]", skill);
-            fd.append("keahlian[]", skill);
-          });
         }
 
         await axios.post("/register/tutor/upload-document", fd, {
