@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { CheckCircle2, Lightbulb, X, Plus } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from '@/lib/axios';
@@ -53,15 +53,7 @@ function Stepper() {
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
-const MATKUL_PER_SEMESTER = {
-  1: ["Bahasa Indonesia", "Dasar Dasar Komputasi", "Dasar Pemrograman", "Fisika", "Kalkulus", "Keterampilan Interpersonal", "Pendidikan Agama", "Pengantar Teknologi Informasi"],
-  2: ["Algoritma dan Struktur Data", "Dasar Kewirausahaan", "Interaksi Manusia dan Komputer", "Matematika Diskrit", "Matriks dan Ruang Vektor", "Organisasi dan Arsitektur Komputer", "Pendidikan Pancasila"],
-  3: ["Basis Data", "Logika Informatika", "Pemrograman Berbasis Web", "Pendidikan Kewarganegaraan", "Probabilitas dan Statistik", "Rekayasa Perangkat Lunak", "Sistem Operasi"],
-  4: ["Jaringan Komputer", "Otomata dan Teori Bahasa", "Pembelajaran Mesin (Machine Learning)", "Pemrograman Berorientasi Objek", "Pemrograman Web Lanjut", "Rangkaian Logika Digital", "Sistem Basis Data"],
-  5: ["Kecerdasan Buatan (Artificial Intelligence)", "Kriptografi", "Manajemen Proyek Teknologi Informasi", "Penambangan Data (Data Mining)", "Sistem Informasi", "Sistem Terdistribusi", "Technopreneurship"],
-  6: ["Analisis dan Perancangan Berorientasi Objek", "Bahasa Inggris", "Keamanan Sistem dan Siber", "Komputasi Awan (Cloud Computing)", "Komputasi Numerik", "Komputer Grafik", "Literasi Informasi", "Pemrograman Perangkat Bergerak (Mobile)", "Pengembangan Startup Digital", "Pengolahan Citra Digital", "Rekayasa Kebutuhan Perangkat Lunak", "Sistem Temu Kembali Informasi", "Sistem Tertanam (Embedded System)"],
-  7: ["Analisis Data", "Bengkel Koding", "Forensik Digital", "Internet of Things (IoT)", "Jaminan Kualitas Perangkat Lunak", "Komputasi Kuantum", "Lingkungan Cerdas dan Intelijen", "Manajemen Jaringan", "Pemrograman Sisi Klien", "Pemrograman Sisi Server", "Pemrograman/Pengembangan Game", "Pemrosesan Bahasa Alami Berbasis Teks/Ucapan (NLP)", "Penglihatan Komputer dan Analisis Citra"]
-};
+// Data mata kuliah sekarang diambil langsung dari API agar sinkron dengan database (tidak ada typo/mismatch)
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function RegisterTutorMataKuliah() {
@@ -69,19 +61,33 @@ export default function RegisterTutorMataKuliah() {
   const location = useLocation();
   const [selected, setSelected] = useState(location.state?.selectedMataKuliah || []);
   const [search, setSearch] = useState("");
+  const [coursesList, setCoursesList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const maxSemester = location.state?.semester || 14;
 
-  const ALL_MATKUL = useMemo(() => {
-    let availableCourses = [];
-    // Tutor hanya bisa mengajar mata kuliah maksimal 1 semester di bawah semester saat ini
-    for (let i = 1; i <= Math.min(maxSemester - 1, 7); i++) {
-      if (MATKUL_PER_SEMESTER[i]) {
-        availableCourses = [...availableCourses, ...MATKUL_PER_SEMESTER[i]];
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get("/courses");
+        setCoursesList(response.data?.data || response.data || []);
+      } catch (error) {
+        console.error("Gagal mengambil daftar mata kuliah", error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-    return availableCourses.sort();
-  }, [maxSemester]);
+    };
+    fetchCourses();
+  }, []);
+
+  const ALL_MATKUL = useMemo(() => {
+    // Tutor hanya bisa mengajar mata kuliah maksimal 1 semester di bawah semester saat ini
+    const maxSemAllowed = Math.min(maxSemester - 1, 7);
+    return coursesList
+      .filter(c => c.semester <= maxSemAllowed)
+      .map(c => c.name)
+      .sort();
+  }, [coursesList, maxSemester]);
 
   const toggle = (mk) => {
     setSelected((prev) =>
