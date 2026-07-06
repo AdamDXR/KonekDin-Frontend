@@ -53,7 +53,13 @@ function Stepper() {
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
-// Data mata kuliah sekarang diambil langsung dari API agar sinkron dengan database (tidak ada typo/mismatch)
+const MATKUL_PER_SEMESTER = {
+  1: ["Kalkulus", "Fisika", "Dasar Pemrograman", "Interpersonal", "Dasar Komputasi", "Bahasa Indonesia", "Agama Islam", "Pengantar Teknologi Informasi"],
+  2: ["Matriks Ruang Vektor", "Pancasila", "Algoritma Struktur Data", "Matematika Diskrit"],
+  3: ["Probabilitas dan Statistika", "Logika Informatika", "Basis Data", "Sistem Operasi", "Kriptografi", "Pemrograman Web", "Penambangan Data", "Pengembangan Perangkat Lunak"],
+  4: ["Otomata dan Teori Bahasa", "Literasi Informasi", "Pembelajaran Mesin", "Jaringan Komputer", "Sistem Basis Data", "Rangkaian Logika Digital"],
+  5: ["Keamanan Siber", "Pemrograman Mobile", "Rekayasa Perangkat Lunak Lanjut", "Kecerdasan Buatan", "Manajemen Proyek TI"]
+};
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function RegisterTutorMataKuliah() {
@@ -61,33 +67,19 @@ export default function RegisterTutorMataKuliah() {
   const location = useLocation();
   const [selected, setSelected] = useState(location.state?.selectedMataKuliah || []);
   const [search, setSearch] = useState("");
-  const [coursesList, setCoursesList] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const maxSemester = location.state?.semester || 14;
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await axios.get("/courses");
-        setCoursesList(response.data?.data || response.data || []);
-      } catch (error) {
-        console.error("Gagal mengambil daftar mata kuliah", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchCourses();
-  }, []);
-
   const ALL_MATKUL = useMemo(() => {
+    let availableCourses = [];
     // Tutor hanya bisa mengajar mata kuliah maksimal 1 semester di bawah semester saat ini
-    const maxSemAllowed = Math.min(maxSemester - 1, 7);
-    return coursesList
-      .filter(c => c.semester <= maxSemAllowed)
-      .map(c => c.name)
-      .sort();
-  }, [coursesList, maxSemester]);
+    for (let i = 1; i <= Math.min(maxSemester - 1, 7); i++) {
+      if (MATKUL_PER_SEMESTER[i]) {
+        availableCourses = [...availableCourses, ...MATKUL_PER_SEMESTER[i]];
+      }
+    }
+    return availableCourses.sort();
+  }, [maxSemester]);
 
   const toggle = (mk) => {
     setSelected((prev) =>

@@ -484,13 +484,13 @@ function TabVerifikasiTutor() {
                     <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                       <div className="w-10 h-10 rounded-lg bg-[#000666]/10 flex items-center justify-center text-[#000666]">
                         {['file', 'transcript', 'certificate'].includes(doc.type) && <FileText className="w-5 h-5" />}
-                        {doc.type === 'link' && <Link2 className="w-5 h-5" />}
+                        {(doc.type === 'link' || doc.type === 'portfolio') && <Link2 className="w-5 h-5" />}
                         {doc.type === 'image' && <ImageIcon className="w-5 h-5" />}
                       </div>
-                      <div className="overflow-hidden">
+                      <div className="break-words min-w-0 flex-1">
                         <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{doc.label}</p>
-                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#000666] truncate hover:underline cursor-pointer block">
-                          {doc.type === 'link' ? doc.value : doc.name}
+                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#000666] hover:underline cursor-pointer block break-all">
+                          {(doc.type === 'link' || doc.type === 'portfolio') ? (doc.value || doc.url) : doc.name}
                         </a>
                       </div>
                     </div>
