@@ -1473,13 +1473,6 @@ export default function ProfilTutor() {
             <h2 className="text-lg font-extrabold text-[#0d7c6b]">
               Mata Kuliah Diajarkan
             </h2>
-            <Link
-              to="/register/tutor/dokumen"
-              className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Tambah Mata Kuliah
-            </Link>
           </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 min-h-[120px]">
             {matkulList.length === 0 ? (
@@ -1502,13 +1495,6 @@ export default function ProfilTutor() {
             <h2 className="text-lg font-extrabold text-[#0d7c6b]">
               Keahlian / Skill
             </h2>
-            <button 
-              onClick={() => setShowModalKeahlian(true)}
-              className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Edit Keahlian
-            </button>
           </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 min-h-[120px]">
             {keahlianList.length === 0 ? (
@@ -1535,13 +1521,6 @@ export default function ProfilTutor() {
               Transkrip Nilai
             </h2>
           </div>
-          <button
-            onClick={() => setShowModalTranskrip(true)}
-            className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Tambah Transkrip
-          </button>
         </div>
         
         <div className="flex flex-col gap-3">
@@ -1592,13 +1571,6 @@ export default function ProfilTutor() {
             <ShieldCheck className="h-5 w-5 text-[#0d7c6b]" />
             <h2 className="text-lg font-extrabold text-white">Portofolio</h2>
           </div>
-          <button 
-            onClick={() => setShowModalPortofolio(true)}
-            className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Tambah Portofolio
-          </button>
         </div>
         <div className="flex flex-col gap-3">
           {portofolioList.map((p) => (
@@ -1652,13 +1624,6 @@ export default function ProfilTutor() {
           <h2 className="text-lg font-extrabold text-[#0d7c6b]">
             Sertifikasi
           </h2>
-          <button 
-            onClick={() => setShowModalSertifikasi(true)}
-            className="flex items-center gap-1.5 text-[#0d7c6b] text-xs font-bold hover:underline"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Tambah Sertifikat
-          </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
