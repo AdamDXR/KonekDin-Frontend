@@ -88,8 +88,8 @@ export default function Pembayaran() {
     try {
       const payment_method = selectedMethod === 'Transfer' ? `${selectedBank} VA` : selectedEWallet;
 
-      // Simulasi konfirmasi pembayaran setelah user klik OK di popup VA/EWallet
-      await axios.patch(`/learner/bookings/${orderId}/simulate-payment`, {
+      // Kirim metode pembayaran ke backend, status tetap pending menunggu ACC Admin
+      await axios.patch(`/learner/bookings/${orderId}/pay`, {
         payment_method: payment_method,
       });
       
@@ -428,7 +428,7 @@ export default function Pembayaran() {
               </Button>
 
               <p className="text-center text-[10px] text-slate-400 mt-2">
-                Pembayaran akan dikonfirmasi secara otomatis oleh sistem
+                Pembayaran Anda akan diverifikasi oleh Admin
               </p>
             </div>
           </div>

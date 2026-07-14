@@ -140,7 +140,7 @@ export default function DetailPesanan() {
                   </div>
 
                   <div className="flex flex-col items-end gap-3 w-full md:w-auto">
-                    {status === 'unpaid' ? (
+                    {status === 'unpaid' && !order.payment_method ? (
                       <>
                         <div className="bg-orange-100 text-orange-600 px-4 py-1.5 rounded-full text-sm font-bold self-end md:self-center">
                           Belum Bayar
@@ -150,6 +150,18 @@ export default function DetailPesanan() {
                           className="w-full md:w-auto bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl px-6 h-11 font-bold shadow-sm shadow-emerald-500/20"
                         >
                           Bayar Sekarang
+                        </Button>
+                      </>
+                    ) : (status === 'unpaid' && order.payment_method) || status === 'pending' ? (
+                      <>
+                        <div className="bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full text-sm font-bold self-end md:self-center">
+                          Menunggu Konfirmasi
+                        </div>
+                        <Button 
+                          disabled
+                          className="w-full md:w-auto bg-slate-100 text-slate-400 rounded-xl px-6 h-11 font-bold cursor-not-allowed"
+                        >
+                          Menunggu ACC Admin
                         </Button>
                       </>
                     ) : (
