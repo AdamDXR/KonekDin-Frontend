@@ -1,40 +1,71 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, CheckCircle2, Info, ArrowRight, Timer, Banknote, X, Copy } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Info, ArrowRight, Timer, Banknote, X, Copy, Clock, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import axios from '@/lib/axios'
+import { formatDistanceToNowStrict } from 'date-fns'
+import { id } from 'date-fns/locale'
 
 const tipeConfig = {
   pengingat: {
-    accent: 'bg-orange-400',
+    borderClass: 'bg-orange-500',
     iconBg: 'bg-orange-100',
-    icon: <CalendarDays className="h-5 w-5 text-orange-500" />,
-    titleColor: 'text-orange-500',
+    icon: <CalendarDays className="h-5 w-5 text-orange-600" />,
   },
   pembayaran: {
-    accent: 'bg-[#0d7c6b]',
-    iconBg: 'bg-[#e6f4f1]',
-    icon: <CheckCircle2 className="h-5 w-5 text-[#0d7c6b]" />,
-    titleColor: 'text-[#0d7c6b]',
+    borderClass: 'bg-teal-500',
+    iconBg: 'bg-teal-100',
+    icon: <CheckCircle2 className="h-5 w-5 text-teal-700" />,
   },
   info: {
-    accent: 'bg-slate-300',
-    iconBg: 'bg-slate-200',
+    borderClass: 'bg-slate-300',
+    iconBg: 'bg-slate-100',
     icon: <Info className="h-5 w-5 text-slate-500" />,
-    titleColor: 'text-slate-600',
   },
   pengingat_30m: {
-    accent: 'bg-[#0a0f44]',
-    iconBg: 'bg-[#93c5fd]',
-    icon: <Timer className="h-5 w-5 text-[#0a0f44]" />,
-    titleColor: 'text-[#0a0f44]',
+    borderClass: 'bg-orange-500',
+    iconBg: 'bg-orange-100',
+    icon: <Timer className="h-5 w-5 text-orange-600" />,
   },
   menunggu_pembayaran: {
-    accent: 'bg-yellow-400',
+    borderClass: 'bg-yellow-500',
     iconBg: 'bg-yellow-100',
     icon: <Banknote className="h-5 w-5 text-yellow-600" />,
-    titleColor: 'text-yellow-600',
   },
+  proses: {
+    borderClass: 'bg-amber-500',
+    iconBg: 'bg-amber-100',
+    icon: <Clock className="h-5 w-5 text-amber-600" />,
+  },
+  sukses: {
+    borderClass: 'bg-emerald-500',
+    iconBg: 'bg-emerald-100',
+    icon: <CheckCircle2 className="h-5 w-5 text-emerald-700" />,
+  },
+  ditolak: {
+    borderClass: 'bg-rose-500',
+    iconBg: 'bg-rose-100',
+    icon: <XCircle className="h-5 w-5 text-rose-700" />,
+  },
+}
+
+function formatWaktuRelatif(dateObj) {
+  if (!dateObj) return 'Baru saja'
+  
+  const diffMs = Date.now() - dateObj.getTime()
+  if (diffMs < 60_000) return 'Baru saja'
+
+  let relative = formatDistanceToNowStrict(dateObj, {
+    addSuffix: true,
+    locale: id,
+  })
+
+  // Bersihkan teks default dari date-fns jika diperlukan
+  relative = relative.replace(/^sekitar\s+/i, "")
+  relative = relative.replace(/^kurang dari\s+/i, "")
+
+  // Kapitalisasi huruf pertama
+  return relative.charAt(0).toUpperCase() + relative.slice(1)
 }
 
 function RenderPesan({ segmen }) {
@@ -44,7 +75,7 @@ function RenderPesan({ segmen }) {
         typeof s === 'string' ? (
           <span key={i}>{s}</span>
         ) : (
-          <strong key={i} className="font-semibold text-slate-800">
+          <strong key={i} className="font-semibold text-slate-900">
             {s.bold}
           </strong>
         )
@@ -54,28 +85,30 @@ function RenderPesan({ segmen }) {
 }
 
 function NotifikasiCard({ item, onCtaClick, onActionClick }) {
-  const cfg = tipeConfig[item.tipe]
+  const cfg = tipeConfig[item.tipe] || tipeConfig.info
 
   return (
     <div className="rounded-2xl border border-slate-100 overflow-hidden shadow-sm bg-white">
       <div className="flex">
-        <div className={`w-1 flex-shrink-0 ${cfg.accent}`} />
+        {/* Colored Left Border */}
+        <div className={`w-1 flex-shrink-0 ${cfg.borderClass}`} />
+        
+        {/* Main Text Content */}
         <div className="flex-1 px-5 py-4">
           <div className="flex items-start justify-between gap-4 mb-2">
-            <h3 className={`text-sm font-bold leading-tight ${cfg.titleColor || 'text-[#0d7c6b]'}`}>
-              {item.judul}
-            </h3>
-            {item.isBaru ? (
-              <span className="flex-shrink-0 text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
-                BARU
-              </span>
-            ) : (
-              <span className="flex-shrink-0 text-[11px] text-slate-400 whitespace-nowrap">
-                {item.waktu}
-              </span>
-            )}
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold leading-tight text-[#0a0f44]">
+                {item.judul}
+              </h3>
+            </div>
+            <span className="flex-shrink-0 text-[11px] font-semibold px-2.5 py-0.5 rounded-full text-slate-500 bg-slate-100 whitespace-nowrap">
+              {formatWaktuRelatif(item.dateObj)}
+            </span>
           </div>
+          
           <RenderPesan segmen={item.pesan} />
+          
+          {/* Action Buttons */}
           {(item.cta || item.cta2) && (
             <div className="mt-4 flex flex-wrap gap-2">
               {item.cta && (
@@ -111,9 +144,11 @@ function NotifikasiCard({ item, onCtaClick, onActionClick }) {
             </div>
           )}
         </div>
+
+        {/* Right Side: Icon */}
         <div className="flex items-start pt-4 pr-5">
           <div className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${cfg.iconBg}`}>
-            {cfg.icon}
+            {React.cloneElement(cfg.icon, { className: 'w-5 h-5 ' + cfg.icon.props.className.split(' ').find(c => c.startsWith('text-')) })}
           </div>
         </div>
       </div>
@@ -243,6 +278,18 @@ export default function Notifikasi() {
         tipe = 'info'
         judul = 'Status Pesanan'
       }
+      
+      // Deteksi Pengajuan Tutor
+      const combinedText = (titleRaw + ' ' + msgRaw).toLowerCase()
+      if (combinedText.includes('pengajuan tutor')) {
+        if (combinedText.includes('ditolak')) {
+          tipe = 'ditolak'
+        } else if (combinedText.includes('diproses') || combinedText.includes('terima')) {
+          tipe = 'proses'
+        } else if (combinedText.includes('disetujui')) {
+          tipe = 'sukses'
+        }
+      }
 
       // Tentukan CTA berdasarkan action field
       let cta = null
@@ -255,6 +302,14 @@ export default function Notifikasi() {
         cta2 = { label: 'Ubah Metode Pembayaran', action: 'UBAH_METODE' }
       }
 
+      // Parse bold segments
+      const extractBoldSegments = (text) => {
+        // Since original logic was just simple parsing or treating bold as separate, 
+        // we can just treat the whole message as a single string for now or do simple bold detection.
+        // In the original, it used `s.bold`. Assuming `n.message` might just be a string here:
+        return [text]
+      }
+
       return {
         id: n.id,
         tipe,
@@ -264,7 +319,7 @@ export default function Notifikasi() {
           : 'Baru saja',
         dateObj: n.created_at ? new Date(n.created_at) : null,
         isBaru: !n.read_at,
-        pesan: [msgRaw],
+        pesan: extractBoldSegments(msgRaw),
         cta,
         cta2,
       }
@@ -310,10 +365,10 @@ export default function Notifikasi() {
     <div className="flex flex-col min-h-full pb-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2">
+        <h1 className="text-3xl font-bold text-[#0a0f44] mb-2 tracking-tight">
           Notifikasi
         </h1>
-        <p className="text-slate-500">
+        <p className="text-slate-500 text-[15px]">
           Update terbaru untuk perjalanan akademik anda.
         </p>
       </div>
@@ -321,20 +376,24 @@ export default function Notifikasi() {
       {/* Grup per hari */}
       <div className="flex flex-col gap-8">
         {isLoading ? (
-          <div className="flex justify-center items-center h-40 text-slate-500 animate-pulse">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center text-slate-400">
             Memuat notifikasi...
           </div>
         ) : errorMsg ? (
-          <div className="flex justify-center items-center h-40 text-red-500 bg-red-50 rounded-2xl border border-red-100 p-4">
+          <div className="bg-white rounded-2xl border border-rose-100 shadow-sm p-10 text-center text-rose-500">
             {errorMsg}
           </div>
-        ) : notifikasiData.length > 0 ? (
+        ) : notifikasiData.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center text-slate-400">
+            Tidak ada notifikasi baru
+          </div>
+        ) : (
           notifikasiData.map((grup) => (
             <section key={grup.grup}>
-              <p className="text-[11px] font-semibold tracking-widest text-slate-400 mb-3 px-1">
+              <p className="text-[11px] font-bold tracking-widest text-slate-400 mb-4 px-1 uppercase">
                 {grup.grup}
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3.5">
                 {grup.items.map((item) => (
                   <NotifikasiCard
                     key={item.id}
@@ -346,11 +405,6 @@ export default function Notifikasi() {
               </div>
             </section>
           ))
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-500 bg-white rounded-2xl border border-slate-100 border-dashed">
-            <Info className="h-10 w-10 text-slate-200 mb-3" />
-            <p className="font-medium">Belum ada notifikasi</p>
-          </div>
         )}
       </div>
 
